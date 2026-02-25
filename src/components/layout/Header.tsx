@@ -22,6 +22,12 @@ const DiscordIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const XIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+);
+
 const navItems: { label: string; path: string; external?: boolean }[] = [
   { label: 'Home', path: '/home' },
   { label: 'Markets', path: '/markets' },
@@ -200,36 +206,53 @@ export function Header() {
           {/* IPFS Sync Status */}
           <IpfsSyncIndicator />
 
-          {/* Social Links */}
-          <HeaderTooltip label="GitHub">
-            <motion.a
-              href="https://github.com/unicitynetwork"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.05 }}
-              className="relative p-2 sm:p-2.5 lg:p-3 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 rounded-lg sm:rounded-xl transition-all group"
-            >
-              <Github className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
-              <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-orange-500/0 group-hover:bg-orange-500/10 transition-colors" />
-            </motion.a>
-          </HeaderTooltip>
+          {/* Social Links - desktop only */}
+          <div className="hidden lg:flex items-center">
+            <HeaderTooltip label="GitHub">
+              <motion.a
+                href="https://github.com/unicitynetwork"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.05 }}
+                className="relative p-2 sm:p-2.5 lg:p-3 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 rounded-lg sm:rounded-xl transition-all group"
+              >
+                <Github className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
+                <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-orange-500/0 group-hover:bg-orange-500/10 transition-colors" />
+              </motion.a>
+            </HeaderTooltip>
 
-          <HeaderTooltip label="Discord">
-            <motion.a
-              href="https://discord.gg/S9f57ZKdt"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.05 }}
-              className="relative p-2 sm:p-2.5 lg:p-3 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 rounded-lg sm:rounded-xl transition-all group"
-            >
-              <DiscordIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
-              <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-orange-500/0 group-hover:bg-orange-500/10 transition-colors" />
-            </motion.a>
-          </HeaderTooltip>
+            <HeaderTooltip label="Discord">
+              <motion.a
+                href="https://discord.com/invite/PGzNZT5uVp"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.05 }}
+                className="relative p-2 sm:p-2.5 lg:p-3 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 rounded-lg sm:rounded-xl transition-all group"
+              >
+                <DiscordIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
+                <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-orange-500/0 group-hover:bg-orange-500/10 transition-colors" />
+              </motion.a>
+            </HeaderTooltip>
+
+            <HeaderTooltip label="Twitter/X">
+              <motion.a
+                href="https://x.com/unicity_labs"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.05 }}
+                className="relative p-2 sm:p-2.5 lg:p-3 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 rounded-lg sm:rounded-xl transition-all group"
+              >
+                <XIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
+                <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-orange-500/0 group-hover:bg-orange-500/10 transition-colors" />
+              </motion.a>
+            </HeaderTooltip>
+          </div>
 
           {/* Theme Toggle */}
           <ThemeToggle />
@@ -310,6 +333,36 @@ export function Header() {
               )
             ))}
 
+            {/* Social Links in mobile menu */}
+            <div className="flex items-center gap-2 px-4 pt-3 mt-2 border-t border-neutral-200 dark:border-neutral-700/50">
+              <a
+                href="https://github.com/unicitynetwork"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all group"
+              >
+                <Github className="w-5 h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
+              </a>
+              <a
+                href="https://discord.com/invite/PGzNZT5uVp"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all group"
+              >
+                <DiscordIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
+              </a>
+              <a
+                href="https://x.com/unicity_labs"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all group"
+              >
+                <XIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-400 transition-colors" />
+              </a>
+            </div>
           </nav>
         </motion.div>
         </>

@@ -1579,7 +1579,7 @@ main();`}
           {/* Footer */}
           <footer className="border-t border-neutral-200 dark:border-neutral-700 pt-8 mt-16">
             <div className="flex flex-wrap gap-6 text-sm text-neutral-600 dark:text-neutral-400 mb-6">
-              <a href="https://discord.gg/S9f57ZKdt" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
+              <a href="https://discord.com/invite/PGzNZT5uVp" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
                 Discord
               </a>
               <a href="https://github.com/unicitynetwork" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
