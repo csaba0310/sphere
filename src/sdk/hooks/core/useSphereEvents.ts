@@ -18,6 +18,8 @@ export function useSphereEvents(): void {
   const { sphere } = useSphereContext();
   const queryClient = useQueryClient();
   const invalidateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track seen transfer IDs to prevent duplicate toasts from Nostr re-deliveries
+  const seenTransferIdsRef = useRef<Set<string>>(new Set());
 
   // When sphere instance changes (new wallet, delete, import) —
   // immediately sync identity cache so the UI never shows stale data
@@ -48,6 +50,10 @@ export function useSphereEvents(): void {
 
     const handleIncomingTransfer = (transfer: IncomingTransfer) => {
       invalidatePayments();
+
+      // Deduplicate: Nostr relays may re-deliver the same transfer on reconnect
+      if (seenTransferIdsRef.current.has(transfer.id)) return;
+      seenTransferIdsRef.current.add(transfer.id);
 
       const sender = transfer.senderNametag ? `@${transfer.senderNametag}` : 'Someone';
       const firstToken = transfer.tokens[0];
