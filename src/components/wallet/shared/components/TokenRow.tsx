@@ -127,6 +127,11 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
             Confirmed
           </span>
+        ) : token.status === 'transferring' ? (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+            <Loader2 className="w-2.5 h-2.5 animate-spin" />
+            Sending
+          </span>
         ) : (
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
             <Loader2 className="w-2.5 h-2.5 animate-spin" />
