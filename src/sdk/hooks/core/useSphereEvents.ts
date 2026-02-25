@@ -57,8 +57,20 @@ export function useSphereEvents(): void {
 
       const sender = transfer.senderNametag ? `@${transfer.senderNametag}` : 'Someone';
       const firstToken = transfer.tokens[0];
-      const amount = firstToken ? formatAmount(firstToken.amount, firstToken.decimals) : '?';
       const symbol = firstToken?.symbol ?? '?';
+      const decimals = firstToken?.decimals ?? 0;
+
+      // Sum all token amounts for the total (all tokens share the same coin type)
+      let amount: string;
+      if (transfer.tokens.length <= 1) {
+        amount = firstToken ? formatAmount(firstToken.amount, decimals) : '?';
+      } else {
+        const totalSmallest = transfer.tokens.reduce(
+          (sum, t) => sum + BigInt(t.amount || '0'),
+          0n,
+        );
+        amount = formatAmount(totalSmallest.toString(), decimals);
+      }
 
       showTransferToast({
         sender,

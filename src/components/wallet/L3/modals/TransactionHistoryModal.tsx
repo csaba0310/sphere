@@ -35,6 +35,17 @@ function truncateMiddle(str: string, startLen = 14, endLen = 6): string {
   return `${str.slice(0, startLen)}...${str.slice(-endLen)}`;
 }
 
+/** Format raw amount (smallest units) to human-readable with given decimals */
+function formatRawAmount(raw: string, decimals: number): string {
+  const val = BigInt(raw || '0');
+  if (decimals === 0) return val.toString();
+  const divisor = BigInt(10 ** decimals);
+  const intPart = val / divisor;
+  const fracPart = val % divisor;
+  const fracStr = fracPart.toString().padStart(decimals, '0');
+  return `${intPart}.${fracStr}`.replace(/\.?0+$/, '');
+}
+
 /** Single detail row with copy button */
 function DetailRow({ label, value, copyKey, copiedKey, onCopy }: {
   label: string;
@@ -75,21 +86,13 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
       const def = registry.getDefinition(entry.coinId);
       const decimals = def?.decimals || 0;
 
-      // Convert amount from smallest unit to human readable
-      const amountBigInt = BigInt(entry.amount);
-      const divisor = BigInt(10 ** decimals);
-      const integerPart = amountBigInt / divisor;
-      const fractionalPart = amountBigInt % divisor;
-
-      // Format the fractional part with leading zeros
-      const fractionalStr = fractionalPart.toString().padStart(decimals, '0');
-      const formattedAmount = decimals > 0
-        ? `${integerPart}.${fractionalStr}`.replace(/\.?0+$/, '')
-        : integerPart.toString();
-
       return {
         ...entry,
-        formattedAmount,
+        formattedAmount: formatRawAmount(entry.amount, decimals),
+        formattedTokenIds: entry.tokenIds?.map(t => ({
+          ...t,
+          formattedAmount: formatRawAmount(t.amount, decimals),
+        })),
         iconUrl: def ? registry.getIconUrl(entry.coinId) : null,
         date: new Date(entry.timestamp).toLocaleDateString('en-US', {
           month: 'short',
@@ -250,8 +253,48 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                               </div>
                             )}
 
+                            {/* Token breakdown (V6 combined transfers) */}
+                            {entry.formattedTokenIds && entry.formattedTokenIds.length > 1 && (
+                              <div className="py-1">
+                                <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                                  Tokens ({entry.formattedTokenIds.length})
+                                </span>
+                                <div className="mt-1 space-y-1">
+                                  {entry.formattedTokenIds.map((t, idx) => (
+                                    <div key={idx} className="flex items-center justify-between gap-2 pl-2 border-l-2 border-neutral-200 dark:border-neutral-700">
+                                      <div className="flex items-center gap-1.5 min-w-0">
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                          t.source === 'split'
+                                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                        }`}>
+                                          {t.source}
+                                        </span>
+                                        <span className="text-[11px] text-neutral-700 dark:text-neutral-300 font-mono truncate">
+                                          {truncateMiddle(t.id, 8, 6)}
+                                        </span>
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); copy(t.id, `${entry.id}-tid-${idx}`); }}
+                                          className="shrink-0 p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded transition-colors"
+                                          title="Copy Token ID"
+                                        >
+                                          {copiedKey === `${entry.id}-tid-${idx}`
+                                            ? <Check className="w-3 h-3 text-emerald-500" />
+                                            : <Copy className="w-3 h-3 text-neutral-400" />
+                                          }
+                                        </button>
+                                      </div>
+                                      <span className="text-[11px] text-neutral-600 dark:text-neutral-400 font-mono shrink-0">
+                                        {t.formattedAmount} {entry.symbol}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
                             {/* Common fields */}
-                            {entry.tokenId && (
+                            {entry.tokenId && !entry.formattedTokenIds?.length && (
                               <DetailRow label="Token ID" value={entry.tokenId} copyKey={`${entry.id}-tokenid`} copiedKey={copiedKey} onCopy={copy} />
                             )}
                             {entry.transferId && (
