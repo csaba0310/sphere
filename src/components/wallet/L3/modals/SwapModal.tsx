@@ -78,6 +78,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
           unconfirmedAmount: '0',
           confirmedTokenCount: 0,
           unconfirmedTokenCount: 0,
+          transferringTokenCount: 0,
           iconUrl: iconUrl ?? undefined,
           priceUsd: priceData?.priceUsd ?? 1.0,
           priceEur: priceData?.priceEur ?? 0.92,
