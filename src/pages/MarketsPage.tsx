@@ -168,8 +168,8 @@ export function MarketsPage() {
           <div className="flex flex-wrap gap-6">
             <Link to="/developers/docs" className="hover:text-orange-500 transition">Docs</Link>
             <a href="https://github.com/unicitynetwork" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">GitHub</a>
-            <a href="https://discord.gg/S9f57ZKdt" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">Discord</a>
-            <a href="https://x.com/unaborobot" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">Twitter/X</a>
+            <a href="https://discord.com/invite/PGzNZT5uVp" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">Discord</a>
+            <a href="https://x.com/unicity_labs" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">Twitter/X</a>
           </div>
         </div>
       </footer>

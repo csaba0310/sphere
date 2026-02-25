@@ -51,7 +51,7 @@ export function ComingSoonModal({ isOpen, onClose, title = 'Get API Key' }: Comi
                 </p>
                 <div className="flex gap-3 justify-center">
                   <a
-                    href="https://discord.gg/S9f57ZKdt"
+                    href="https://discord.com/invite/PGzNZT5uVp"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 py-2.5 rounded-xl font-medium hover:opacity-90 transition shadow-lg shadow-orange-500/25"
