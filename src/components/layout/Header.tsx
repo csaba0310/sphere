@@ -210,7 +210,7 @@ export function Header() {
           <div className="hidden lg:flex items-center">
             <HeaderTooltip label="GitHub">
               <motion.a
-                href="https://github.com/unicitynetwork"
+                href="https://github.com/unicity-sphere/sphere"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05, y: -2 }}
@@ -336,7 +336,7 @@ export function Header() {
             {/* Social Links in mobile menu */}
             <div className="flex items-center gap-2 px-4 pt-3 mt-2 border-t border-neutral-200 dark:border-neutral-700/50">
               <a
-                href="https://github.com/unicitynetwork"
+                href="https://github.com/unicity-sphere/sphere"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}

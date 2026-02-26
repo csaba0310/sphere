@@ -19,7 +19,7 @@ import { WalletRequiredBlocker } from '../agents/WalletRequiredBlocker';
 import { ActivityTicker } from '../activity';
 
 const CUSTOM_URL_PRESETS = [
-  { label: 'Sphere Connect Example', url: 'https://unicitynetwork.github.io/sphere-sdk-connect-example/' },
+  { label: 'Sphere Connect Example', url: 'https://unicity-sphere.github.io/sphere-sdk-connect-example/' },
 ];
 
 export function DesktopLayout() {
