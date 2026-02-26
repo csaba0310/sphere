@@ -193,10 +193,10 @@ export function DesktopLayout() {
         <div
           data-tutorial="wallet-panel"
           className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-            walletOpen ? 'w-80 xl:w-96' : 'w-0'
+            walletOpen ? 'w-104 xl:w-lg' : 'w-0'
           }`}
         >
-          <div className="w-80 xl:w-96 h-full">
+          <div className="w-104 xl:w-lg h-full">
             <WalletPanel />
           </div>
         </div>
