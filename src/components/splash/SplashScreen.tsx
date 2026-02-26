@@ -46,7 +46,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
       <div className="relative z-20 h-full flex flex-col">
 
         {/* ── Top: UNICITY logo + decorative line ── */}
-        <div className="flex items-center px-6 sm:px-10 lg:px-[23%] pt-5 sm:pt-7 lg:pt-[56px]">
+        <div className="flex items-center px-6 sm:px-10 lg:px-[23%] pt-5 sm:pt-7 lg:pt-14">
           <motion.img
             src="/UnicityLogo.svg"
             alt="Unicity"
@@ -59,7 +59,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.8 }}
-            className="h-[2px] bg-[#fefefe] rounded-[10px] ml-2 sm:ml-3 origin-left"
+            className="h-0.5 bg-[#fefefe] rounded-[10px] ml-2 sm:ml-3 origin-left"
             style={{ flex: '1 1 0', maxWidth: '750px' }}
           />
         </div>
@@ -122,7 +122,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
               onHoverStart={() => setIsExploreHovered(true)}
               onHoverEnd={() => setIsExploreHovered(false)}
               onClick={onEnter}
-              className="mt-2 sm:mt-3 w-[160px] sm:w-[190px] lg:w-[210px] h-[38px] sm:h-[42px] lg:h-[46px] cursor-pointer shadow-lg hover:shadow-xl relative overflow-hidden"
+              className="mt-2 sm:mt-3 w-40 sm:w-[190px] lg:w-[210px] h-[38px] sm:h-[42px] lg:h-[46px] cursor-pointer shadow-lg hover:shadow-xl relative overflow-hidden"
               style={{
                 borderRadius: '5px 5px 50px 50px',
                 fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace",
