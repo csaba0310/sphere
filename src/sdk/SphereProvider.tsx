@@ -228,7 +228,6 @@ export function SphereProvider({
           onProgress: setInitProgress,
         });
         setInitProgress(null);
-        setupIpfsSync(instance, providers);
 
         if (!generatedMnemonic) {
           throw new Error('Failed to generate mnemonic');
