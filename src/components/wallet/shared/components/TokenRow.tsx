@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import type { Token } from '@unicitylabs/sphere-sdk';
 import { TokenRegistry } from '@unicitylabs/sphere-sdk';
-import { Box, Copy, CheckCircle2 } from 'lucide-react';
+import { Box, Copy, CheckCircle2, Loader2 } from 'lucide-react';
 import { useState, memo, useEffect } from 'react';
 
 interface TokenRowProps {
@@ -123,9 +123,21 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
         </div>
       </div>
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-700/50 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700">
-          Token
-        </span>
+        {token.status === 'confirmed' ? (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+            Confirmed
+          </span>
+        ) : token.status === 'transferring' ? (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+            <Loader2 className="w-2.5 h-2.5 animate-spin" />
+            Sending
+          </span>
+        ) : (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+            <Loader2 className="w-2.5 h-2.5 animate-spin" />
+            Pending
+          </span>
+        )}
         <span className="text-[10px] text-neutral-400 dark:text-neutral-600">
           {new Date(token.createdAt).toLocaleDateString()}
         </span>

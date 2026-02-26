@@ -11,6 +11,15 @@ import { BaseModal, ModalHeader, Button } from '../../ui';
 
 type Step = 'swap' | 'processing' | 'success';
 
+/**
+ * Hardcoded fallback prices (USD) for tokens not yet listed on CoinGecko.
+ * Key = token name as used by the faucet / registry (lowercased).
+ */
+const FALLBACK_PRICES: Record<string, { priceUsd: number; priceEur: number }> = {
+  unicity:      { priceUsd: 1.0, priceEur: 0.92 },   // UCT
+  'unicity-usd': { priceUsd: 1.0, priceEur: 0.92 },  // USDU
+};
+
 /** Format asset amount from smallest unit to human-readable */
 function formatAssetAmount(asset: Asset): string {
   return toHumanReadable(asset.totalAmount, asset.decimals);
@@ -65,6 +74,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
       const swappableAssets: Asset[] = fungibleDefs.map(def => {
         const symbol = def.symbol || def.name.toUpperCase();
         const priceData = pricesMap.get(def.name.toLowerCase());
+        const fallback = FALLBACK_PRICES[def.name.toLowerCase()];
         const iconUrl = registry.getIconUrl(def.id);
 
         return {
@@ -78,9 +88,10 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
           unconfirmedAmount: '0',
           confirmedTokenCount: 0,
           unconfirmedTokenCount: 0,
+          transferringTokenCount: 0,
           iconUrl: iconUrl ?? undefined,
-          priceUsd: priceData?.priceUsd ?? 1.0,
-          priceEur: priceData?.priceEur ?? 0.92,
+          priceUsd: priceData?.priceUsd || fallback?.priceUsd || 1.0,
+          priceEur: priceData?.priceEur || fallback?.priceEur || 0.92,
           change24h: priceData?.change24h ?? 0,
           fiatValueUsd: null,
           fiatValueEur: null,
@@ -101,6 +112,14 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
     return userAsset ? formatAssetAmount(userAsset) : '0';
   };
 
+  // Resolve price for an asset, falling back to hardcoded prices for
+  // tokens not yet listed on CoinGecko (UCT, USDU).
+  const resolvePrice = (asset: Asset): number => {
+    if (asset.priceUsd && asset.priceUsd > 0) return asset.priceUsd;
+    const name = (asset.name ?? asset.symbol ?? '').toLowerCase();
+    return FALLBACK_PRICES[name]?.priceUsd ?? 0;
+  };
+
   // Calculate exchange rate and output amount
   const exchangeInfo = useMemo(() => {
     if (!fromAsset || !toAsset || !fromAmount || parseFloat(fromAmount) <= 0) {
@@ -108,10 +127,10 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
     }
 
     const fromAmountNum = parseFloat(fromAmount);
-    const fromPrice = fromAsset.priceUsd ?? 0;
-    const toPrice = toAsset.priceUsd ?? 0;
+    const fromPrice = resolvePrice(fromAsset);
+    const toPrice = resolvePrice(toAsset);
 
-    if (toPrice === 0) return null;
+    if (fromPrice === 0 || toPrice === 0) return null;
 
     const rate = fromPrice / toPrice;
     const toAmount = fromAmountNum * rate;
@@ -297,7 +316,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                   {fromAsset && fromAmount && (
                     <div className="mt-2 text-right text-xs text-neutral-500 dark:text-neutral-400">
-                      ≈ ${(parseFloat(fromAmount) * (fromAsset.priceUsd ?? 0)).toFixed(2)}
+                      ≈ ${(parseFloat(fromAmount) * resolvePrice(fromAsset)).toFixed(2)}
                     </div>
                   )}
                 </div>

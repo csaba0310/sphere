@@ -1582,7 +1582,7 @@ main();`}
               <a href="https://discord.com/invite/PGzNZT5uVp" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
                 Discord
               </a>
-              <a href="https://github.com/unicitynetwork" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
+              <a href="https://github.com/unicity-sphere/sphere" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
                 GitHub
               </a>
               <Link to="/developers" className="hover:text-orange-500 transition">

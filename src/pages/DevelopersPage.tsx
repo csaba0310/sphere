@@ -404,7 +404,7 @@ sphere.communications.onDirectMessage(async (msg) => {
               <a href="https://discord.com/invite/PGzNZT5uVp" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition flex items-center gap-2">
                 <span>{'\u{1F4AC}'}</span> Discord
               </a>
-              <a href="https://github.com/unicitynetwork" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition flex items-center gap-2">
+              <a href="https://github.com/unicity-sphere/sphere" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition flex items-center gap-2">
                 <span>{'\u{1F419}'}</span> GitHub
               </a>
             </div>
