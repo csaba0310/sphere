@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin } from 'lucide-react';
+import unicityLogoUrl from '/UnicityLogo.svg';
+import splashVideoUrl from '/kling_20260226_VIDEO_Take_Image_1650_0.mp4';
 
 const DiscordIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -37,7 +39,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
           muted
           loop
           playsInline
-          src="/kling_20260226_VIDEO_Take_Image_1650_0.mp4"
+          src={splashVideoUrl}
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>
@@ -48,7 +50,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
         {/* ── Top: UNICITY logo + decorative line ── */}
         <div className="flex items-center px-6 sm:px-10 lg:px-[23%] pt-5 sm:pt-7 lg:pt-14">
           <motion.img
-            src="/UnicityLogo.svg"
+            src={unicityLogoUrl}
             alt="Unicity"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
