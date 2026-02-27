@@ -13,7 +13,6 @@ import {
   type BrowserProviders,
 } from '@unicitylabs/sphere-sdk/impl/browser';
 import { SphereContext } from './SphereContext';
-import { SPHERE_KEYS } from './queryKeys';
 
 const COINGECKO_BASE_URL = import.meta.env.DEV
   ? '/coingecko'
@@ -66,12 +65,12 @@ function setupIpfsSync(instance: Sphere, providers: BrowserProviders): void {
 /** Internal trigger content — hidden from chat UI, detected by bot */
 export const WELCOME_TRIGGER = '__sphere_welcome__';
 
-/** Send welcome trigger DM to configured agent after wallet creation/import (fire-and-forget) */
+/** Send welcome trigger DM to configured agent (fire-and-forget) */
 function sendWelcomeDM(instance: Sphere): void {
+  if (!instance.identity) return;
+
   const agentNametag = (import.meta.env.VITE_WELCOME_AGENT_NAMETAG as string | undefined) || 'kbbot';
   const delayMs = parseInt((import.meta.env.VITE_WELCOME_DELAY_MS as string | undefined) || '4000', 10);
-
-  if (!instance.identity) return;
 
   setTimeout(() => {
     instance.communications
@@ -344,25 +343,33 @@ export function SphereProvider({
       sphereRef.current = null;
     }
 
-    // Disconnect storage providers to release IndexedDB connections,
-    // then delete the databases via SDK.
+    // Clear all SDK-owned data (wallet keys, tokens, DMs, etc.) from IndexedDB.
+    // Sphere.clear() handles reconnecting storage internally, so we just
+    // disconnect first to release stale handles.
     if (providers) {
       await Promise.allSettled([
         providers.storage.disconnect(),
         providers.tokenStorage.disconnect(),
       ]);
-      const clearDone = Sphere.clear({
-        storage: providers.storage,
-        tokenStorage: providers.tokenStorage,
-      });
-      await Promise.race([clearDone, new Promise(r => setTimeout(r, 5000))]);
+      try {
+        await Sphere.clear({
+          storage: providers.storage,
+          tokenStorage: providers.tokenStorage,
+        });
+      } catch (err) {
+        console.warn('[SphereProvider] Sphere.clear() failed, deleting IndexedDB directly:', err);
+        // Fallback: nuke the IndexedDB databases directly
+        for (const dbName of ['sphere-storage', 'sphere-token-storage']) {
+          try { indexedDB.deleteDatabase(dbName); } catch { /* best effort */ }
+        }
+      }
     }
 
     // Clear localStorage regardless of whether DB deletion succeeded.
     clearAllSphereData();
 
-    // Clear React Query cache so old balances/tokens don't leak to new wallet
-    queryClient.removeQueries({ queryKey: SPHERE_KEYS.all });
+    // Clear all React Query caches so stale data doesn't leak to new wallet
+    queryClient.clear();
 
     // Reset React state
     setSphere(null);
@@ -373,12 +380,12 @@ export function SphereProvider({
     await initialize(0, true);
   }, [providers, initialize, queryClient]);
 
-  const finalizeWallet = useCallback((importedSphere?: Sphere) => {
+  const finalizeWallet = useCallback((importedSphere?: Sphere, isNewWallet?: boolean) => {
     if (importedSphere) {
       if (providers) setupIpfsSync(importedSphere, providers);
       sphereRef.current = importedSphere;
       setSphere(importedSphere);
-      sendWelcomeDM(importedSphere);
+      if (isNewWallet) sendWelcomeDM(importedSphere);
     }
     setWalletExists(true);
   }, [providers]);
