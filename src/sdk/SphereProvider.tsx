@@ -27,10 +27,6 @@ import type {
 } from './SphereContext';
 import { clearAllSphereData, STORAGE_KEYS } from '../config/storageKeys';
 
-const IPFS_GATEWAYS = import.meta.env.VITE_IPFS_GATEWAYS
-  ? (import.meta.env.VITE_IPFS_GATEWAYS as string).split(',').map(s => s.trim())
-  : ['https://unicity-ipfs1.dyndns.org'];
-
 function isIpfsEnabled(): boolean {
   const stored = localStorage.getItem(STORAGE_KEYS.IPFS_ENABLED);
   return stored !== 'false'; // enabled by default
@@ -42,7 +38,6 @@ function getIpfsConfig() {
     tokenSync: {
       ipfs: {
         enabled: true,
-        gateways: IPFS_GATEWAYS,
       },
     },
   };

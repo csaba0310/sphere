@@ -8,7 +8,6 @@ import { Sphere } from "@unicitylabs/sphere-sdk";
 import type { LegacyFileType } from "@unicitylabs/sphere-sdk";
 import { useSphereContext } from "../../../../sdk/hooks/core/useSphere";
 import { SPHERE_KEYS } from "../../../../sdk/queryKeys";
-import { recordActivity } from "../../../../services/ActivityService";
 import { addrKey } from "../components/addrKey";
 import type { DerivedAddressInfo } from "../components/AddressSelectionScreen";
 import type { NametagAvailability } from "../components/NametagScreen";
@@ -318,7 +317,6 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
         setGeneratedMnemonic(result.mnemonic);
       }
 
-      recordActivity("wallet_created", { isPublic: false });
 
       if (result.sphere) {
         routeAfterImport(result.sphere);
@@ -370,7 +368,6 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
         setGeneratedMnemonic(result.mnemonic);
       }
 
-      recordActivity("wallet_created", { isPublic: false });
 
       if (result.sphere) {
         routeAfterImport(result.sphere);
@@ -507,8 +504,7 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
         // Import flow — wallet already exists (in ref), just register nametag
         setProcessingStatus("Registering Unicity ID...");
         await activeSphere.registerNametag(cleanTag);
-        recordActivity("wallet_created", { isPublic: false });
-        setProcessingStep(2);
+          setProcessingStep(2);
         setProcessingStatus("Setup complete!");
         setIsProcessingComplete(true);
       } else {
@@ -517,8 +513,7 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
         const result = await createWallet({ nametag: cleanTag });
         setGeneratedMnemonic(result.mnemonic);
         importedSphereRef.current = result.sphere;
-        recordActivity("wallet_created", { isPublic: false });
-        setProcessingStep(2);
+          setProcessingStep(2);
         setProcessingStatus("Setup complete!");
         setIsProcessingComplete(true);
       }
@@ -549,16 +544,14 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
         setProcessingTotalSteps(1);
         setProcessingStatus("Setup complete!");
         setIsProcessingComplete(true);
-        recordActivity("wallet_created", { isPublic: false });
-      } else {
+        } else {
         // Create flow — create wallet without nametag
         setProcessingTotalSteps(2);
         setProcessingStatus("Creating wallet...");
         const result = await createWallet();
         setGeneratedMnemonic(result.mnemonic);
         importedSphereRef.current = result.sphere;
-        recordActivity("wallet_created", { isPublic: false });
-        setProcessingStep(1);
+          setProcessingStep(1);
         setProcessingStatus("Setup complete!");
         setIsProcessingComplete(true);
       }

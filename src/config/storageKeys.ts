@@ -22,9 +22,6 @@ export const STORAGE_KEYS = {
   CHAT_SELECTED_GROUP: 'sphere_chat_selected_group',
   CHAT_SELECTED_DM: 'sphere_chat_selected_dm',
 
-  // Agent Chat Sessions
-  AGENT_CHAT_SESSIONS: 'sphere_agent_chat_sessions',
-
   // IPFS
   IPFS_ENABLED: 'sphere_ipfs_enabled',
 
@@ -34,17 +31,6 @@ export const STORAGE_KEYS = {
   // Dev Settings
   DEV_AGGREGATOR_URL: 'sphere_dev_aggregator_url',
   DEV_SKIP_TRUST_BASE: 'sphere_dev_skip_trust_base',
-} as const;
-
-export const STORAGE_KEY_GENERATORS = {
-  // Agent memory: `sphere_agent_memory:${userId}:${activityId}`
-  agentMemory: (userId: string, activityId: string) =>
-    `sphere_agent_memory:${userId}:${activityId}` as const,
-
-  // Agent chat messages per session: `sphere_agent_chat_messages:${sessionId}`
-  agentChatMessages: (sessionId: string) =>
-    `sphere_agent_chat_messages:${sessionId}` as const,
-
 } as const;
 
 const STORAGE_PREFIX = 'sphere_';
