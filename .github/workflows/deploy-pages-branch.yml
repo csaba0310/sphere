@@ -74,12 +74,7 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: /sphere/${{ steps.branch.outputs.name }}/
-          VITE_AGENT_API_URL: https://sphere.unicity.network/api
-          VITE_AGGREGATOR_URL: https://goggregator-test.unicity.network
-          VITE_ACTIVITY_API_URL: https://sphere.unicity.network/activities
-
-      - name: SPA fallback for GitHub Pages
-        run: cp dist/index.html dist/404.html
+          VITE_HASH_ROUTER: 'true'
 
       - name: Deploy branch to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -105,7 +100,7 @@ jobs:
       - name: Create redirect page
         run: |
           mkdir -p redirect
-          cat > redirect/index.html << 'EOF'
+          cat > redirect/index.html << 'REDIRECT_EOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -118,7 +113,7 @@ jobs:
             <p>Redirecting to <a href="/sphere/main/">/sphere/main/</a>...</p>
           </body>
           </html>
-          EOF
+          REDIRECT_EOF
 
       - name: Deploy redirect
         uses: peaceiris/actions-gh-pages@v4

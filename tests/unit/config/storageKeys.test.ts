@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   STORAGE_KEYS,
-  STORAGE_KEY_GENERATORS,
   clearAllSphereData,
 } from "../../../src/config/storageKeys";
 
@@ -32,31 +31,6 @@ describe("STORAGE_KEYS", () => {
   it("should contain expected dev keys", () => {
     expect(STORAGE_KEYS.DEV_AGGREGATOR_URL).toBe("sphere_dev_aggregator_url");
     expect(STORAGE_KEYS.DEV_SKIP_TRUST_BASE).toBe("sphere_dev_skip_trust_base");
-  });
-});
-
-// ==========================================
-// Test: STORAGE_KEY_GENERATORS
-// ==========================================
-
-describe("STORAGE_KEY_GENERATORS", () => {
-  describe("agentMemory", () => {
-    it("should generate correct key format", () => {
-      const userId = "user1";
-      const activityId = "activity1";
-      const key = STORAGE_KEY_GENERATORS.agentMemory(userId, activityId);
-
-      expect(key).toBe("sphere_agent_memory:user1:activity1");
-    });
-  });
-
-  describe("agentChatMessages", () => {
-    it("should generate correct key format", () => {
-      const sessionId = "session123";
-      const key = STORAGE_KEY_GENERATORS.agentChatMessages(sessionId);
-
-      expect(key).toBe("sphere_agent_chat_messages:session123");
-    });
   });
 });
 

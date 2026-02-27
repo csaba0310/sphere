@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Github, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { isMock } from '../../hooks/useAgentChat';
 import { ThemeToggle } from '../theme';
 import { STORAGE_KEYS } from '../../config/storageKeys';
 import { IpfsSyncIndicator } from './IpfsSyncIndicator';
@@ -118,11 +117,6 @@ export function Header() {
                 <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30 font-medium">
                   beta
                 </span>
-{isMock() && (
-                  <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30">
-                    DEMO
-                  </span>
-                )}
               </div>
               <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400">Agentic AI Marketplaces</p>
 

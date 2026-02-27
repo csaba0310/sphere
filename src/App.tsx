@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { IntroPage } from './pages/IntroPage';
 import { HomePage } from './pages/HomePage';
@@ -32,9 +32,7 @@ export default function App() {
       <Route path="/connect" element={<ConnectPage />} />
       <Route element={<DashboardLayout />}>
         <Route path="/home" element={<HomePage />} />
-        <Route path="/agents/chat" element={<Navigate to="/agents/dm" replace />} />
         <Route path="/agents/:agentId" element={<AgentPage />} />
-        <Route path="/ai" element={<Navigate to="/agents/ai" replace />} />
         <Route path="/developers" element={<Suspense fallback={<LazyFallback />}><DevelopersPage /></Suspense>} />
         <Route path="/mine" element={<Suspense fallback={<LazyFallback />}><MineAlphaPage /></Suspense>} />
         <Route path="/developers/docs" element={<Suspense fallback={<LazyFallback />}><DocsPage /></Suspense>} />
