@@ -1,6 +1,6 @@
 # Unicity AgentSphere
 
-A Web3 wallet and agent platform for the Unicity network — dual-layer crypto wallet, AI agents, DMs, group chat, and marketplace.
+A Web3 wallet and agent platform for the Unicity network — dual-layer crypto wallet, DMs, group chat, and marketplace.
 
 ## Features
 
@@ -27,7 +27,7 @@ Agents are specialized interfaces loaded as tabs. Currently active:
 - **Group Chat** — public group channels via NIP-29
 - **Sphere Agents** — load any external dApp via iframe (custom URL)
 
-The architecture supports additional agent types (AI, trivia, games, merch, etc.) which can be enabled in `src/config/activities.ts`.
+Additional agent types can be added in `src/config/activities.ts`.
 
 ### Group Chat (NIP-29)
 
@@ -66,15 +66,13 @@ npm run test:run     # Vitest single run
 Copy `.env.example` to `.env`. Key variables:
 
 ```env
-VITE_AGENT_API_URL=http://localhost:3000   # Agent chatbot backend
-VITE_USE_MOCK_AGENTS=true                   # Mock agents for local dev
-VITE_AGGREGATOR_URL=/rpc                    # L3 aggregator (proxied in dev)
-VITE_NOSTR_RELAYS=wss://...                 # DM relays (comma-separated)
-VITE_GROUP_CHAT_RELAYS=wss://...            # NIP-29 group chat relays
-BASE_PATH=/                                 # Deployment base path
+VITE_MIXPANEL_TOKEN=             # Analytics (optional)
+VITE_WELCOME_AGENT_NAMETAG=kbbot # Welcome DM agent nametag
+VITE_WELCOME_DELAY_MS=4000       # Delay before welcome DM (ms)
+SSL_CERT_PATH=                   # Dev server HTTPS (optional)
+HMR_HOST=                        # Remote HMR host (optional)
+BASE_PATH=/                      # Deployment base path
 ```
-
-See `.env.example` for the full list including IPFS, analytics, SSL, and HMR options.
 
 ## Tech Stack
 
@@ -93,25 +91,28 @@ src/
 ├── index.html           # HTML entry point
 ├── main.tsx             # App bootstrap, provider tree
 ├── App.tsx              # Route definitions
-├── sdk/                 # React adapter layer over sphere-sdk (21 files)
-│   ├── core/            # useSphere, useWalletStatus, useIdentity, useSphereEvents
-│   ├── payments/        # useTokens, useBalance, useTransfer, useTransactionHistory
-│   ├── l1/              # useL1Balance, useL1Utxos, useL1Send, useL1Transactions
-│   └── comms/           # useSendDM, usePaymentRequests
+├── sdk/                 # React adapter layer over sphere-sdk (24 files)
+│   ├── hooks/core/      # useSphere, useWalletStatus, useIdentity, useNametag, useSphereEvents, useIpfsSync
+│   ├── hooks/payments/  # useTokens, useBalance, useAssets, useTransfer, useTransactionHistory
+│   ├── hooks/l1/        # useL1Balance, useL1Utxos, useL1Send, useL1Transactions
+│   ├── hooks/comms/     # useSendDM, usePaymentRequests
+│   └── utils/           # format utilities
 ├── components/
-│   ├── agents/          # Agent cards, AgentChat, MerchChat, TriviaChat, GamesChat
-│   ├── chat/            # DM, group chat, mini chat, hooks, utils
-│   ├── wallet/          # L1, L3, onboarding, shared, UI components
-│   ├── layout/          # DashboardLayout, Header, IpfsSyncIndicator
+│   ├── activity/        # Activity ticker, market feed display
+│   ├── agents/          # Agent cards and selection
+│   ├── chat/            # DM, group chat, mini chat, hooks
+│   ├── wallet/          # L1, L3, onboarding, shared components
+│   ├── layout/          # DashboardLayout, Header
 │   ├── desktop/         # Desktop layout, TabBar, Taskbar
 │   ├── connect/         # Wallet connection flow
 │   └── ...              # splash, theme, tutorial, ui
-├── pages/               # IntroPage, AgentPage, ConnectPage, + lazy-loaded pages
-├── hooks/               # 12 app-level hooks
+├── pages/               # IntroPage, AgentPage, MarketsPage, + lazy-loaded pages
+├── hooks/               # 9 app-level hooks
 ├── contexts/            # ServicesProvider (GroupChat)
-├── services/            # ActivityService, FaucetService
-├── config/              # localStorage key constants
-├── utils/               # markdown, memory, mentions, retry
+├── services/            # FaucetService
+├── config/              # activities, localStorage keys
+├── lib/                 # TanStack Query client config
+├── utils/               # markdown, mentions, retry
 └── types/               # TypeScript type definitions
 tests/
 └── unit/                # Vitest tests (jsdom)
