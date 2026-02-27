@@ -74,9 +74,7 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: /sphere/${{ steps.branch.outputs.name }}/
-
-      - name: SPA fallback (branch-level, used if root 404 is missing)
-        run: cp dist/index.html dist/404.html
+          VITE_HASH_ROUTER: 'true'
 
       - name: Deploy branch to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -99,10 +97,9 @@ jobs:
     needs: build-and-deploy
     if: github.event_name != 'delete'
     steps:
-      - name: Create redirect and SPA 404 pages
+      - name: Create redirect page
         run: |
           mkdir -p redirect
-          # Root index.html — redirect to main branch
           cat > redirect/index.html << 'REDIRECT_EOF'
           <!DOCTYPE html>
           <html lang="en">
@@ -117,26 +114,6 @@ jobs:
           </body>
           </html>
           REDIRECT_EOF
-
-          # Root 404.html — SPA fallback for all branch deployments
-          # Converts /sphere/{branch}/{route} → /sphere/{branch}/?p={route}
-          # The app's index.html restores the route via history.replaceState
-          cat > redirect/404.html << 'SPA_EOF'
-          <!DOCTYPE html>
-          <html>
-          <head><meta charset="UTF-8"></head>
-          <body>
-            <script>
-              var path = window.location.pathname;
-              // Match /sphere/{branch}/{anything}
-              var m = path.match(/^(\/sphere\/[^/]+)(\/.*)/);
-              if (m) {
-                window.location.replace(m[1] + '/?p=' + encodeURIComponent(m[2]) + window.location.search.replace('?', '&') + window.location.hash);
-              }
-            </script>
-          </body>
-          </html>
-          SPA_EOF
 
       - name: Deploy redirect
         uses: peaceiris/actions-gh-pages@v4
