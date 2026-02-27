@@ -20,11 +20,12 @@
     </script>
     <script>
       // SPA route restore — GitHub Pages 404.html redirects here with ?p=/route
+      // e.g. /sphere/branch/?p=%2Fhome → /sphere/branch/home
       (function() {
         var p = new URLSearchParams(window.location.search).get('p');
         if (p) {
-          var clean = window.location.pathname + window.location.hash;
-          window.history.replaceState(null, '', p + window.location.hash);
+          var base = window.location.pathname.replace(/\/$/, '');
+          window.history.replaceState(null, '', base + p + window.location.hash);
         }
       })();
     </script>
