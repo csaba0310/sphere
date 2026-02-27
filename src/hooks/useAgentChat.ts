@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { getTriviaMockResponse, getAmaMockResponse, getDefaultMockResponse, getGamesMockResponse } from '../data/agentsMockData';
+import { getAmaMockResponse, getDefaultMockResponse } from '../data/agentsMockData';
 import { loadMemory, saveMemory, isLocalStorageAvailable } from '../utils/memory';
 
 export interface ChatMessage {
@@ -238,12 +238,8 @@ export function useAgentChat({ activityId, userId }: UseAgentChatOptions) {
 }
 
 // Mock responses for different activities
-function getMockResponse(activityId: string, userInput: string): string {
+function getMockResponse(activityId: string, _userInput: string): string {
   switch (activityId) {
-    case 'trivia':
-      return getTriviaMockResponse(userInput);
-    case 'games':
-      return getGamesMockResponse(userInput);
     case 'ama':
       return getAmaMockResponse();
     default:

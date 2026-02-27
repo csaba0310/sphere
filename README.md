@@ -1,311 +1,128 @@
 # Unicity AgentSphere
 
-A multifunctional Web3 platform with integrated crypto wallet, specialized AI agents, and P2P functionality.
+A Web3 wallet and agent platform for the Unicity network — dual-layer crypto wallet, AI agents, DMs, group chat, and marketplace.
 
-## Overview
+## Features
 
-**Unicity AgentSphere** is a modern decentralized application built on the concept of "agents" — specialized AI interfaces for various activities: sports betting, gaming, merchandise shopping, P2P crypto trading, trivia, direct messaging, and AI assistance.
+### Multi-Layer Wallet
 
-## Key Features
-
-### 🤖 Agent System
-
-**Core Agents:**
-- **Chat** — direct and group messaging via Nostr protocol
-- **Uncensored AI (Viktor)** — uncensored LLM with internet access
-- **Unicity Trivia** — quiz games with score tracking
-- **P2P Gaming** — gaming platform (Quake arena, crypto poker)
-- **P2P Prediction** — sports prediction markets with history tracking
-- **OTC** — peer-to-peer cryptocurrency trading
-- **Unicity Merch** — merchandise store with order management
-
-**Additional Agents:**
-- **Agent Casino** — verifiably fair casino games
-- **P2P Sports** — private betting pools
-- **P2P Derivatives** — leveraged trading
-- **P2P Payday Loans** — instant approval loans
-- **P2P Crypto Offramp** — convert crypto to cash
-- **P2P Fiat Onramp** — convert cash to crypto
-- **Friendly Miners** — buy hash rate
-- **Buy Anything** — product purchasing
-- **Sell Anything** — get quotes for items
-- **Get UCT** — acquire Unicity tokens
-
-### 💰 Multi-Layer Wallet
-
-**Layer 1 (L1)** — base blockchain layer:
-- Wallet creation and management
-- Transaction history
-- Vesting selector
+**Layer 1 (ALPHA blockchain):**
+- Wallet creation, import, and management
+- Transaction history and vesting
 - Password protection
-- Bridge between layers
+- L1-L3 bridge
 
-**Layer 3 (L3)** — application-specific rollup:
-- Fast, low-cost transactions
-- Token management
-- Direct transfers
+**Layer 3 (Unicity state transitions):**
+- Fast, low-cost token transfers
+- Token management and balance tracking
 - Incoming payment notifications
+- Nametag system (@username)
 
-**Additional Features:**
-- Nametag system (@username identification)
-- Wallet switching
-- QR codes for receiving payments
-- Seed phrase management
-- Real-time market data
+**Common:** QR codes, wallet switching, seed phrase management, real-time market data.
 
-### 💬 NIP-29 Group Chat
+### Agent System
 
-Sphere implements [NIP-29](https://github.com/nostr-protocol/nips/blob/master/29.md) for relay-based group chat functionality, providing Discord-like group messaging.
+Agents are specialized interfaces loaded as tabs. Currently active:
+- **Messages (DM)** — private conversations via Nostr
+- **Group Chat** — public group channels via NIP-29
+- **Sphere Agents** — load any external dApp via iframe (custom URL)
 
-**Features:**
+The architecture supports additional agent types (AI, trivia, games, merch, etc.) which can be enabled in `src/config/activities.ts`.
+
+### Group Chat (NIP-29)
+
+Relay-based group messaging via [NIP-29](https://github.com/nostr-protocol/nips/blob/master/29.md):
 - Public and private groups with invite codes
 - Real-time messaging via WebSocket
-- Group discovery and browsing
-- Member count display
-- Unread message tracking
-- Join/leave group functionality
-- Message history persistence
+- Group discovery, join/leave, unread tracking
+- Dedicated Zooid relay at `wss://sphere-relay.unicity.network`
 
-**Architecture:**
-- Dedicated Zooid relay (NIP-29 compliant) at `wss://sphere-relay.unicity.network`
-- `GroupChatService` — manages relay connection, subscriptions, and message sending
-- `GroupChatRepository` — local storage for groups, messages, and members
-- `useGroupChat` hook — React Query integration for state management
-
-**Event Kinds (NIP-29):**
-- Kind 9: Group chat message
-- Kind 9021: Join request
-- Kind 9022: Leave request
-- Kind 39000: Group metadata (relay-signed)
-- Kind 39002: Group members (relay-signed)
-
-**Files:**
-```
-src/components/chat/
-├── data/
-│   ├── groupModels.ts        # Group, GroupMessage, GroupMember classes
-│   └── GroupChatRepository.ts # Local storage operations
-├── services/
-│   └── GroupChatService.ts   # NIP-29 relay communication
-├── hooks/
-│   └── useGroupChat.ts       # React Query hook
-└── group/
-    ├── GroupChatSection.tsx  # Main container
-    ├── GroupList.tsx         # Sidebar with joined groups
-    ├── GroupItem.tsx         # Single group row
-    ├── GroupMessageList.tsx  # Message display
-    ├── GroupMessageBubble.tsx # Individual message
-    └── JoinGroupModal.tsx    # Browse/join groups
-```
-
-### 🔐 Security
-
-- Cryptographic identification
-- Transaction signing via elliptic curve cryptography
-- PIN-based session protection
-- Decentralized messaging (Nostr protocol)
-- Secure seed phrase storage
-
-## Tech Stack
-
-### Frontend
-- **React 19** with TypeScript
-- **Vite 7** — build tool and HMR
-- **Tailwind CSS 4** — styling
-- **Framer Motion** — animations
-- **React Router DOM v7** — routing
-- **TanStack React Query v5** — server state management
-
-### Web3 / Crypto
-- **Unicity Labs State Transition SDK** — blockchain interaction
-- **Nostr JS SDK** — decentralized messaging
-- **BIP39** — seed phrase generation
-- **Elliptic** — cryptography
-- **CryptoJS** — encryption
-
-### Utilities
-- **Axios** — HTTP client
-- **Lucide React** — icons
-- **UUID** — identifier generation
-- **QR Code Styling** — QR code generation
-
-## Installation and Setup
+## Quick Start
 
 ### Requirements
-- Node.js 18+
-- npm or yarn
+- Node.js 20+
 
-### Install Dependencies
+### Setup
 
 ```bash
 npm install
+cp .env.example .env    # Configure environment variables
+npm run dev              # Start dev server at http://localhost:5173
 ```
 
-### Run Development Server
+### Commands
 
 ```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:5173`
-
-### Build for Production
-
-```bash
-npm run build
-```
-
-### Preview Production Build
-
-```bash
-npm run preview
-```
-
-### Lint Code
-
-```bash
-npm run lint
+npm run dev          # Development server
+npm run build        # TypeScript compile + Vite production build
+npm run preview      # Preview production build
+npm run lint         # ESLint
+npm run test         # Vitest watch mode
+npm run test:run     # Vitest single run
 ```
 
 ## Environment Variables
 
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env`. Key variables:
 
 ```env
-# Agent mode (mock/real)
-VITE_USE_MOCK_AGENTS=true
-
-# Backend API URL
-VITE_AGENT_API_URL=https://api.example.com
-
-# Base path for deployment
-BASE_PATH=/
-
-# NIP-29 Group Chat Relays (Zooid, comma-separated)
-VITE_GROUP_CHAT_RELAYS=wss://sphere-relay.unicity.network
+VITE_AGENT_API_URL=http://localhost:3000   # Agent chatbot backend
+VITE_USE_MOCK_AGENTS=true                   # Mock agents for local dev
+VITE_AGGREGATOR_URL=/rpc                    # L3 aggregator (proxied in dev)
+VITE_NOSTR_RELAYS=wss://...                 # DM relays (comma-separated)
+VITE_GROUP_CHAT_RELAYS=wss://...            # NIP-29 group chat relays
+BASE_PATH=/                                 # Deployment base path
 ```
+
+See `.env.example` for the full list including IPFS, analytics, SSL, and HMR options.
+
+## Tech Stack
+
+- **React 19** + TypeScript, **Vite 7**
+- **TanStack Query v5** — server state
+- **Tailwind CSS 4** — styling
+- **Framer Motion** — animations
+- **React Router DOM v7** — routing
+- **@unicitylabs/sphere-sdk** — all wallet operations (L1, L3, Nostr, IPFS)
+- **Vitest** + jsdom — testing
 
 ## Project Structure
 
 ```
 src/
-├── components/          # React components
-│   ├── agents/         # Agent components
-│   │   ├── shared/     # Reusable chat components
-│   │   └── [specific]  # AIChat, SportChat, P2PChat, etc.
-│   ├── wallet/         # Multi-layer wallet
-│   │   ├── L1/         # Layer 1 components
-│   │   ├── L3/         # Layer 3 components
-│   │   └── shared/     # Shared utilities
-│   ├── chat/           # Messaging system
-│   ├── auth/           # Authentication
-│   ├── layout/         # Page layouts
-│   ├── theme/          # Theme management
-│   └── splash/         # Loading screen
-├── pages/              # Application pages
-├── hooks/              # Custom React hooks
-├── config/             # Configuration (agent definitions)
-├── types/              # TypeScript types
-├── data/               # Mock data
-├── repositories/       # Data access layer
-├── utils/              # Helper functions
-└── assets/             # Static resources
+├── index.html           # HTML entry point
+├── main.tsx             # App bootstrap, provider tree
+├── App.tsx              # Route definitions
+├── sdk/                 # React adapter layer over sphere-sdk (21 files)
+│   ├── core/            # useSphere, useWalletStatus, useIdentity, useSphereEvents
+│   ├── payments/        # useTokens, useBalance, useTransfer, useTransactionHistory
+│   ├── l1/              # useL1Balance, useL1Utxos, useL1Send, useL1Transactions
+│   └── comms/           # useSendDM, usePaymentRequests
+├── components/
+│   ├── agents/          # Agent cards, AgentChat, MerchChat, TriviaChat, GamesChat
+│   ├── chat/            # DM, group chat, mini chat, hooks, utils
+│   ├── wallet/          # L1, L3, onboarding, shared, UI components
+│   ├── layout/          # DashboardLayout, Header, IpfsSyncIndicator
+│   ├── desktop/         # Desktop layout, TabBar, Taskbar
+│   ├── connect/         # Wallet connection flow
+│   └── ...              # splash, theme, tutorial, ui
+├── pages/               # IntroPage, AgentPage, ConnectPage, + lazy-loaded pages
+├── hooks/               # 12 app-level hooks
+├── contexts/            # ServicesProvider (GroupChat)
+├── services/            # ActivityService, FaucetService
+├── config/              # localStorage key constants
+├── utils/               # markdown, memory, mentions, retry
+└── types/               # TypeScript type definitions
+tests/
+└── unit/                # Vitest tests (jsdom)
 ```
 
-## Responsive Design
+## Docker
 
-### Mobile (< 1024px)
-- Swipeable tab interface (chat/wallet)
-- Optimized keyboard handling
-- Touch-friendly elements
-
-### Desktop (≥ 1024px)
-- Grid layout with agent picker, chat, and wallet
-- Sidebars with additional information
-- Extended navigation capabilities
-
-## Core Components
-
-### Agent Architecture
-
-Each agent is configured in `src/config/activities.ts`:
-
-```typescript
-// For rendering agent cards (src/types/index.ts)
-interface IAgent {
-  id: string;
-  name: string;
-  Icon: LucideIcon;  // Lucide React icon component
-  category: string;
-  color: string;
-  isSelected?: boolean;
-}
-
-// Full agent configuration (src/config/activities.ts)
-interface AgentConfig {
-  id: string;
-  name: string;
-  description: string;
-  Icon: LucideIcon;
-  category: string;
-  color: string;
-  type: AgentType;  // 'chat' | 'simple-ai' | 'ai-with-sidebar' | 'trivia' | 'unified'
-  greetingMessage?: string;
-  placeholder?: string;
-  backendActivityId?: string;  // For real mode API calls
-  quickActions?: QuickAction[];
-  contentType?: ContentType;  // 'none' | 'game' | 'match' | 'product' | 'merch'
-  hasSidebar?: boolean;
-}
+```bash
+docker compose up        # Runs on port 3010
 ```
-
-### State Management
-
-- **Server State:** TanStack Query
-- **UI State:** React hooks (useState, useRef)
-- **Theme State:** Context API
-- **Persistent State:** localStorage
-
-### Real-time Features
-
-- WebSocket via Nostr for chat
-- Automatic wallet balance updates
-- Market data refresh (60 sec intervals)
-- Automatic incoming transfer detection
-
-## User Flow
-
-1. **Splash Screen** → IntroPage
-2. **Authentication** → WalletGate (create/import wallet)
-3. **Dashboard** → Agent selection
-4. **Interaction** → Chat interface with optional sidebar
-5. **Wallet** → L1/L3 management, transfers
-6. **Direct Messages** → Real-time communication
-7. **Marketplace** → Shopping, trading, betting, gaming
-
-## Development Features
-
-### Performance Optimization
-- Query caching via React Query
-- Debounced scroll detection
-- Memoization with Framer Motion
-- Lazy component mounting
-- LocalStorage for offline access
-
-### Security
-- Cryptographic key management
-- Transaction signing
-- PIN session authentication
-- Identity verification via Unicity SDK
 
 ## License
 
-Private project
-
-## Contact
-
-For questions and suggestions, please contact the Unicity Labs development team.
-
----
-
-**Built with React, TypeScript, Vite, and Unicity SDKs**
+Private project — Unicity Labs

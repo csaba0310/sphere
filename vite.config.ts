@@ -34,8 +34,13 @@ export default defineConfig(({ mode }) => {
       {
         name: 'html-from-src',
         configureServer(server) {
+          // SPA fallback: rewrite HTML requests to src/index.html
+          // This runs before Vite's built-in middleware so it handles
+          // both "/" and deep routes like "/home", "/agents/dm", etc.
           server.middlewares.use((req, _res, next) => {
-            if (req.url === '/' || req.url === '/index.html') {
+            const url = req.url || '';
+            const isAsset = url.startsWith('/src/') || url.startsWith('/node_modules/') || url.startsWith('/@') || url.includes('.');
+            if (!isAsset) {
               req.url = '/src/index.html';
             }
             next();

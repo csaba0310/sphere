@@ -10,9 +10,6 @@ import { DesktopShortcuts } from './DesktopShortcuts';
 import { ChatSection } from '../chat/ChatSection';
 import { DMChatSection } from '../chat/dm/DMChatSection';
 import { GroupChatSection } from '../chat/group/GroupChatSection';
-import { MerchChat } from '../agents/MerchChat';
-import { TriviaChat } from '../agents/TriviaChat';
-import { GamesChat } from '../agents/GamesChat';
 import { IframeAgent } from '../agents/IframeAgent';
 import { WalletPanel } from '../wallet/WalletPanel';
 import { WalletRequiredBlocker } from '../agents/WalletRequiredBlocker';
@@ -97,12 +94,6 @@ export function DesktopLayout() {
             <GroupChatSection />
           </WalletRequiredBlocker>
         );
-      case 'trivia':
-        return <TriviaChat agent={agent} />;
-      case 'games':
-        return <GamesChat agent={agent} />;
-      case 'merch':
-        return <MerchChat agent={agent} />;
       case 'custom':
         return renderCustomUrlPrompt();
       default:
