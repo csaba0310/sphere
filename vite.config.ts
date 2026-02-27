@@ -31,6 +31,26 @@ export default defineConfig(({ mode }) => {
           Buffer: 'build',
         },
       }),
+      {
+        name: 'html-from-src',
+        configureServer(server) {
+          server.middlewares.use((req, _res, next) => {
+            if (req.url === '/' || req.url === '/index.html') {
+              req.url = '/src/index.html';
+            }
+            next();
+          });
+        },
+        closeBundle() {
+          // Move index.html from dist/src/ to dist/ after build
+          const srcHtml = path.resolve(__dirname, 'dist/src/index.html');
+          const destHtml = path.resolve(__dirname, 'dist/index.html');
+          if (fs.existsSync(srcHtml)) {
+            fs.renameSync(srcHtml, destHtml);
+            fs.rmdirSync(path.resolve(__dirname, 'dist/src'));
+          }
+        },
+      },
     ],
     base: env.BASE_PATH || '/',
     server: {
@@ -73,6 +93,11 @@ export default defineConfig(({ mode }) => {
         'vite-plugin-node-polyfills/shims/buffer': path.resolve(__dirname, 'node_modules/vite-plugin-node-polyfills/shims/buffer'),
         'vite-plugin-node-polyfills/shims/process': path.resolve(__dirname, 'node_modules/vite-plugin-node-polyfills/shims/process'),
         'vite-plugin-node-polyfills/shims/global': path.resolve(__dirname, 'node_modules/vite-plugin-node-polyfills/shims/global'),
+      },
+    },
+    build: {
+      rollupOptions: {
+        input: path.resolve(__dirname, 'src/index.html'),
       },
     },
     // Pre-bundle heavy CJS dependencies to speed up dev server cold start
