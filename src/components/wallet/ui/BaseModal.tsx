@@ -9,8 +9,6 @@ interface BaseModalProps {
   children: ReactNode;
   /** Modal max-width: sm (384px), md (448px), lg (512px) */
   size?: ModalSize;
-  /** Show decorative background orbs */
-  showOrbs?: boolean;
   /** Additional className for the modal container */
   className?: string;
 }
@@ -26,7 +24,6 @@ export function BaseModal({
   onClose,
   children,
   size = 'md',
-  showOrbs = true,
   className = '',
 }: BaseModalProps) {
   return (
