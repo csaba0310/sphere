@@ -1,6 +1,6 @@
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { type Asset, TokenRegistry } from '@unicitylabs/sphere-sdk';
-import { Box } from 'lucide-react';
+import { Box, Loader2 } from 'lucide-react';
 import { memo, useEffect } from 'react';
 
 interface AssetRowProps {
@@ -20,6 +20,8 @@ function areAssetPropsEqual(prev: AssetRowProps, next: AssetRowProps): boolean {
     prev.asset.symbol === next.asset.symbol &&
     prev.asset.totalAmount === next.asset.totalAmount &&
     prev.asset.tokenCount === next.asset.tokenCount &&
+    prev.asset.unconfirmedTokenCount === next.asset.unconfirmedTokenCount &&
+    prev.asset.transferringTokenCount === next.asset.transferringTokenCount &&
     prev.asset.priceUsd === next.asset.priceUsd &&
     prev.asset.change24h === next.asset.change24h &&
     prev.asset.iconUrl === next.asset.iconUrl &&
@@ -123,6 +125,18 @@ export const AssetRow = memo(function AssetRow({ asset, showBalances, delay, onC
             <div className="text-xs text-neutral-500 truncate max-w-25">
               {asset.name}
             </div>
+            {asset.transferringTokenCount > 0 && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center gap-0.5">
+                <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                {asset.transferringTokenCount} sending
+              </span>
+            )}
+            {asset.unconfirmedTokenCount - asset.transferringTokenCount > 0 && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
+                <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                {asset.unconfirmedTokenCount - asset.transferringTokenCount} pending
+              </span>
+            )}
           </div>
           <div className="text-xs text-left text-neutral-500">
             <AnimatedAmount

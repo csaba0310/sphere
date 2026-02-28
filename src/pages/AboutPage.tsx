@@ -252,7 +252,7 @@ const stack = [
     role: 'Settlement',
     color: 'from-orange-500 to-amber-500',
     description: "A purpose built L1 blockchain that delivers on Satoshi's vision of peer to peer electronic cash.",
-    url: 'https://github.com/unicitynetwork',
+    url: 'https://github.com/unicity-sphere/sphere',
   },
 ];
 
@@ -468,7 +468,7 @@ export function AboutPage() {
           <span>Built by Unicity Labs</span>
           <div className="flex flex-wrap gap-6">
             <Link to="/developers/docs" className="hover:text-orange-500 transition">Docs</Link>
-            <a href="https://github.com/unicitynetwork" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">GitHub</a>
+            <a href="https://github.com/unicity-sphere/sphere" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">GitHub</a>
             <a href="https://discord.com/invite/PGzNZT5uVp" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">Discord</a>
             <a href="https://x.com/unicity_labs" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">Twitter/X</a>
           </div>

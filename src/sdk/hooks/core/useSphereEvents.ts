@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSphereContext } from './useSphere';
 import { SPHERE_KEYS } from '../../queryKeys';
 import { formatAmount } from '../../index';
-import { showToast } from '../../../components/ui/toast-utils';
+import { showTransferToast } from '../../../components/ui/toast-utils';
 import { CHAT_KEYS, GROUP_CHAT_KEYS, type DmReceivedDetail } from '../../../components/chat/data/chatTypes';
 import type { IncomingTransfer } from '@unicitylabs/sphere-sdk';
 
@@ -18,6 +18,8 @@ export function useSphereEvents(): void {
   const { sphere } = useSphereContext();
   const queryClient = useQueryClient();
   const invalidateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track seen transfer IDs to prevent duplicate toasts from Nostr re-deliveries
+  const seenTransferIdsRef = useRef<Set<string>>(new Set());
 
   // When sphere instance changes (new wallet, delete, import) —
   // immediately sync identity cache so the UI never shows stale data
@@ -49,19 +51,34 @@ export function useSphereEvents(): void {
     const handleIncomingTransfer = (transfer: IncomingTransfer) => {
       invalidatePayments();
 
-      // Build toast message
-      const sender = transfer.senderNametag ? `@${transfer.senderNametag}` : 'Someone';
-      const tokenSummary = transfer.tokens.map(t => {
-        const amt = formatAmount(t.amount, t.decimals);
-        return `${amt} ${t.symbol}`;
-      }).join(', ');
+      // Deduplicate: Nostr relays may re-deliver the same transfer on reconnect
+      if (seenTransferIdsRef.current.has(transfer.id)) return;
+      seenTransferIdsRef.current.add(transfer.id);
 
-      let message = `${sender} sent you ${tokenSummary}`;
-      if (transfer.memo) {
-        message += `\n"${transfer.memo}"`;
+      const sender = transfer.senderNametag ? `@${transfer.senderNametag}` : 'Someone';
+      const firstToken = transfer.tokens[0];
+      const symbol = firstToken?.symbol ?? '?';
+      const decimals = firstToken?.decimals ?? 0;
+
+      // Sum all token amounts for the total (all tokens share the same coin type)
+      let amount: string;
+      if (transfer.tokens.length <= 1) {
+        amount = firstToken ? formatAmount(firstToken.amount, decimals) : '?';
+      } else {
+        const totalSmallest = transfer.tokens.reduce(
+          (sum, t) => sum + BigInt(t.amount || '0'),
+          0n,
+        );
+        amount = formatAmount(totalSmallest.toString(), decimals);
       }
 
-      showToast(message, 'success', 6000);
+      showTransferToast({
+        sender,
+        amount,
+        symbol,
+        iconUrl: firstToken?.iconUrl,
+        memo: transfer.memo,
+      });
     };
     const handleTransferConfirmed = invalidatePayments;
 
@@ -127,8 +144,16 @@ export function useSphereEvents(): void {
       window.dispatchEvent(new Event('payment-requests-updated'));
     };
 
+    // Invalidate history query immediately when SDK saves a new history entry
+    const handleHistoryUpdated = () => {
+      queryClient.invalidateQueries({
+        queryKey: SPHERE_KEYS.payments.transactions.history,
+      });
+    };
+
     sphere.on('transfer:incoming', handleIncomingTransfer);
     sphere.on('transfer:confirmed', handleTransferConfirmed);
+    sphere.on('history:updated', handleHistoryUpdated);
     sphere.on('nametag:registered', handleNametagChange);
     sphere.on('nametag:recovered', handleNametagChange);
     sphere.on('identity:changed', handleIdentityChange);
@@ -146,6 +171,7 @@ export function useSphereEvents(): void {
       }
       sphere.off('transfer:incoming', handleIncomingTransfer);
       sphere.off('transfer:confirmed', handleTransferConfirmed);
+      sphere.off('history:updated', handleHistoryUpdated);
       sphere.off('nametag:registered', handleNametagChange);
       sphere.off('nametag:recovered', handleNametagChange);
       sphere.off('identity:changed', handleIdentityChange);

@@ -148,7 +148,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
           {[
             { href: 'https://x.com/unicity_labs', icon: <XIcon className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]" />, label: 'X' },
             { href: 'https://discord.com/invite/PGzNZT5uVp', icon: <DiscordIcon className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]" />, label: 'Discord' },
-            { href: 'https://github.com/unicitynetwork', icon: <Github className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]" />, label: 'GitHub' },
+            { href: 'https://github.com/unicity-sphere/sphere', icon: <Github className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]" />, label: 'GitHub' },
             { href: 'https://www.linkedin.com/company/unicity-labs/', icon: <Linkedin className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]" />, label: 'LinkedIn' },
           ].map(({ href, icon, label }) => (
             <motion.a

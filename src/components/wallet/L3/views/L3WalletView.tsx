@@ -251,6 +251,7 @@ export function L3WalletView({
       unconfirmedAmount: '0',
       confirmedTokenCount: 1,
       unconfirmedTokenCount: 0,
+      transferringTokenCount: 0,
       iconUrl: undefined,
       priceUsd: 1.0,
       priceEur: 0.92,
