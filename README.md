@@ -20,6 +20,17 @@ A Web3 wallet and agent platform for the Unicity network — dual-layer crypto w
 
 **Common:** QR codes, wallet switching, seed phrase management, real-time market data.
 
+### Connect Protocol (dApp ↔ Wallet)
+
+Sphere implements `ConnectHost` — the wallet side of the Sphere Connect protocol. External dApps can connect to Sphere and request wallet operations:
+
+- **Iframe mode** — dApp embedded inside Sphere as an iframe connects via `PostMessageTransport`
+- **Popup mode** — dApp opens Sphere as a popup window, user approves the connection
+- **Permission-based access** — dApp requests specific scopes; user approves or rejects
+- **Intent handling** — dApp triggers send/sign/DM flows in the wallet UI
+
+Key components: `ConnectPage` (`/connect` route), `ConnectProvider`, `ConnectionApprovalModal`.
+
 ### Agent System
 
 Agents are specialized interfaces loaded as tabs. Currently active:
