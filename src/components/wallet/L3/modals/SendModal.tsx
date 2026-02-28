@@ -196,7 +196,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} showOrbs={false}>
+    <BaseModal isOpen={isOpen} onClose={handleClose}>
       <ModalHeader title={getTitle()} onClose={handleClose} />
 
       <div className="px-6 py-3 flex-1 flex flex-col justify-center overflow-y-auto">

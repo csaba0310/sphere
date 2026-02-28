@@ -60,7 +60,7 @@ export function TabBar({ isFullscreen, onToggleFullscreen }: TabBarProps) {
         onClick={handleShowDesktop}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-2 px-4 py-2 rounded-full shrink-0 bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium shadow-md shadow-orange-500/20 dark:shadow-[rgba(255,111,0,0.25)]"
+        className="flex items-center gap-2 px-4 py-2 rounded-full shrink-0 bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium shadow-md shadow-orange-500/20 dark:shadow-brand-orange-border"
         title="Show Desktop"
       >
         <LayoutGrid className="w-3.5 h-3.5" />

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquarePlus, Search, X, PanelLeftClose, Sparkles } from 'lucide-react';
+import { MessageSquarePlus, Search, X, PanelLeftClose } from 'lucide-react';
 import type { Conversation } from '../data/chatTypes';
 import { DMConversationItem } from './DMConversationItem';
 

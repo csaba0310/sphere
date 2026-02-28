@@ -227,7 +227,7 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
             </p>
             <motion.button
               onClick={() => setShowNewConversation(true)}
-              className="mt-5 px-6 py-2.5 rounded-full bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium shadow-md shadow-orange-500/20 dark:shadow-[rgba(255,111,0,0.25)]"
+              className="mt-5 px-6 py-2.5 rounded-full bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium shadow-md shadow-orange-500/20 dark:shadow-brand-orange-border"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

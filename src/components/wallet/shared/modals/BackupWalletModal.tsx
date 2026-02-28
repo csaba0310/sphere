@@ -18,7 +18,7 @@ export function BackupWalletModal({
   hasMnemonic = true,
 }: BackupWalletModalProps) {
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="sm" showOrbs={false}>
+    <BaseModal isOpen={isOpen} onClose={onClose} size="sm">
       {/* Centered Header */}
       <div className="relative px-6 py-5 flex flex-col items-center text-center">
         <motion.div

@@ -68,7 +68,6 @@ export function LogoutConfirmModal({
       isOpen={isOpen}
       onClose={showSyncWarning ? handleCloseSyncWarning : onClose}
       size="sm"
-      showOrbs={false}
     >
       <AnimatePresence mode="wait">
         {showSyncWarning ? (

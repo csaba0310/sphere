@@ -177,7 +177,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
   }, [addresses]);
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="lg" showOrbs={false} className="max-h-[92%]">
+    <BaseModal isOpen={isOpen} onClose={onClose} size="lg" className="max-h-[92%]">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
         <div className="flex items-center gap-3">

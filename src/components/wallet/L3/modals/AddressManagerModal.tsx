@@ -66,7 +66,7 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="sm" showOrbs={false}>
+    <BaseModal isOpen={isOpen} onClose={onClose} size="sm">
       <ModalHeader title="Address Manager" icon={MapPin} iconVariant="neutral" onClose={onClose} />
 
       <div className="p-4 space-y-2">

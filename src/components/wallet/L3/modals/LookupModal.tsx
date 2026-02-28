@@ -118,7 +118,7 @@ export function LookupModal({ isOpen, onClose }: LookupModalProps) {
   const lookupFields = result ? toFields(result, 'lookup') : [];
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="sm" showOrbs={false}>
+    <BaseModal isOpen={isOpen} onClose={onClose} size="sm">
       <ModalHeader title="My Public Keys" icon={Key} iconVariant="neutral" onClose={onClose} />
 
       <div className="overflow-y-auto flex-1">

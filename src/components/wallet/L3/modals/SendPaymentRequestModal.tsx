@@ -216,7 +216,7 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} showOrbs={false}>
+    <BaseModal isOpen={isOpen} onClose={handleClose}>
       <ModalHeader title={getTitle()} onClose={handleClose} />
 
       <div className="px-6 py-3 flex-1 flex flex-col justify-center overflow-y-auto">

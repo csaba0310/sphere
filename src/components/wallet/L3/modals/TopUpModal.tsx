@@ -64,7 +64,7 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
 
   return (
     <>
-      <BaseModal isOpen={isOpen} onClose={handleClose} showOrbs={false}>
+      <BaseModal isOpen={isOpen} onClose={handleClose}>
         <ModalHeader title="Top Up" icon={Plus} onClose={handleClose} />
 
         {/* Tab Switcher */}

@@ -42,7 +42,7 @@ export function ComingSoonModal({ isOpen, onClose, title = 'Get API Key' }: Comi
 
               {/* Content */}
               <div className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center">
                   <span className="text-3xl">🚀</span>
                 </div>
                 <h4 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">Coming Soon</h4>
@@ -54,7 +54,7 @@ export function ComingSoonModal({ isOpen, onClose, title = 'Get API Key' }: Comi
                     href="https://discord.com/invite/PGzNZT5uVp"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 py-2.5 rounded-xl font-medium hover:opacity-90 transition shadow-lg shadow-orange-500/25"
+                    className="bg-linear-to-r from-orange-500 to-amber-500 text-white px-5 py-2.5 rounded-xl font-medium hover:opacity-90 transition shadow-lg shadow-orange-500/25"
                   >
                     Join Discord
                   </a>

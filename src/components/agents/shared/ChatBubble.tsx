@@ -85,7 +85,7 @@ export function ChatBubble({
         className={`max-w-[85%] rounded-2xl p-4 ${
           role === 'user'
             ? `bg-linear-to-br ${agentColor} text-white shadow-lg`
-            : 'bg-neutral-100 dark:bg-[#111] backdrop-blur-xl border border-neutral-200 dark:border-[rgba(255,111,0,0.08)] text-neutral-800 dark:text-[#fefefe]'
+            : 'bg-neutral-100 dark:bg-[#111] backdrop-blur-xl border border-neutral-200 dark:border-brand-orange-dim text-neutral-800 dark:text-[#fefefe]'
         }`}
       >
         <div className="flex items-center gap-2 mb-2">
