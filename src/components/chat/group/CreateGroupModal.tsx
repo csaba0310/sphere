@@ -69,7 +69,7 @@ export function CreateGroupModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100000]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100000"
           />
 
           {/* Modal */}
