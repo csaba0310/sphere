@@ -25,10 +25,10 @@ interface ButtonProps extends Omit<ComponentPropsWithoutRef<typeof motion.button
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25',
-  secondary: 'bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-white',
-  danger: 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25',
-  success: 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25',
+  primary: 'bg-orange-500 dark:bg-brand-orange hover:bg-orange-600 dark:hover:bg-brand-orange-dark text-white',
+  secondary: 'bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] hover:bg-neutral-200 dark:hover:bg-[rgba(255,255,255,0.1)] text-neutral-700 dark:text-white',
+  danger: 'bg-red-500 hover:bg-red-600 text-white',
+  success: 'bg-emerald-500 hover:bg-emerald-600 text-white',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

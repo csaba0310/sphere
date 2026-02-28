@@ -68,7 +68,7 @@ export const DMChatInput = forwardRef<HTMLTextAreaElement, DMChatInputProps>(
 
     return (
       <div
-        className="p-4 border-t border-neutral-200 dark:border-neutral-800/50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm theme-transition"
+        className="p-4 border-t border-neutral-100 dark:border-[rgba(255,255,255,0.06)]"
         style={{ paddingBottom: 'calc(1rem + var(--safe-area-bottom, 0px))' }}
       >
         <div className="flex gap-3">
@@ -79,14 +79,14 @@ export const DMChatInput = forwardRef<HTMLTextAreaElement, DMChatInputProps>(
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={disabled || isSending}
-            className="flex-1 bg-neutral-100 dark:bg-neutral-800/50 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 outline-none resize-none rounded-xl p-3 min-h-11 max-h-[120px] border border-neutral-200 dark:border-neutral-700/50 text-base theme-transition disabled:opacity-50"
+            className="flex-1 bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-[rgba(255,255,255,0.3)] outline-none resize-none rounded-xl p-3 min-h-11 max-h-[120px] text-base disabled:opacity-50 focus:ring-1 focus:ring-orange-500/50 dark:focus:ring-[rgba(255,111,0,0.3)] transition-all"
             rows={1}
             enterKeyHint="send"
           />
           <motion.button
             onClick={onSend}
             disabled={!value.trim() || isSending || disabled}
-            className="px-5 py-2 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 text-white disabled:opacity-50 flex items-center justify-center min-w-[60px]"
+            className="px-5 py-2 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white disabled:opacity-50 flex items-center justify-center min-w-[60px]"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

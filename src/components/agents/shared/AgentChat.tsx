@@ -556,7 +556,7 @@ export function AgentChat<TCardData, TItem extends SidebarItem = SidebarItem>({
           transform transition-all duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'lg:w-0 lg:border-0 lg:min-w-0' : 'lg:w-64'}
-          bg-white/95 dark:bg-neutral-900/95 lg:bg-transparent dark:lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none rounded-l-3xl lg:rounded-none
+          bg-white/95 dark:bg-[#060606]/70 lg:bg-transparent dark:lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none rounded-l-3xl lg:rounded-none
         `}>
           {/* Header with tabs */}
           <div className="p-4 border-b border-neutral-200 dark:border-neutral-800/50">
@@ -791,7 +791,7 @@ export function AgentChat<TCardData, TItem extends SidebarItem = SidebarItem>({
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-sm w-full shadow-xl"
+                className="bg-white dark:bg-[#0d0d0d]/80 dark:backdrop-blur-xl border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-sm w-full shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
@@ -833,7 +833,7 @@ export function AgentChat<TCardData, TItem extends SidebarItem = SidebarItem>({
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-sm w-full shadow-xl"
+                className="bg-white dark:bg-[#0d0d0d]/80 dark:backdrop-blur-xl border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-sm w-full shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
@@ -938,7 +938,7 @@ export function AgentChat<TCardData, TItem extends SidebarItem = SidebarItem>({
       </div>
 
       {/* Bottom section - always at bottom */}
-      <div className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm theme-transition">
+      <div className="bg-white/95 dark:bg-[#060606]/60 backdrop-blur-sm theme-transition">
         {/* Quick actions */}
         {agent.quickActions && (
           <QuickActions
@@ -968,8 +968,8 @@ export function AgentChat<TCardData, TItem extends SidebarItem = SidebarItem>({
     <>
       <div className={`overflow-hidden relative lg:grid lg:grid-cols-[auto_1fr] h-full min-h-0 theme-transition ${
         isFullscreen
-          ? 'bg-white dark:bg-neutral-900'
-          : 'bg-white/60 dark:bg-neutral-900/70 backdrop-blur-xl rounded-none md:rounded-3xl lg:rounded-none border-0 md:border md:border-neutral-200 dark:md:border-neutral-800/50 lg:border-0 lg:shadow-none'
+          ? 'bg-white dark:bg-[#060606]/90'
+          : 'bg-white/60 dark:bg-[#060606]/30 backdrop-blur-xl rounded-none md:rounded-3xl lg:rounded-none border-0 md:border md:border-neutral-200 dark:md:border-neutral-800/50 lg:border-0 lg:shadow-none'
       }`}>
         <div className={`absolute -top-20 -right-20 w-96 h-96 ${bgGradient.from} rounded-full blur-3xl pointer-events-none`} />
         <div className={`absolute -bottom-20 -left-20 w-96 h-96 ${bgGradient.to} rounded-full blur-3xl pointer-events-none`} />

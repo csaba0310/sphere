@@ -133,7 +133,7 @@ export function MerchChat({ agent }: MerchChatProps) {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                className="bg-white dark:bg-[#0d0d0d]/80 dark:backdrop-blur-xl border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-md w-full shadow-2xl"
                 onClick={e => e.stopPropagation()}
               >
                 {orderStep === 'confirm' && (

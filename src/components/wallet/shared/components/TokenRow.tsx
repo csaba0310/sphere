@@ -89,7 +89,7 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const className = "p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800/30 border border-neutral-200/50 dark:border-white/5 hover:border-neutral-300 dark:hover:border-white/10 transition-all group";
+  const className = "p-3 rounded-xl bg-neutral-50 dark:bg-[rgba(255,255,255,0.03)] hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.05)] transition-all group";
 
   const amountDisplay = (
     <AnimatedTokenAmount
@@ -110,7 +110,7 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
           )}
         </div>
         <div>
-          <div className="text-neutral-900 dark:text-white font-medium text-sm">
+          <div className="text-neutral-900 dark:text-[#fefefe] font-medium text-sm" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
             {amountDisplay}
           </div>
           <div
@@ -123,10 +123,10 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
         </div>
       </div>
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-700/50 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700">
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] text-neutral-500 dark:text-[rgba(255,255,255,0.45)]">
           Token
         </span>
-        <span className="text-[10px] text-neutral-400 dark:text-neutral-600">
+        <span className="text-[10px] text-neutral-400 dark:text-[rgba(255,255,255,0.28)]" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
           {new Date(token.createdAt).toLocaleDateString()}
         </span>
       </div>

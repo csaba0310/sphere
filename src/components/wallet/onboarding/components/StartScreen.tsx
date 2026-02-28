@@ -45,25 +45,19 @@ export function StartScreen({
       transition={{ duration: 0.1 }}
       className="relative z-10 w-full max-w-90"
     >
-      {/* Icon with glow effect */}
-      <motion.div
-        className="relative w-18 h-18 mx-auto mb-6"
-        whileHover={{ scale: 1.05 }}
-      >
-        <div className="absolute inset-0 bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl blur-xl opacity-45" />
-        <div className="relative w-full h-full rounded-2xl bg-linear-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-xl shadow-orange-500/25">
-          <Wallet className="w-9 h-9 text-white" />
-        </div>
-      </motion.div>
+      {/* Icon */}
+      <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-linear-to-br from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark flex items-center justify-center">
+        <Wallet className="w-8 h-8 text-white" />
+      </div>
 
-      <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2 tracking-tight">
+      <h2 className="text-2xl font-bold text-neutral-900 dark:text-[#fefefe] mb-2 tracking-tight" style={{ fontFamily: "'Geist', sans-serif" }}>
         {showContinueSetup ? "Complete Setup" : "No Wallet Found"}
       </h2>
-      <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-7 mx-auto leading-relaxed">
+      <p className="text-neutral-500 dark:text-[rgba(255,255,255,0.45)] text-sm mb-7 mx-auto leading-relaxed">
         {showContinueSetup ? (
           <>
             Your wallet is ready. Create a{" "}
-            <span className="text-orange-500 dark:text-orange-400 font-semibold">
+            <span className="text-orange-500 dark:text-brand-orange font-semibold">
               Unicity ID
             </span>{" "}
             to complete setup.
@@ -71,7 +65,7 @@ export function StartScreen({
         ) : (
           <>
             Create a new secure wallet to start using{" "}
-            <span className="text-orange-500 dark:text-orange-400 font-semibold whitespace-nowrap">
+            <span className="text-orange-500 dark:text-brand-orange font-semibold whitespace-nowrap">
               the Unicity Network
             </span>
           </>
@@ -87,9 +81,8 @@ export function StartScreen({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.1 }}
-            className="relative w-full py-3.5 px-5 rounded-xl bg-linear-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group mb-3"
+            className="relative w-full py-3.5 px-5 rounded-xl bg-linear-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden mb-3"
           >
-            <div className="absolute inset-0 bg-linear-to-r from-emerald-400 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             <span className="relative z-10 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4" />
               Continue Setup
@@ -101,7 +94,7 @@ export function StartScreen({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex items-center justify-center gap-2 text-neutral-500 dark:text-neutral-400 text-[11px] mb-2"
+              className="flex items-center justify-center gap-2 text-neutral-500 dark:text-[rgba(255,255,255,0.45)] text-[11px] mb-2"
             >
               <Loader2 className="w-3 h-3 animate-spin" />
               <span>Checking for existing Unicity ID...</span>
@@ -113,11 +106,11 @@ export function StartScreen({
       {/* Divider when showing continue option */}
       {showContinueSetup && (
         <div className="flex items-center gap-3 my-3">
-          <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-700" />
+          <div className="flex-1 h-px bg-neutral-200 dark:bg-[rgba(255,255,255,0.07)]" />
           <span className="text-[11px] text-neutral-400 dark:text-neutral-500">
             or start fresh
           </span>
-          <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-700" />
+          <div className="flex-1 h-px bg-neutral-200 dark:bg-[rgba(255,255,255,0.07)]" />
         </div>
       )}
 
@@ -127,9 +120,8 @@ export function StartScreen({
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
-        className="relative w-full py-3.5 px-5 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 text-white text-sm font-bold shadow-xl shadow-orange-500/25 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
+        className="relative w-full py-3.5 px-5 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
       >
-        <div className="absolute inset-0 bg-linear-to-r from-orange-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
         <span className="relative z-10 flex items-center gap-2">
           {isBusy ? (
             <>
@@ -149,7 +141,7 @@ export function StartScreen({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-center justify-center gap-2 text-neutral-500 dark:text-neutral-400 text-[11px] mt-2.5"
+          className="flex items-center justify-center gap-2 text-neutral-500 dark:text-[rgba(255,255,255,0.45)] text-[11px] mt-2.5"
         >
           <Loader2 className="w-3 h-3 animate-spin text-orange-500" />
           <span>{progressMessage}</span>
@@ -162,7 +154,7 @@ export function StartScreen({
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
-        className="relative w-full py-3.5 px-5 rounded-xl bg-neutral-100 dark:bg-neutral-800/50 text-neutral-700 dark:text-neutral-300 text-sm font-bold border border-neutral-200 dark:border-neutral-700/50 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-3 hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors"
+        className="relative w-full py-3.5 px-5 rounded-xl bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] text-neutral-700 dark:text-[rgba(255,255,255,0.65)] text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-3 hover:bg-neutral-200 dark:hover:bg-[rgba(255,255,255,0.1)] transition-colors"
       >
         <KeyRound className="w-4 h-4" />
         Restore Wallet

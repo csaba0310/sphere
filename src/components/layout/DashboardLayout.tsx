@@ -19,31 +19,57 @@ export function DashboardLayout() {
   const showMiniChat = !isDmTabActive;
 
   return (
-    <div className="h-full flex flex-col bg-neutral-100 dark:bg-linear-to-br dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950 theme-transition overflow-y-auto overflow-x-hidden">
-      <Header />
-      <div className="flex-1 min-h-0 flex">
-        <div className={`flex-1 w-full mx-auto ${isFullscreen ? 'p-0' : isAgentPage ? 'max-w-450 p-0 md:px-4 md:pt-4 lg:p-0 lg:max-w-none' : 'max-w-450 px-4 pt-4 pb-0 md:p-8 lg:pb-8'} ${
-          isMinePage ? 'bg-neutral-100 dark:bg-gray-950' : ''
-        }`}>
-          <Outlet />
-        </div>
+    <div className="h-full flex flex-col bg-neutral-100 dark:bg-[#060606] theme-transition overflow-y-auto overflow-x-hidden relative">
+      {/* Video background — dark mode only */}
+      <div className="hidden dark:block fixed inset-0 z-0 pointer-events-none">
+        <video
+          className="w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          src="/kling_20260226_VIDEO_Take_Image_1650_0.mp4"
+        />
+        <div className="absolute inset-0 bg-black/50" />
       </div>
 
-      {/* Mini chat bubbles - hidden when DM tab is active */}
-      {showMiniChat && <MiniChatBubbles />}
+      {/* Grid overlay — dark mode only */}
+      <div
+        className="hidden dark:block fixed inset-0 z-1 pointer-events-none opacity-[0.07]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }}
+      />
 
-      {/* Onboarding tutorial overlay */}
-      {isAgentPage && tutorial.isActive && (
-        <TutorialOverlay
-          isActive={tutorial.isActive}
-          currentStep={tutorial.currentStep}
-          currentStepIndex={tutorial.currentStepIndex}
-          totalSteps={tutorial.totalSteps}
-          isLastStep={tutorial.isLastStep}
-          onNext={tutorial.next}
-          onDismiss={tutorial.dismiss}
-        />
-      )}
+      {/* Content — above background layers */}
+      <div className="relative z-10 flex flex-col h-full">
+        {!isFullscreen && <Header />}
+        <div className="flex-1 min-h-0 flex">
+          <div className={`flex-1 w-full ${isFullscreen ? 'p-0' : isAgentPage ? 'px-12 sm:px-20 lg:px-28 pb-0' : 'px-12 sm:px-20 lg:px-28 pt-4 pb-0 md:pt-8 lg:pb-8'} ${
+            isMinePage ? 'bg-neutral-100 dark:bg-transparent' : ''
+          }`}>
+            <Outlet />
+          </div>
+        </div>
+
+        {/* Mini chat bubbles - hidden when DM tab is active */}
+        {showMiniChat && <MiniChatBubbles />}
+
+        {/* Onboarding tutorial overlay */}
+        {isAgentPage && tutorial.isActive && (
+          <TutorialOverlay
+            isActive={tutorial.isActive}
+            currentStep={tutorial.currentStep}
+            currentStepIndex={tutorial.currentStepIndex}
+            totalSteps={tutorial.totalSteps}
+            isLastStep={tutorial.isLastStep}
+            onNext={tutorial.next}
+            onDismiss={tutorial.dismiss}
+          />
+        )}
+      </div>
     </div>
   );
 }

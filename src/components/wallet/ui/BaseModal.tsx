@@ -50,16 +50,8 @@ export function BaseModal({
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
               onClick={(e) => e.stopPropagation()}
-              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-[600px] bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden ${className}`}
+              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-[600px] bg-white dark:bg-[#111] border border-neutral-200 dark:border-[rgba(255,255,255,0.1)] rounded-3xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden ${className}`}
             >
-              {/* Background Orbs */}
-              {showOrbs && (
-                <>
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-                </>
-              )}
-
               {children}
             </motion.div>
           </div>

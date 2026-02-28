@@ -134,7 +134,7 @@ export function IframeAgent({ agent }: IframeAgentProps) {
 
       <div className="relative flex-1 min-h-0">
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-neutral-900/80">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-[#060606]/50">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
               <span className="text-sm text-neutral-500 dark:text-neutral-400">

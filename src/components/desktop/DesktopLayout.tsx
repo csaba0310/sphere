@@ -17,6 +17,7 @@ import { IframeAgent } from '../agents/IframeAgent';
 import { WalletPanel } from '../wallet/WalletPanel';
 import { WalletRequiredBlocker } from '../agents/WalletRequiredBlocker';
 import { ActivityTicker } from '../activity';
+import { Footer } from '../layout/Footer';
 
 const CUSTOM_URL_PRESETS = [
   { label: 'Sphere Connect Example', url: 'https://unicitynetwork.github.io/sphere-sdk-connect-example/' },
@@ -117,8 +118,8 @@ export function DesktopLayout() {
     <div className="h-full flex items-center justify-center">
       <div className="flex flex-col items-center gap-4 p-8 max-w-md w-full">
         <Globe className="w-12 h-12 text-neutral-400" />
-        <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Load Custom URL</h3>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center">
+        <h3 className="text-lg font-semibold text-neutral-900 dark:text-[#fefefe]">Load Custom URL</h3>
+        <p className="text-sm text-neutral-500 dark:text-[rgba(255,255,255,0.45)] text-center">
           Quick open or enter any URL
         </p>
         <div className="flex items-center gap-2">
@@ -126,16 +127,16 @@ export function DesktopLayout() {
             <button
               key={preset.url}
               onClick={() => openCustomUrl(preset.url)}
-              className="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-orange-500 hover:text-white transition-colors border border-neutral-200 dark:border-neutral-700"
+              className="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-100 dark:bg-[#111]/60 dark:backdrop-blur-sm text-neutral-700 dark:text-[#fefefe] hover:bg-orange-500 dark:hover:bg-brand-orange hover:text-white transition-colors border border-neutral-200 dark:border-[rgba(255,255,255,0.07)]"
             >
               {preset.label}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-3 w-full">
-          <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-700" />
+          <div className="flex-1 h-px bg-neutral-200 dark:bg-[rgba(255,255,255,0.07)]" />
           <span className="text-xs text-neutral-400">or</span>
-          <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-700" />
+          <div className="flex-1 h-px bg-neutral-200 dark:bg-[rgba(255,255,255,0.07)]" />
         </div>
         <form onSubmit={handleCustomUrlSubmit} className="w-full flex gap-2">
           <input
@@ -143,12 +144,12 @@ export function DesktopLayout() {
             value={customUrlInput}
             onChange={(e) => setCustomUrlInput(e.target.value)}
             placeholder="https://example.com or localhost:5174"
-            className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500"
+            className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-neutral-300 dark:border-[rgba(255,255,255,0.07)] bg-white dark:bg-[#1a1a1a]/60 dark:backdrop-blur-sm text-neutral-900 dark:text-[#fefefe] placeholder-neutral-400 dark:placeholder-[rgba(255,255,255,0.28)] focus:outline-none focus:ring-2 focus:ring-orange-500/50 dark:focus:ring-[rgba(255,111,0,0.4)] focus:border-orange-500 dark:focus:border-brand-orange"
             autoFocus
           />
           <button
             type="submit"
-            className="px-5 py-2.5 text-sm font-medium rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-sm"
+            className="px-5 py-2.5 text-sm font-medium rounded-xl bg-orange-500 dark:bg-brand-orange text-white hover:bg-orange-600 dark:hover:bg-brand-orange-dark transition-colors shadow-sm"
           >
             Open
           </button>
@@ -158,74 +159,81 @@ export function DesktopLayout() {
   );
 
   return (
-    <div className={`flex flex-col overflow-hidden bg-white dark:bg-neutral-900 ${
+    <div className={`flex flex-col overflow-hidden bg-white dark:bg-transparent ${
       isFullscreen ? 'fixed inset-0 z-99999' : 'h-full'
     }`}>
-      {/* Activity ticker - hidden in fullscreen */}
+      {/* Activity ticker — hidden in fullscreen */}
       {!isFullscreen && (
-        <div className="shrink-0">
+        <div className="shrink-0 mt-2">
           <ActivityTicker />
         </div>
       )}
 
-      {/* Tab bar with wallet toggle */}
-      <TabBar
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={toggleFullscreen}
-      />
-
-      {/* Content area with optional wallet panel */}
-      <div className="flex-1 min-h-0 flex relative">
-        {/* Main content */}
-        <div className="flex-1 min-w-0 relative bg-white dark:bg-neutral-900">
-          {activeTabId === null && <DesktopShortcuts />}
-          {openTabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={tab.id === activeTabId ? 'h-full' : 'hidden'}
-            >
-              {renderTabContent(tab.id, tab.appId, tab.url)}
-            </div>
-          ))}
-        </div>
-
-        {/* Wallet panel — desktop: inline side panel with slide transition */}
-        <div
-          data-tutorial="wallet-panel"
-          className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-            walletOpen ? 'w-80 xl:w-96' : 'w-0'
-          }`}
-        >
-          <div className="w-80 xl:w-96 h-full">
-            <WalletPanel />
-          </div>
-        </div>
-
-        {/* Wallet panel — mobile: overlay sliding from right */}
-        <AnimatePresence>
-          {walletOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="lg:hidden absolute inset-0 bg-black/50 z-40"
-                onClick={toggleWallet}
-              />
-              <motion.div
-                data-tutorial="wallet-panel-mobile"
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="lg:hidden absolute inset-0 z-50"
-              >
-                <WalletPanel />
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+      {/* Horizontal tab bar */}
+      <div className="shrink-0">
+        <TabBar
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={toggleFullscreen}
+        />
       </div>
+
+      {/* Content + wallet row */}
+      <div className="flex-1 min-h-0 flex">
+          {/* Content area with rounded corners */}
+          <div className="flex-1 min-w-0 relative">
+            <div className="h-full lg:rounded-2xl overflow-hidden bg-white dark:bg-[#0a0a0a]/60 dark:backdrop-blur-sm">
+              {activeTabId === null && <DesktopShortcuts />}
+              {openTabs.map((tab) => (
+                <div
+                  key={tab.id}
+                  className={tab.id === activeTabId ? 'h-full' : 'hidden'}
+                >
+                  {renderTabContent(tab.id, tab.appId, tab.url)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Wallet panel — desktop: inline side panel with slide transition */}
+          <div
+            data-tutorial="wallet-panel"
+            className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
+              walletOpen ? 'w-80 xl:w-96' : 'w-0'
+            }`}
+          >
+            <div className="w-80 xl:w-96 h-full">
+              <WalletPanel />
+            </div>
+          </div>
+
+          {/* Wallet panel — mobile: overlay sliding from right */}
+          <AnimatePresence>
+            {walletOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="lg:hidden absolute inset-0 bg-black/50 z-40"
+                  onClick={toggleWallet}
+                />
+                <motion.div
+                  data-tutorial="wallet-panel-mobile"
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="lg:hidden absolute inset-0 z-50"
+                >
+                  <WalletPanel />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Footer with social icons */}
+        {!isFullscreen && <Footer />}
     </div>
   );
 }

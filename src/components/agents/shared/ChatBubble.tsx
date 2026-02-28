@@ -85,7 +85,7 @@ export function ChatBubble({
         className={`max-w-[85%] rounded-2xl p-4 ${
           role === 'user'
             ? `bg-linear-to-br ${agentColor} text-white shadow-lg`
-            : 'bg-neutral-100 dark:bg-neutral-800/80 backdrop-blur-xl border border-neutral-200 dark:border-neutral-700/50 text-neutral-800 dark:text-neutral-200'
+            : 'bg-neutral-100 dark:bg-[#111] backdrop-blur-xl border border-neutral-200 dark:border-[rgba(255,111,0,0.08)] text-neutral-800 dark:text-[#fefefe]'
         }`}
       >
         <div className="flex items-center gap-2 mb-2">
@@ -94,7 +94,7 @@ export function ChatBubble({
               <Sparkles className="w-2.5 h-2.5 text-white" />
             </div>
           )}
-          <span className={`text-xs ${role === 'user' ? 'text-white/80' : 'text-neutral-500 dark:text-neutral-400'}`}>
+          <span className={`text-xs ${role === 'user' ? 'text-white/80' : 'text-neutral-500 dark:text-[rgba(255,255,255,0.45)]'}`}>
             {role === 'user' ? 'You' : agentName}
           </span>
         </div>
@@ -103,7 +103,7 @@ export function ChatBubble({
         {role === 'assistant' && (isStreaming || thinking) && (
           <div className="mb-2">
             <details className="group">
-              <summary className="flex items-center gap-2 text-xs text-neutral-400 dark:text-neutral-500 cursor-pointer list-none">
+              <summary className="flex items-center gap-2 text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.28)] cursor-pointer list-none">
                 {isStreaming && <AnimatedDots color={getDotsColor(agentColor)} />}
                 <span>{currentStatus || 'Thinking...'}</span>
                 {thinking && (
@@ -114,7 +114,7 @@ export function ChatBubble({
               </summary>
               {thinking && (
                 <div className="mt-2 pl-1">
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500 italic leading-relaxed">
+                  <p className="text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.28)] italic leading-relaxed">
                     {thinking}
                   </p>
                 </div>
@@ -135,7 +135,7 @@ export function ChatBubble({
         {showCopy && role === 'assistant' && content && onCopy && (
           <button
             onClick={onCopy}
-            className="mt-3 flex items-center gap-1 text-xs text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+            className="mt-3 flex items-center gap-1 text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.28)] hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
           >
             {isCopied ? (
               <>
