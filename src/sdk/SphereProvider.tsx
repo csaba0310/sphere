@@ -27,7 +27,23 @@ import type {
 } from './SphereContext';
 import { clearAllSphereData, STORAGE_KEYS } from '../config/storageKeys';
 
-// SDK logger debug flag is set inside initialize() after createBrowserProviders().
+// SDK debug logging: off by default, opt-in via console commands.
+// Print hint in dev mode so developers know how to enable it.
+if (import.meta.env.DEV) {
+  console.log(
+    '%c[Sphere SDK] Debug logging is off. Enable with:%c\n' +
+    '  logger.configure({ debug: true })          — all tags\n' +
+    '  logger.setTagDebug("Nostr", true)           — Nostr only\n' +
+    '  logger.setTagDebug("Payments", true)         — Payments only\n' +
+    '  logger.setTagDebug("IndexedDB", true)        — IndexedDB only\n' +
+    '  logger.setTagDebug("Aggregator", true)       — Aggregator only\n' +
+    'Available: Nostr, Payments, IndexedDB, IndexedDBToken, LocalStorage, Aggregator, Price, Market, SphereProvider',
+    'color: #888; font-weight: bold',
+    'color: #888',
+  );
+  // Expose logger on window for easy console access
+  (window as unknown as Record<string, unknown>).logger = logger;
+}
 
 function isIpfsEnabled(): boolean {
   const stored = localStorage.getItem(STORAGE_KEYS.IPFS_ENABLED);
@@ -134,8 +150,7 @@ export function SphereProvider({
         market: true,
         ...getIpfsConfig(),
       });
-      // createBrowserProviders defaults debug=false; re-enable for dev mode
-      logger.configure({ debug: import.meta.env.DEV });
+      // Debug logging is off by default; enable at runtime via: logger.configure({ debug: true })
       setProviders(browserProviders);
 
       // Configure our bundle's TokenRegistry singleton — the SDK configures
