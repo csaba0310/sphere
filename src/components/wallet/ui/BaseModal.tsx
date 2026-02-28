@@ -50,7 +50,7 @@ export function BaseModal({
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
               onClick={(e) => e.stopPropagation()}
-              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-[600px] bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden ${className}`}
+              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-150 bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden ${className}`}
             >
               {/* Background Orbs */}
               {showOrbs && (
