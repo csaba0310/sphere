@@ -19,6 +19,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useCreateAddress, type CreateAddressStep, type ExistingAddressData } from '../hooks/useCreateAddress';
+import { getErrorMessage } from '../../../../sdk/errors';
 
 interface CreateAddressModalProps {
   isOpen: boolean;
@@ -80,7 +81,7 @@ export function CreateAddressModal({ isOpen, onClose, existingAddress }: CreateA
 
       await submitNametag(nametagInput.trim());
     } catch (err) {
-      setAvailabilityError(err instanceof Error ? err.message : 'Failed to check availability');
+      setAvailabilityError(getErrorMessage(err));
     } finally {
       setIsCheckingAvailability(false);
     }

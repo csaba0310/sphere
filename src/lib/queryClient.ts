@@ -1,4 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '../sdk/errors';
+import { showToast } from '../components/ui/toast-utils';
 
 /**
  * Shared QueryClient instance for TanStack Query.
@@ -12,6 +14,11 @@ export const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+    },
+    mutations: {
+      onError: (err) => {
+        showToast(getErrorMessage(err), 'error');
+      },
     },
   },
 });

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Hash, Lock, Globe, Loader2 } from 'lucide-react';
 import { GroupVisibility } from '@unicitylabs/sphere-sdk';
 import type { CreateGroupOptions } from '@unicitylabs/sphere-sdk';
+import { getErrorMessage } from '../../../sdk/errors';
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ export function CreateGroupModal({
       setVisibility(GroupVisibility.PUBLIC);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create group');
+      setError(getErrorMessage(err));
     }
   };
 

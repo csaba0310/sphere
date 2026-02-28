@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getErrorMessage } from "../../../../../sdk/errors";
 
 type VestingMode = 'all' | 'vested' | 'unvested';
 
@@ -106,7 +107,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
           resolvedAddress = resolved.address;
           nametag = resolved.nametag;
         } catch (err) {
-          setError(err instanceof Error ? err.message : "Failed to resolve address");
+          setError(getErrorMessage(err));
           setIsPreparing(false);
           return;
         }
@@ -137,7 +138,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
       });
       setStep('confirm');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to prepare transaction");
+      setError(getErrorMessage(err));
     } finally {
       setIsPreparing(false);
     }
@@ -151,7 +152,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
       await onSend(preview.resolvedAddress, amount);
       onClose({ success: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Transaction failed");
+      setError(getErrorMessage(err));
     }
   };
 

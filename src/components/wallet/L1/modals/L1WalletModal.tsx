@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useIdentity, useL1Balance, useL1Send } from "../../../../sdk";
+import { getErrorMessage } from "../../../../sdk/errors";
 import { useSphereContext } from "../../../../sdk/hooks/core/useSphere";
 import { useL1Transactions, type L1Transaction } from "../../../../sdk/hooks/l1/useL1Transactions";
 import { SPHERE_KEYS } from "../../../../sdk/queryKeys";
@@ -166,7 +167,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
       setShowSendModal(false);
       showMessage("success", "Transaction Sent", "Transaction sent successfully!", result.txHash ? [result.txHash] : undefined);
     } catch (err) {
-      showMessage("error", "Transaction Failed", "Transaction failed: " + (err instanceof Error ? err.message : String(err)));
+      showMessage("error", "Transaction Failed", getErrorMessage(err));
     }
   }, [l1Send, showMessage]);
 

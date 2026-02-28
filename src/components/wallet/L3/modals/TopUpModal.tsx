@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Sparkles, Receipt, CheckCircle, XCircle } from 'lucide-react';
 import { useIdentity } from '../../../../sdk';
+import { getErrorMessage } from '../../../../sdk/errors';
 import { FaucetService } from '../../../../services/FaucetService';
 import { showToast } from '../../../ui/toast-utils';
 import { BaseModal, ModalHeader, Button } from '../../ui';
@@ -42,7 +43,7 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
         setTimeout(() => setFaucetSuccess(false), 3000);
       }
     } catch (error) {
-      setFaucetError(error instanceof Error ? error.message : 'Failed to request tokens');
+      setFaucetError(getErrorMessage(error));
     } finally {
       setIsFaucetLoading(false);
     }

@@ -1,6 +1,7 @@
 import { Check, Sparkles, Trash2, Loader2, XIcon, ArrowRight, Clock, Receipt, AlertCircle } from 'lucide-react';
 import { type IncomingPaymentRequest, PaymentRequestStatus } from '../hooks/useIncomingPaymentRequests';
 import { useTransfer } from '../../../../sdk';
+import { getErrorMessage } from '../../../../sdk/errors';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { AmountFormatUtils } from '../utils/currency';
@@ -44,17 +45,7 @@ export function PaymentRequestsModal({ isOpen, onClose, requests, pendingCount, 
       });
       paid(req);
     } catch (error: unknown) {
-      console.error("Failed to execute payment transaction:", error);
-      let errorMessage = "Transaction failed";
-      if (error instanceof Error) {
-        if (error.message.includes("Insufficient")) {
-          errorMessage = "Insufficient funds";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-
-      setErrors(prev => ({ ...prev, [req.id]: errorMessage }));
+      setErrors(prev => ({ ...prev, [req.id]: getErrorMessage(error) }));
     } finally {
       setProcessingId(null);
     }
