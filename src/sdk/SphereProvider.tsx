@@ -6,8 +6,9 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Sphere, TokenRegistry, NETWORKS } from '@unicitylabs/sphere-sdk';
+import { Sphere, TokenRegistry, NETWORKS, logger, isSphereError } from '@unicitylabs/sphere-sdk';
 import type { InitProgress, NetworkType } from '@unicitylabs/sphere-sdk';
+import { getErrorMessage } from './errors';
 import {
   createBrowserProviders,
   type BrowserProviders,
@@ -25,6 +26,24 @@ import type {
   ImportFromFileResult,
 } from './SphereContext';
 import { clearAllSphereData, STORAGE_KEYS } from '../config/storageKeys';
+
+// SDK debug logging: off by default, opt-in via console commands.
+// Print hint in dev mode so developers know how to enable it.
+if (import.meta.env.DEV) {
+  console.log(
+    '%c[Sphere SDK] Debug logging is off. Enable with:%c\n' +
+    '  logger.configure({ debug: true })          — all tags\n' +
+    '  logger.setTagDebug("Nostr", true)           — Nostr only\n' +
+    '  logger.setTagDebug("Payments", true)         — Payments only\n' +
+    '  logger.setTagDebug("IndexedDB", true)        — IndexedDB only\n' +
+    '  logger.setTagDebug("Aggregator", true)       — Aggregator only\n' +
+    'Available: Nostr, Payments, IndexedDB, IndexedDBToken, LocalStorage, Aggregator, Price, Market, SphereProvider',
+    'color: #888; font-weight: bold',
+    'color: #888',
+  );
+  // Expose logger on window for easy console access
+  (window as unknown as Record<string, unknown>).logger = logger;
+}
 
 function isIpfsEnabled(): boolean {
   const stored = localStorage.getItem(STORAGE_KEYS.IPFS_ENABLED);
@@ -58,7 +77,7 @@ function setupIpfsSync(instance: Sphere, providers: BrowserProviders): void {
   if (providers.ipfsTokenStorage) {
     instance.addTokenStorageProvider(providers.ipfsTokenStorage)
       .then(() => instance.sync())
-      .catch(err => console.warn('[SphereProvider] IPFS sync failed:', err));
+      .catch(err => logger.warn('SphereProvider', 'IPFS sync failed', err));
   }
 }
 
@@ -75,8 +94,8 @@ function sendWelcomeDM(instance: Sphere): void {
   setTimeout(() => {
     instance.communications
       .sendDM(`@${agentNametag}`, WELCOME_TRIGGER)
-      .then(() => console.log(`[SphereProvider] Welcome trigger sent to @${agentNametag}`))
-      .catch((err) => console.warn(`[SphereProvider] Failed to send welcome trigger:`, err));
+      .then(() => logger.debug('SphereProvider', `Welcome trigger sent to @${agentNametag}`))
+      .catch((err) => logger.warn('SphereProvider', `Failed to send welcome trigger`, err));
   }, delayMs);
 }
 
@@ -131,6 +150,7 @@ export function SphereProvider({
         market: true,
         ...getIpfsConfig(),
       });
+      // Debug logging is off by default; enable at runtime via: logger.configure({ debug: true })
       setProviders(browserProviders);
 
       // Configure our bundle's TokenRegistry singleton — the SDK configures
@@ -162,10 +182,10 @@ export function SphereProvider({
         setIsDiscoveringAddresses(true);
         instance.discoverAddresses({ autoTrack: true, includeL1Scan: false }).then(result => {
           if (result.addresses.length > 0) {
-            console.log(`[SphereProvider] Discovered ${result.addresses.length} address(es)`);
+            logger.debug('SphereProvider', `Discovered ${result.addresses.length} address(es)`);
           }
         }).catch(err => {
-          console.warn('[SphereProvider] Address discovery failed:', err);
+          logger.warn('SphereProvider', 'Address discovery failed', err);
         }).finally(() => {
           setIsDiscoveringAddresses(false);
         });
@@ -180,18 +200,16 @@ export function SphereProvider({
         });
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-
       // IndexedDB may be temporarily blocked after database deletion.
       // Retry once after a short delay before giving up.
-      if (message.includes('IndexedDB open timed out') && attempt < 1) {
-        console.warn('[SphereProvider] IndexedDB open timed out, retrying in 1s...');
+      if (isSphereError(err) && err.code === 'STORAGE_ERROR' && attempt < 1) {
+        logger.warn('SphereProvider', 'Storage error, retrying in 1s...', err);
         await new Promise(r => setTimeout(r, 1000));
         return initialize(attempt + 1, skipLoading);
       }
 
-      console.error('[SphereProvider] Initialization failed:', err);
-      setError(err instanceof Error ? err : new Error(message));
+      logger.error('SphereProvider', 'Initialization failed', err);
+      setError(err instanceof Error ? err : new Error(getErrorMessage(err)));
     } finally {
       setInitProgress(null);
       setIsLoading(false);
@@ -329,7 +347,7 @@ export function SphereProvider({
         setWalletExists(false);
         return {
           success: false,
-          error: err instanceof Error ? err.message : 'Import failed',
+          error: getErrorMessage(err),
         };
       }
     },
@@ -357,7 +375,7 @@ export function SphereProvider({
           tokenStorage: providers.tokenStorage,
         });
       } catch (err) {
-        console.warn('[SphereProvider] Sphere.clear() failed, deleting IndexedDB directly:', err);
+        logger.warn('SphereProvider', 'Sphere.clear() failed, deleting IndexedDB directly', err);
         // Fallback: nuke the IndexedDB databases directly
         for (const dbName of ['sphere-storage', 'sphere-token-storage']) {
           try { indexedDB.deleteDatabase(dbName); } catch { /* best effort */ }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Sparkles, Receipt, CheckCircle, XCircle } from 'lucide-react';
 import { useIdentity } from '../../../../sdk';
+import { getErrorMessage } from '../../../../sdk/errors';
 import { FaucetService } from '../../../../services/FaucetService';
 import { showToast } from '../../../ui/toast-utils';
 import { BaseModal, ModalHeader, Button } from '../../ui';
@@ -35,14 +36,19 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
       const failedRequests = results.filter(r => !r.success);
 
       if (failedRequests.length > 0) {
-        const failedCoins = failedRequests.map(r => r.coin).join(', ');
-        setFaucetError(`Failed to request: ${failedCoins}`);
+        const uniqueReasons = [...new Set(failedRequests.map(r => r.message || 'Unknown error'))];
+        if (uniqueReasons.length === 1) {
+          setFaucetError(uniqueReasons[0]);
+        } else {
+          const reasons = failedRequests.map(r => `${r.coin}: ${r.message || 'Unknown error'}`);
+          setFaucetError(`Failed to request:\n${reasons.join('\n')}`);
+        }
       } else {
         setFaucetSuccess(true);
         setTimeout(() => setFaucetSuccess(false), 3000);
       }
     } catch (error) {
-      setFaucetError(error instanceof Error ? error.message : 'Failed to request tokens');
+      setFaucetError(getErrorMessage(error));
     } finally {
       setIsFaucetLoading(false);
     }
@@ -151,7 +157,7 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                           className="mt-4 w-full flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl"
                         >
                           <XCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
-                          <p className="text-xs text-red-600 dark:text-red-400">{faucetError}</p>
+                          <p className="text-xs text-red-600 dark:text-red-400 whitespace-pre-line">{faucetError}</p>
                         </motion.div>
                       )}
                     </AnimatePresence>

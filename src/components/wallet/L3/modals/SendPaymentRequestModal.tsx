@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Loader2, User, CheckCircle, Hash, Receipt } from 'lucide-react';
 import { TokenRegistry, toSmallestUnit } from '@unicitylabs/sphere-sdk';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
+import { getErrorMessage } from '../../../../sdk/errors';
 import { BaseModal, ModalHeader, Button } from '../../ui';
 
 type Step = 'recipient' | 'coin' | 'amount' | 'confirm' | 'processing' | 'success';
@@ -154,8 +155,8 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
           setStep('coin');
         }
       }
-    } catch {
-      setRecipientError('Network error');
+    } catch (err) {
+      setRecipientError(getErrorMessage(err));
     } finally {
       setIsCheckingRecipient(false);
     }
@@ -193,8 +194,7 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
       setRequestId(result.requestId || null);
       setStep('success');
     } catch (e: unknown) {
-      console.error(e);
-      setError(e instanceof Error ? e.message : 'Failed to send payment request');
+      setError(getErrorMessage(e));
       setStep('confirm');
     }
   };

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import CryptoJS from "crypto-js";
 import elliptic from "elliptic";
+import { getErrorMessage } from "../../../../../sdk/errors";
 
 const ec = new elliptic.ec("secp256k1");
 
@@ -170,10 +171,7 @@ export function BridgeModal({
       }
     } catch (err) {
       setStatus("error");
-      setError(
-        "Failed to check balance: " +
-          (err instanceof Error ? err.message : String(err))
-      );
+      setError(getErrorMessage(err));
     }
   }, [address]);
 
@@ -240,9 +238,7 @@ export function BridgeModal({
       }
     } catch (err) {
       setStatus("error");
-      setError(
-        "Bridge failed: " + (err instanceof Error ? err.message : String(err))
-      );
+      setError(getErrorMessage(err));
     }
   };
 

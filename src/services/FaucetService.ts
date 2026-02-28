@@ -13,6 +13,26 @@ export interface FaucetResponse {
   amount: number;
 }
 
+// Map raw API/network errors to user-friendly messages
+function humanizeError(raw: string): string {
+  const lower = raw.toLowerCase();
+  if (lower.includes('failed to fetch') || lower.includes('networkerror') || lower.includes('net::'))
+    return 'Network error. Check your connection';
+  if (lower.includes('rate') && lower.includes('limit'))
+    return 'Too many requests. Try again later';
+  if (lower.includes('timeout') || lower.includes('timed out'))
+    return 'Request timed out. Try again';
+  if (lower.includes('unicityid') && (lower.includes('not found') || lower.includes('invalid')))
+    return 'Unicity ID not found';
+  if (lower.includes('coin') && (lower.includes('not found') || lower.includes('invalid') || lower.includes('unsupported')))
+    return 'Unsupported coin type';
+  if (lower.includes('500') || lower.includes('internal server'))
+    return 'Faucet server error. Try again later';
+  if (lower.includes('503') || lower.includes('unavailable'))
+    return 'Faucet is temporarily unavailable';
+  return raw;
+}
+
 export class FaucetService {
   static async requestTokens(unicityId: string, coin: string, amount: number): Promise<FaucetResponse> {
     if (import.meta.env.DEV) console.log(`🌊 Requesting ${amount} ${coin} for @${unicityId}...`);
@@ -39,7 +59,7 @@ export class FaucetService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`❌ Failed response for ${coin}:`, errorText);
-        throw new Error(`Failed to request ${coin}: ${response.statusText} - ${errorText}`);
+        throw new Error(humanizeError(`${response.statusText} - ${errorText}`));
       }
 
       const data = await response.json();
@@ -55,7 +75,7 @@ export class FaucetService {
       console.error(`❌ Faucet request failed for ${coin}:`, error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: humanizeError(error instanceof Error ? error.message : 'Unknown error'),
         coin,
         amount,
       };

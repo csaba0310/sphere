@@ -21,7 +21,7 @@ export function EmptyState({
   action,
 }: EmptyStateProps) {
   return (
-    <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center py-12">
+    <div className="h-full min-h-75 flex flex-col items-center justify-center text-center py-12">
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -37,7 +37,7 @@ export function EmptyState({
       <p className="text-neutral-900 dark:text-white font-bold text-lg mb-2">{title}</p>
 
       {description && (
-        <p className="text-neutral-500 dark:text-neutral-400 text-sm max-w-[220px] leading-relaxed">
+        <p className="text-neutral-500 dark:text-neutral-400 text-sm max-w-55 leading-relaxed">
           {description}
         </p>
       )}

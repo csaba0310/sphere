@@ -147,7 +147,7 @@ export function ConnectPage() {
   }, [sphereReady, origin]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col items-center p-4 pt-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col items-center p-4 pt-8">
       <div className="w-full max-w-sm space-y-3">
         {/* Connection status bar */}
         {status === 'ready' && (
@@ -173,7 +173,7 @@ export function ConnectPage() {
         )}
 
         {/* Wallet panel — same component as the main app */}
-        <div className="h-[520px]">
+        <div className="h-130">
           <WalletPanel />
         </div>
 
