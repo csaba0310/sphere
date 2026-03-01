@@ -7,13 +7,29 @@ import { AgentPage } from './pages/AgentPage';
 import { ConnectPage } from './pages/ConnectPage';
 import { useSphereEvents } from './sdk';
 
+// Retry wrapper: auto-reload page once on chunk load failure (stale deployment)
+function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType }>) {
+  return lazy(() =>
+    importFn().catch((error) => {
+      const key = 'chunk_reload';
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      sessionStorage.removeItem(key);
+      throw error;
+    })
+  );
+}
+
 // Lazy-load non-core pages to reduce main bundle size
-const DevelopersPage = lazy(() => import('./pages/DevelopersPage').then(m => ({ default: m.DevelopersPage })));
-const MineAlphaPage = lazy(() => import('./pages/MineAlphaPage').then(m => ({ default: m.MineAlphaPage })));
-const DocsPage = lazy(() => import('./pages/DocsPage').then(m => ({ default: m.DocsPage })));
-const MarketsPage = lazy(() => import('./pages/MarketsPage').then(m => ({ default: m.MarketsPage })));
-const AgentsPage = lazy(() => import('./pages/AgentsPage').then(m => ({ default: m.AgentsPage })));
-const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const DevelopersPage = lazyWithRetry(() => import('./pages/DevelopersPage').then(m => ({ default: m.DevelopersPage })));
+const MineAlphaPage = lazyWithRetry(() => import('./pages/MineAlphaPage').then(m => ({ default: m.MineAlphaPage })));
+const DocsPage = lazyWithRetry(() => import('./pages/DocsPage').then(m => ({ default: m.DocsPage })));
+const MarketsPage = lazyWithRetry(() => import('./pages/MarketsPage').then(m => ({ default: m.MarketsPage })));
+const AgentsPage = lazyWithRetry(() => import('./pages/AgentsPage').then(m => ({ default: m.AgentsPage })));
+const AboutPage = lazyWithRetry(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
 
 function LazyFallback() {
   return (

@@ -18,6 +18,9 @@ RUN echo 'server { \
     index index.html; \
     gzip on; \
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript; \
+    location = /index.html { \
+        add_header Cache-Control "no-cache, no-store, must-revalidate"; \
+    } \
     location /assets/ { \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
