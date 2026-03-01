@@ -6,14 +6,14 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Sphere, TokenRegistry, NETWORKS } from '@unicitylabs/sphere-sdk';
+import { Sphere, TokenRegistry, NETWORKS, logger, isSphereError } from '@unicitylabs/sphere-sdk';
 import type { InitProgress, NetworkType } from '@unicitylabs/sphere-sdk';
+import { getErrorMessage } from './errors';
 import {
   createBrowserProviders,
   type BrowserProviders,
 } from '@unicitylabs/sphere-sdk/impl/browser';
 import { SphereContext } from './SphereContext';
-import { SPHERE_KEYS } from './queryKeys';
 
 const COINGECKO_BASE_URL = import.meta.env.DEV
   ? '/coingecko'
@@ -27,9 +27,23 @@ import type {
 } from './SphereContext';
 import { clearAllSphereData, STORAGE_KEYS } from '../config/storageKeys';
 
-const IPFS_GATEWAYS = import.meta.env.VITE_IPFS_GATEWAYS
-  ? (import.meta.env.VITE_IPFS_GATEWAYS as string).split(',').map(s => s.trim())
-  : ['https://unicity-ipfs1.dyndns.org'];
+// SDK debug logging: off by default, opt-in via console commands.
+// Print hint in dev mode so developers know how to enable it.
+if (import.meta.env.DEV) {
+  console.log(
+    '%c[Sphere SDK] Debug logging is off. Enable with:%c\n' +
+    '  logger.configure({ debug: true })          — all tags\n' +
+    '  logger.setTagDebug("Nostr", true)           — Nostr only\n' +
+    '  logger.setTagDebug("Payments", true)         — Payments only\n' +
+    '  logger.setTagDebug("IndexedDB", true)        — IndexedDB only\n' +
+    '  logger.setTagDebug("Aggregator", true)       — Aggregator only\n' +
+    'Available: Nostr, Payments, IndexedDB, IndexedDBToken, LocalStorage, Aggregator, Price, Market, SphereProvider',
+    'color: #888; font-weight: bold',
+    'color: #888',
+  );
+  // Expose logger on window for easy console access
+  (window as unknown as Record<string, unknown>).logger = logger;
+}
 
 function isIpfsEnabled(): boolean {
   const stored = localStorage.getItem(STORAGE_KEYS.IPFS_ENABLED);
@@ -42,7 +56,6 @@ function getIpfsConfig() {
     tokenSync: {
       ipfs: {
         enabled: true,
-        gateways: IPFS_GATEWAYS,
       },
     },
   };
@@ -64,25 +77,25 @@ function setupIpfsSync(instance: Sphere, providers: BrowserProviders): void {
   if (providers.ipfsTokenStorage) {
     instance.addTokenStorageProvider(providers.ipfsTokenStorage)
       .then(() => instance.sync())
-      .catch(err => console.warn('[SphereProvider] IPFS sync failed:', err));
+      .catch(err => logger.warn('SphereProvider', 'IPFS sync failed', err));
   }
 }
 
 /** Internal trigger content — hidden from chat UI, detected by bot */
 export const WELCOME_TRIGGER = '__sphere_welcome__';
 
-/** Send welcome trigger DM to configured agent after wallet creation/import (fire-and-forget) */
+/** Send welcome trigger DM to configured agent (fire-and-forget) */
 function sendWelcomeDM(instance: Sphere): void {
+  if (!instance.identity) return;
+
   const agentNametag = (import.meta.env.VITE_WELCOME_AGENT_NAMETAG as string | undefined) || 'kbbot';
   const delayMs = parseInt((import.meta.env.VITE_WELCOME_DELAY_MS as string | undefined) || '4000', 10);
-
-  if (!instance.identity) return;
 
   setTimeout(() => {
     instance.communications
       .sendDM(`@${agentNametag}`, WELCOME_TRIGGER)
-      .then(() => console.log(`[SphereProvider] Welcome trigger sent to @${agentNametag}`))
-      .catch((err) => console.warn(`[SphereProvider] Failed to send welcome trigger:`, err));
+      .then(() => logger.debug('SphereProvider', `Welcome trigger sent to @${agentNametag}`))
+      .catch((err) => logger.warn('SphereProvider', `Failed to send welcome trigger`, err));
   }, delayMs);
 }
 
@@ -137,6 +150,7 @@ export function SphereProvider({
         market: true,
         ...getIpfsConfig(),
       });
+      // Debug logging is off by default; enable at runtime via: logger.configure({ debug: true })
       setProviders(browserProviders);
 
       // Configure our bundle's TokenRegistry singleton — the SDK configures
@@ -168,10 +182,10 @@ export function SphereProvider({
         setIsDiscoveringAddresses(true);
         instance.discoverAddresses({ autoTrack: true, includeL1Scan: false }).then(result => {
           if (result.addresses.length > 0) {
-            console.log(`[SphereProvider] Discovered ${result.addresses.length} address(es)`);
+            logger.debug('SphereProvider', `Discovered ${result.addresses.length} address(es)`);
           }
         }).catch(err => {
-          console.warn('[SphereProvider] Address discovery failed:', err);
+          logger.warn('SphereProvider', 'Address discovery failed', err);
         }).finally(() => {
           setIsDiscoveringAddresses(false);
         });
@@ -186,18 +200,16 @@ export function SphereProvider({
         });
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-
       // IndexedDB may be temporarily blocked after database deletion.
       // Retry once after a short delay before giving up.
-      if (message.includes('IndexedDB open timed out') && attempt < 1) {
-        console.warn('[SphereProvider] IndexedDB open timed out, retrying in 1s...');
+      if (isSphereError(err) && err.code === 'STORAGE_ERROR' && attempt < 1) {
+        logger.warn('SphereProvider', 'Storage error, retrying in 1s...', err);
         await new Promise(r => setTimeout(r, 1000));
         return initialize(attempt + 1, skipLoading);
       }
 
-      console.error('[SphereProvider] Initialization failed:', err);
-      setError(err instanceof Error ? err : new Error(message));
+      logger.error('SphereProvider', 'Initialization failed', err);
+      setError(err instanceof Error ? err : new Error(getErrorMessage(err)));
     } finally {
       setInitProgress(null);
       setIsLoading(false);
@@ -335,7 +347,7 @@ export function SphereProvider({
         setWalletExists(false);
         return {
           success: false,
-          error: err instanceof Error ? err.message : 'Import failed',
+          error: getErrorMessage(err),
         };
       }
     },
@@ -349,25 +361,33 @@ export function SphereProvider({
       sphereRef.current = null;
     }
 
-    // Disconnect storage providers to release IndexedDB connections,
-    // then delete the databases via SDK.
+    // Clear all SDK-owned data (wallet keys, tokens, DMs, etc.) from IndexedDB.
+    // Sphere.clear() handles reconnecting storage internally, so we just
+    // disconnect first to release stale handles.
     if (providers) {
       await Promise.allSettled([
         providers.storage.disconnect(),
         providers.tokenStorage.disconnect(),
       ]);
-      const clearDone = Sphere.clear({
-        storage: providers.storage,
-        tokenStorage: providers.tokenStorage,
-      });
-      await Promise.race([clearDone, new Promise(r => setTimeout(r, 5000))]);
+      try {
+        await Sphere.clear({
+          storage: providers.storage,
+          tokenStorage: providers.tokenStorage,
+        });
+      } catch (err) {
+        logger.warn('SphereProvider', 'Sphere.clear() failed, deleting IndexedDB directly', err);
+        // Fallback: nuke the IndexedDB databases directly
+        for (const dbName of ['sphere-storage', 'sphere-token-storage']) {
+          try { indexedDB.deleteDatabase(dbName); } catch { /* best effort */ }
+        }
+      }
     }
 
     // Clear localStorage regardless of whether DB deletion succeeded.
     clearAllSphereData();
 
-    // Clear React Query cache so old balances/tokens don't leak to new wallet
-    queryClient.removeQueries({ queryKey: SPHERE_KEYS.all });
+    // Clear all React Query caches so stale data doesn't leak to new wallet
+    queryClient.clear();
 
     // Reset React state
     setSphere(null);
@@ -378,12 +398,12 @@ export function SphereProvider({
     await initialize(0, true);
   }, [providers, initialize, queryClient]);
 
-  const finalizeWallet = useCallback((importedSphere?: Sphere) => {
+  const finalizeWallet = useCallback((importedSphere?: Sphere, isNewWallet?: boolean) => {
     if (importedSphere) {
       if (providers) setupIpfsSync(importedSphere, providers);
       sphereRef.current = importedSphere;
       setSphere(importedSphere);
-      sendWelcomeDM(importedSphere);
+      if (isNewWallet) sendWelcomeDM(importedSphere);
     }
     setWalletExists(true);
   }, [providers]);

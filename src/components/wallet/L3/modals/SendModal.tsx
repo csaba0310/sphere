@@ -4,6 +4,7 @@ import { ArrowRight, Loader2, User, CheckCircle, Coins, Hash, Copy, Check } from
 import type { Asset } from '@unicitylabs/sphere-sdk';
 import { toSmallestUnit } from '@unicitylabs/sphere-sdk';
 import { useAssets, useTransfer, formatAmount } from '../../../../sdk';
+import { getErrorMessage } from '../../../../sdk/errors';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
 import { BaseModal, ModalHeader, Button } from '../../ui';
 
@@ -140,8 +141,8 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
           setStep('asset');
         }
       }
-    } catch {
-      setRecipientError("Network error");
+    } catch (err) {
+      setRecipientError(getErrorMessage(err));
     } finally {
       setIsCheckingRecipient(false);
     }
@@ -173,8 +174,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
 
       setStep('success');
     } catch (e: unknown) {
-      console.error(e);
-      setRecipientError(e instanceof Error ? e.message : "Transfer failed");
+      setRecipientError(getErrorMessage(e));
       setStep('confirm');
     }
   };

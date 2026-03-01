@@ -7,6 +7,7 @@ import { SendPaymentRequestModal } from '../wallet/L3/modals/SendPaymentRequestM
 import { SendModal as L1SendModal } from '../wallet/L1/components/modals/SendModal';
 import { useConnectContext } from './ConnectContext';
 import { useSendDM } from '../../sdk/hooks/comms/useSendDM';
+import { getErrorMessage } from '../../sdk/errors';
 import { useIdentity, useL1Balance, useL1Send } from '../../sdk';
 
 export function ConnectIntentHandler() {
@@ -126,16 +127,16 @@ export function ConnectIntentHandler() {
     const handleSendDM = async () => {
       setDmError(null);
       try {
-        const dm = await sendDM(to, message);
+        const dm = await sendDM({ recipient: to, content: message });
 
         // Register auto-approve if user checked the checkbox
         if (autoApproveDM && connectHost) {
           connectHost.setIntentAutoApprove('dm', async (_action, intentParams) => {
             try {
-              const result = await sendDMRef.current(
-                intentParams.to as string,
-                intentParams.message as string,
-              );
+              const result = await sendDMRef.current({
+                recipient: intentParams.to as string,
+                content: intentParams.message as string,
+              });
               return { result: { sent: true, messageId: result.id, timestamp: result.timestamp } };
             } catch (err) {
               return {
@@ -150,7 +151,7 @@ export function ConnectIntentHandler() {
 
         resolveIntent({ sent: true, messageId: dm.id, timestamp: dm.timestamp });
       } catch (err) {
-        setDmError(err instanceof Error ? err.message : 'Failed to send DM');
+        setDmError(getErrorMessage(err));
       }
     };
 

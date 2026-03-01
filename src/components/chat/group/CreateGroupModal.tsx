@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Hash, Lock, Globe, Loader2 } from 'lucide-react';
 import { GroupVisibility } from '@unicitylabs/sphere-sdk';
 import type { CreateGroupOptions } from '@unicitylabs/sphere-sdk';
+import { getErrorMessage } from '../../../sdk/errors';
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ export function CreateGroupModal({
       setVisibility(GroupVisibility.PUBLIC);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create group');
+      setError(getErrorMessage(err));
     }
   };
 
@@ -68,7 +69,7 @@ export function CreateGroupModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100000]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100000"
           />
 
           {/* Modal */}
@@ -76,12 +77,12 @@ export function CreateGroupModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-modal-bg rounded-2xl shadow-2xl z-[100000] overflow-hidden border border-neutral-200 dark:border-white/10"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-modal-bg rounded-2xl shadow-2xl z-100000 overflow-hidden border border-neutral-200 dark:border-white/10"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                   <Hash className="w-5 h-5 text-white" />
                 </div>
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
@@ -182,7 +183,7 @@ export function CreateGroupModal({
               <button
                 type="submit"
                 disabled={isCreating || !name.trim()}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-lg shadow-orange-500/30 hover:shadow-orange-500/40 transition-shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 text-white font-medium shadow-lg shadow-orange-500/30 hover:shadow-orange-500/40 transition-shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isCreating ? (
                   <>

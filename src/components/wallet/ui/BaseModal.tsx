@@ -47,7 +47,7 @@ export function BaseModal({
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
               onClick={(e) => e.stopPropagation()}
-              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-[600px] bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl dark:shadow-[0_0_60px_rgba(0,0,0,0.5)] pointer-events-auto overflow-hidden flex flex-col ${className}`}
+              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-150 bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl dark:shadow-[0_0_60px_rgba(0,0,0,0.5)] pointer-events-auto flex flex-col overflow-hidden ${className}`}
             >
               {children}
             </motion.div>

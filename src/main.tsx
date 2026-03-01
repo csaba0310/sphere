@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, HashRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/queryClient'
 import { ThemeInitializer } from './components/theme'
@@ -27,9 +27,15 @@ createRoot(document.getElementById('root')!).render(
         <ServicesProvider>
           <ConnectProvider>
             <ThemeInitializer>
-              <BrowserRouter basename={import.meta.env.BASE_URL}>
-                <App />
-              </BrowserRouter>
+              {import.meta.env.VITE_HASH_ROUTER === 'true' ? (
+                <HashRouter>
+                  <App />
+                </HashRouter>
+              ) : (
+                <BrowserRouter basename={import.meta.env.BASE_URL}>
+                  <App />
+                </BrowserRouter>
+              )}
               <ToastContainer />
             </ThemeInitializer>
           </ConnectProvider>

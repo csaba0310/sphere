@@ -173,7 +173,7 @@ export function ConnectPage() {
         )}
 
         {/* Wallet panel — same component as the main app */}
-        <div className="h-[520px]">
+        <div className="h-130">
           <WalletPanel />
         </div>
 

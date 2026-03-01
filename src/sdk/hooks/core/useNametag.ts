@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSphereContext } from './useSphere';
 import { SPHERE_KEYS } from '../../queryKeys';
 
@@ -15,29 +15,19 @@ export interface UseNametagReturn {
 export function useNametag(): UseNametagReturn {
   const { sphere } = useSphereContext();
   const queryClient = useQueryClient();
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [registerError, setRegisterError] = useState<Error | null>(null);
 
   const nametag = sphere?.identity?.nametag ?? null;
 
-  const register = useCallback(
-    async (name: string) => {
+  const registerMutation = useMutation({
+    mutationFn: async (name: string): Promise<void> => {
       if (!sphere) throw new Error('Wallet not initialized');
-      setIsRegistering(true);
-      setRegisterError(null);
-      try {
-        await sphere.registerNametag(name);
-        queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setRegisterError(error);
-        throw error;
-      } finally {
-        setIsRegistering(false);
-      }
+      await sphere.registerNametag(name);
     },
-    [sphere, queryClient],
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
+    },
+    // onError inherited from global handler → auto-toast
+  });
 
   const resolve = useCallback(
     async (name: string): Promise<string | null> => {
@@ -54,9 +44,9 @@ export function useNametag(): UseNametagReturn {
   return {
     nametag,
     isLoading: false,
-    register,
-    isRegistering,
-    registerError,
+    register: registerMutation.mutateAsync,
+    isRegistering: registerMutation.isPending,
+    registerError: registerMutation.error,
     resolve,
   };
 }

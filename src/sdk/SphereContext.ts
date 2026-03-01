@@ -28,7 +28,7 @@ export interface SphereContextValue {
   /** Mark wallet as existing — call after import flow completes (scanning, address selection, etc.).
    *  Optionally accepts a Sphere instance to set in context (for import flows where sphere
    *  is NOT set eagerly to avoid premature re-renders). */
-  finalizeWallet: (importedSphere?: Sphere) => void;
+  finalizeWallet: (importedSphere?: Sphere, isNewWallet?: boolean) => void;
   deleteWallet: () => Promise<void>;
   reinitialize: () => Promise<void>;
 

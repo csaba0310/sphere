@@ -7,6 +7,7 @@ import { toSmallestUnit, toHumanReadable } from '@unicitylabs/sphere-sdk';
 import { TokenRegistry } from '@unicitylabs/sphere-sdk';
 import { FaucetService } from '../../../../services/FaucetService';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
+import { getErrorMessage } from '../../../../sdk/errors';
 import { BaseModal, ModalHeader, Button } from '../../ui';
 
 type Step = 'swap' | 'processing' | 'success';
@@ -183,8 +184,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
       setStep('success');
     } catch (e: unknown) {
-      console.error('Swap failed:', e);
-      setError(e instanceof Error ? e.message : 'Swap failed');
+      setError(getErrorMessage(e));
       setStep('swap');
     }
   };
