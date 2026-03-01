@@ -47,7 +47,7 @@ export function DashboardLayout() {
       <div className="relative z-10 flex flex-col h-full">
         {!isFullscreen && <Header />}
         <div className="flex-1 min-h-0 flex">
-          <div className={`flex-1 w-full ${isFullscreen ? 'p-0' : isAgentPage ? 'px-12 sm:px-20 lg:px-28 pb-0' : 'px-12 sm:px-20 lg:px-28 pt-4 pb-0 md:pt-8 lg:pb-8'} ${
+          <div className={`flex-1 w-full ${isFullscreen ? 'p-0' : isAgentPage ? 'px-0 sm:px-12 lg:px-28 pb-0' : 'px-0 sm:px-12 lg:px-28 pt-4 pb-0 md:pt-8 lg:pb-8'} ${
             isMinePage ? 'bg-neutral-100 dark:bg-transparent' : ''
           }`}>
             <Outlet />

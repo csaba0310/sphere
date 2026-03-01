@@ -136,18 +136,18 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="w-full max-w-sm bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
+            <div className="w-full max-w-sm bg-white dark:bg-modal-bg/90 rounded-2xl shadow-2xl border border-neutral-200 dark:border-white/10 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800">
+              <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <Tag className="w-5 h-5 text-orange-500" />
                   <span className="text-base font-semibold text-neutral-900 dark:text-white">Register Unicity ID</span>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
                 >
                   <X className="w-4 h-4 text-neutral-500" />
                 </button>
@@ -155,7 +155,7 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
 
               {/* Content */}
               <div className="p-4 space-y-4">
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="text-sm text-neutral-500 dark:text-white/45">
                   Choose a unique ID to receive tokens easily without sharing long addresses.
                 </p>
 
@@ -181,12 +181,12 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
                         onKeyDown={handleKeyDown}
                         placeholder="id"
                         autoFocus
-                        className={`w-full bg-neutral-100 dark:bg-neutral-800/50 border-2 rounded-xl py-3 pl-4 pr-28 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:bg-white dark:focus:bg-neutral-800 transition-all ${
+                        className={`w-full bg-neutral-100 dark:bg-white/4 border-2 rounded-xl py-3 pl-4 pr-28 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:bg-white dark:focus:bg-white/6 transition-all ${
                           availability === 'taken'
                             ? 'border-red-400 dark:border-red-500/50 focus:border-red-500'
                             : availability === 'available'
                               ? 'border-emerald-400 dark:border-emerald-500/50 focus:border-emerald-500'
-                              : 'border-neutral-200 dark:border-neutral-700/50 focus:border-orange-500'
+                              : 'border-neutral-200 dark:border-white/8 focus:border-orange-500'
                         }`}
                       />
                     </div>

@@ -71,7 +71,7 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
 
       <div className="p-4 space-y-2">
         {addresses.length === 0 ? (
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-4">
+          <p className="text-sm text-neutral-500 dark:text-white/45 text-center py-4">
             No addresses found
           </p>
         ) : (
@@ -85,17 +85,17 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
                   key={addr.index}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors ${
                     addr.hidden
-                      ? 'bg-neutral-50 dark:bg-neutral-800/30 border-neutral-200 dark:border-neutral-700/50 opacity-60'
+                      ? 'bg-neutral-50 dark:bg-white/4 border-neutral-200 dark:border-white/8 opacity-60'
                       : isCurrent
                         ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800/50'
-                        : 'bg-white dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700'
+                        : 'bg-white dark:bg-white/4 border-neutral-200 dark:border-white/8'
                   }`}
                 >
                   {/* Index badge */}
                   <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
                     isCurrent
                       ? 'bg-orange-500 text-white'
-                      : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400'
+                      : 'bg-neutral-100 dark:bg-white/10 text-neutral-500 dark:text-white/45'
                   }`}>
                     {addr.index}
                   </div>
@@ -107,7 +107,7 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
                         @{addr.nametag}
                       </span>
                     )}
-                    <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400 block truncate">
+                    <span className="text-[11px] font-mono text-neutral-500 dark:text-white/45 block truncate">
                       {truncateAddr(addr.l1Address)}
                     </span>
                   </div>
@@ -120,7 +120,7 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
                       </span>
                     )}
                     {addr.hidden && (
-                      <span className="text-[10px] font-medium text-neutral-500 bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-medium text-neutral-500 bg-neutral-100 dark:bg-white/10 px-1.5 py-0.5 rounded">
                         Hidden
                       </span>
                     )}
@@ -134,7 +134,7 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
                     className={`p-1.5 rounded-lg transition-colors shrink-0 ${
                       isCurrent
                         ? 'opacity-30 cursor-not-allowed'
-                        : 'hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
+                        : 'hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-600 dark:hover:text-white/65'
                     }`}
                   >
                     {isToggling ? (

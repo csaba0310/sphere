@@ -405,36 +405,24 @@ export function L3WalletView({
       </div>
 
       <div className="px-6 mb-4 shrink-0">
-        <div className="flex p-1 bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] rounded-xl">
+        <div className="flex p-1 bg-neutral-100 dark:bg-white/6 rounded-xl relative">
+          {/* Sliding indicator */}
+          <div
+            className={`absolute top-1 bottom-1 bg-white dark:bg-white/10 rounded-lg shadow-sm transition-all duration-250 ease-in-out ${
+              activeTab === 'tokens' ? 'left-[50%] right-1' : 'left-1 right-[50%]'
+            }`}
+          />
           <button
             onClick={() => setActiveTab('assets')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all relative ${activeTab === 'assets' ? 'text-neutral-900 dark:text-[#fefefe]' : 'text-neutral-500 hover:text-neutral-700 dark:text-[rgba(255,255,255,0.35)] dark:hover:text-white'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors relative z-10 ${activeTab === 'assets' ? 'text-neutral-900 dark:text-[#fefefe]' : 'text-neutral-500 hover:text-neutral-700 dark:text-white/35 dark:hover:text-white'}`}
           >
-            {activeTab === 'assets' && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute inset-0 bg-white dark:bg-[rgba(255,255,255,0.1)] rounded-lg shadow-sm"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center gap-2">
-              <Layers className="w-3 h-3" /> Assets
-            </span>
+            <Layers className="w-3 h-3" /> Assets
           </button>
           <button
             onClick={() => setActiveTab('tokens')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all relative ${activeTab === 'tokens' ? 'text-neutral-900 dark:text-[#fefefe]' : 'text-neutral-500 hover:text-neutral-700 dark:text-[rgba(255,255,255,0.35)] dark:hover:text-white'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors relative z-10 ${activeTab === 'tokens' ? 'text-neutral-900 dark:text-[#fefefe]' : 'text-neutral-500 hover:text-neutral-700 dark:text-white/35 dark:hover:text-white'}`}
           >
-            {activeTab === 'tokens' && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute inset-0 bg-white dark:bg-[rgba(255,255,255,0.1)] rounded-lg shadow-sm"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center gap-2">
-              <Coins className="w-3 h-3" /> Tokens
-            </span>
+            <Coins className="w-3 h-3" /> Tokens
           </button>
         </div>
       </div>

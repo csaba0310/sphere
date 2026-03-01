@@ -170,7 +170,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="relative w-full max-w-md bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md bg-white dark:bg-modal-bg/80 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
         <div className="p-6 border-b border-neutral-200 dark:border-white/5 flex justify-between items-center">
@@ -180,7 +180,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                 onClick={() => { setStep('input'); setError(null); }}
                 className="p-1.5 hover:bg-neutral-100 dark:hover:bg-white/5 rounded-full transition-colors"
               >
-                <ArrowLeft className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+                <ArrowLeft className="w-4 h-4 text-neutral-500 dark:text-white/45" />
               </button>
             )}
             <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
@@ -191,7 +191,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
             onClick={() => onClose()}
             className="p-2 hover:bg-neutral-100 dark:hover:bg-white/5 rounded-full transition-colors"
           >
-            <X className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
+            <X className="w-5 h-5 text-neutral-500 dark:text-white/45" />
           </button>
         </div>
 
@@ -206,7 +206,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
               >
                 {/* Vesting Mode Selector */}
                 <div className="mb-5">
-                  <label className="text-sm text-neutral-500 dark:text-neutral-400 block mb-2">
+                  <label className="text-sm text-neutral-500 dark:text-white/45 block mb-2">
                     Coin Type
                   </label>
                   <div className="flex gap-3">
@@ -230,7 +230,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                           className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
                             isSelected
                               ? colorClass
-                              : 'border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-600'
+                              : 'border-neutral-200 dark:border-white/8 bg-neutral-100 dark:bg-white/6 text-neutral-600 dark:text-white/45 hover:border-neutral-300 dark:hover:border-white/10'
                           }`}
                         >
                           <div className="text-sm font-semibold">{option.label}</div>
@@ -244,7 +244,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                 </div>
 
                 <div className="mb-4">
-                  <label className="text-sm text-neutral-500 dark:text-neutral-400 block mb-2">
+                  <label className="text-sm text-neutral-500 dark:text-white/45 block mb-2">
                     Destination Address
                   </label>
                   <input
@@ -252,15 +252,15 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handlePrepare()}
-                    className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white focus:border-green-500 outline-none font-mono text-sm"
+                    className="w-full bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white focus:border-orange-500 outline-none font-mono text-sm"
                     placeholder="Enter wallet address or @nametag"
                   />
                 </div>
 
                 <div className="mb-6">
                   <div className="flex justify-between text-sm mb-2">
-                    <label className="text-neutral-500 dark:text-neutral-400">Amount</label>
-                    <span className="text-neutral-500 dark:text-neutral-400">
+                    <label className="text-neutral-500 dark:text-white/45">Amount</label>
+                    <span className="text-neutral-500 dark:text-white/45">
                       Available:{" "}
                       <span className="text-neutral-900 dark:text-white">
                         {(Number(getCurrentBalance()) / 1e8).toFixed(8)} ALPHA
@@ -274,7 +274,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handlePrepare()}
-                      className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 pr-32 text-neutral-900 dark:text-white text-2xl font-mono focus:border-green-500 outline-none"
+                      className="w-full bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 pr-32 text-neutral-900 dark:text-white text-2xl font-mono focus:border-orange-500 outline-none"
                       placeholder="0.00"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -284,7 +284,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                           const balance = Number(getCurrentBalance()) / 1e8;
                           setAmount(String(Math.floor(balance * 0.25 * 1e8) / 1e8));
                         }}
-                        className="px-2 py-1 text-xs bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-300 dark:hover:bg-neutral-700"
+                        className="px-2 py-1 text-xs bg-neutral-200 dark:bg-white/6 text-neutral-700 dark:text-white/65 rounded hover:bg-neutral-300 dark:hover:bg-white/10"
                       >
                         25%
                       </button>
@@ -294,7 +294,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                           const balance = Number(getCurrentBalance()) / 1e8;
                           setAmount(String(Math.floor(balance * 0.5 * 1e8) / 1e8));
                         }}
-                        className="px-2 py-1 text-xs bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-300 dark:hover:bg-neutral-700"
+                        className="px-2 py-1 text-xs bg-neutral-200 dark:bg-white/6 text-neutral-700 dark:text-white/65 rounded hover:bg-neutral-300 dark:hover:bg-white/10"
                       >
                         50%
                       </button>
@@ -316,7 +316,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                 <button
                   onClick={handlePrepare}
                   disabled={!destination || !amount || isPreparing}
-                  className="w-full py-3 bg-linear-to-br from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-green-500/20"
+                  className="w-full py-3 bg-linear-to-br from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-orange-500/25"
                 >
                   {isPreparing ? (
                     <>
@@ -341,35 +341,35 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                 {preview && (
                   <div className="space-y-4">
                     {/* Recipient */}
-                    <div className="bg-neutral-100 dark:bg-neutral-900 rounded-xl p-4 space-y-3">
+                    <div className="bg-neutral-100 dark:bg-white/6 rounded-xl p-4 space-y-3">
                       <div className="flex justify-between items-start">
-                        <span className="text-xs text-neutral-500 dark:text-neutral-400">Recipient</span>
+                        <span className="text-xs text-neutral-500 dark:text-white/45">Recipient</span>
                       </div>
                       {preview.nametag && (
                         <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
                           @{preview.nametag}
                         </div>
                       )}
-                      <div className="text-xs font-mono text-neutral-700 dark:text-neutral-300 break-all">
+                      <div className="text-xs font-mono text-neutral-700 dark:text-white/65 break-all">
                         {preview.resolvedAddress}
                       </div>
                     </div>
 
                     {/* Amount details */}
-                    <div className="bg-neutral-100 dark:bg-neutral-900 rounded-xl p-4 space-y-3">
+                    <div className="bg-neutral-100 dark:bg-white/6 rounded-xl p-4 space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-sm text-neutral-500 dark:text-neutral-400">Amount</span>
+                        <span className="text-sm text-neutral-500 dark:text-white/45">Amount</span>
                         <span className="text-sm font-mono text-neutral-900 dark:text-white">
                           {preview.amountAlpha} ALPHA
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-neutral-500 dark:text-neutral-400">Network Fee</span>
+                        <span className="text-sm text-neutral-500 dark:text-white/45">Network Fee</span>
                         <span className="text-sm font-mono text-neutral-900 dark:text-white">
                           {preview.feeAlpha} ALPHA
                         </span>
                       </div>
-                      <div className="border-t border-neutral-200 dark:border-neutral-700 pt-3 flex justify-between">
+                      <div className="border-t border-neutral-200 dark:border-white/8 pt-3 flex justify-between">
                         <span className="text-sm font-semibold text-neutral-900 dark:text-white">Total</span>
                         <span className="text-sm font-mono font-semibold text-neutral-900 dark:text-white">
                           {preview.totalAlpha} ALPHA
@@ -378,11 +378,11 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
                     </div>
 
                     {/* From */}
-                    <div className="bg-neutral-100 dark:bg-neutral-900 rounded-xl p-4">
+                    <div className="bg-neutral-100 dark:bg-white/6 rounded-xl p-4">
                       <div className="flex justify-between items-start">
-                        <span className="text-xs text-neutral-500 dark:text-neutral-400">From</span>
+                        <span className="text-xs text-neutral-500 dark:text-white/45">From</span>
                       </div>
-                      <div className="text-xs font-mono text-neutral-700 dark:text-neutral-300 mt-1 break-all">
+                      <div className="text-xs font-mono text-neutral-700 dark:text-white/65 mt-1 break-all">
                         {selectedAddress}
                       </div>
                     </div>
@@ -391,7 +391,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
 
                     <button
                       onClick={handleConfirmSend}
-                      className="w-full py-3 bg-linear-to-br from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors shadow-xl shadow-green-500/20"
+                      className="w-full py-3 bg-linear-to-br from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors shadow-xl shadow-orange-500/25"
                     >
                       Confirm & Send
                       <ArrowRight size={18} />

@@ -24,8 +24,8 @@ const iconVariantClasses: Record<IconVariant, { badge: string; icon: string }> =
     icon: 'text-white',
   },
   neutral: {
-    badge: 'bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)]',
-    icon: 'text-neutral-600 dark:text-[rgba(255,255,255,0.45)]',
+    badge: 'bg-neutral-100 dark:bg-white/6',
+    icon: 'text-neutral-600 dark:text-white/45',
   },
 };
 
@@ -33,14 +33,14 @@ export function ModalHeader({
   title,
   onClose,
   icon: Icon,
-  iconVariant = 'gradient',
+  iconVariant = 'neutral',
   subtitle,
   closeDisabled = false,
 }: ModalHeaderProps) {
   const iconStyles = iconVariantClasses[iconVariant];
 
   return (
-    <div className="relative z-10 px-6 py-3 border-b border-neutral-100 dark:border-[rgba(255,255,255,0.06)] flex justify-between items-center shrink-0">
+    <div className="relative z-10 px-6 py-3 border-b border-neutral-100 dark:border-white/6 flex justify-between items-center shrink-0">
       <div className="flex items-center gap-3">
         {Icon && (
           <motion.div
@@ -51,9 +51,9 @@ export function ModalHeader({
           </motion.div>
         )}
         <div>
-          <h3 className="text-lg font-bold text-neutral-900 dark:text-[#fefefe]" style={{ fontFamily: "'Geist', sans-serif" }}>{title}</h3>
+          <h3 className="text-lg font-bold text-neutral-900 dark:text-white">{title}</h3>
           {subtitle && (
-            <div className="text-xs text-neutral-500 dark:text-[rgba(255,255,255,0.45)]">{subtitle}</div>
+            <div className="text-xs text-neutral-500 dark:text-white/45">{subtitle}</div>
           )}
         </div>
       </div>
@@ -65,8 +65,8 @@ export function ModalHeader({
         disabled={closeDisabled}
         className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors ${
           closeDisabled
-            ? 'bg-neutral-100 dark:bg-[rgba(255,255,255,0.05)] text-neutral-400 dark:text-[rgba(255,255,255,0.28)] cursor-not-allowed'
-            : 'hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.06)] text-neutral-400 dark:text-[rgba(255,255,255,0.35)] hover:text-neutral-700 dark:hover:text-white'
+            ? 'bg-neutral-100 dark:bg-white/5 text-neutral-400 dark:text-white/28 cursor-not-allowed'
+            : 'hover:bg-neutral-100 dark:hover:bg-white/6 text-neutral-400 dark:text-white/35 hover:text-neutral-700 dark:hover:text-white'
         }`}
       >
         <X className="w-4 h-4" />

@@ -10,7 +10,7 @@ import { RegisterNametagModal } from './shared/components/RegisterNametagModal';
 import { AddressSelector } from './shared/components';
 import { CreateWalletFlow } from './onboarding/CreateWalletFlow';
 
-const PANEL_SHELL = "bg-white dark:bg-[#060606]/40 backdrop-blur-xl overflow-hidden h-full relative lg:border-l lg:border-neutral-100 dark:lg:border-[rgba(255,255,255,0.06)] flex flex-col rounded-2xl";
+const PANEL_SHELL = "bg-white dark:bg-modal-bg/50 backdrop-blur-xl overflow-hidden h-full relative lg:border-l lg:border-neutral-100 dark:lg:border-brand-orange-border flex flex-col rounded-2xl";
 
 export function WalletPanel() {
   const [showBalances, setShowBalances] = useState(true);

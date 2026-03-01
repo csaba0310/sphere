@@ -53,7 +53,7 @@ export function SaveWalletModal({ show, onConfirm, onCancel, hasMnemonic }: Save
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ type: "spring", duration: 0.4 }}
-        className="relative w-full max-w-md bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden"
+        className="relative w-full max-w-md bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <motion.div
@@ -76,7 +76,7 @@ export function SaveWalletModal({ show, onConfirm, onCancel, hasMnemonic }: Save
             </motion.div>
           </motion.div>
           <h3 className="text-neutral-900 dark:text-white text-xl font-bold mb-2">Backup Wallet</h3>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+          <p className="text-xs text-neutral-500 dark:text-white/45">
             Export your wallet keys to a JSON file. Keep this safe!
           </p>
         </motion.div>
@@ -103,7 +103,7 @@ export function SaveWalletModal({ show, onConfirm, onCancel, hasMnemonic }: Save
           placeholder="Filename"
           value={filename}
           onChange={(e) => setFilename(e.target.value)}
-          className="w-full mb-3 px-3 py-2 bg-neutral-100 dark:bg-neutral-800 rounded text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 border border-neutral-200 dark:border-neutral-700 focus:border-blue-500 outline-none transition-colors"
+          className="w-full mb-3 px-3 py-2 bg-neutral-100 dark:bg-white/6 rounded text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 border border-neutral-200 dark:border-white/8 focus:border-blue-500 outline-none transition-colors"
         />
 
         <label className="text-xs text-neutral-500 mb-1 block">
@@ -114,7 +114,7 @@ export function SaveWalletModal({ show, onConfirm, onCancel, hasMnemonic }: Save
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-3 px-3 py-2 bg-neutral-100 dark:bg-neutral-800 rounded text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 border border-neutral-200 dark:border-neutral-700 focus:border-blue-500 outline-none transition-colors"
+          className="w-full mb-3 px-3 py-2 bg-neutral-100 dark:bg-white/6 rounded text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 border border-neutral-200 dark:border-white/8 focus:border-blue-500 outline-none transition-colors"
         />
 
         <input
@@ -122,7 +122,7 @@ export function SaveWalletModal({ show, onConfirm, onCancel, hasMnemonic }: Save
           type="password"
           value={passwordConfirm}
           onChange={(e) => setPasswordConfirm(e.target.value)}
-          className="w-full mb-4 px-3 py-2 bg-neutral-100 dark:bg-neutral-800 rounded text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 border border-neutral-200 dark:border-neutral-700 focus:border-blue-500 outline-none transition-colors"
+          className="w-full mb-4 px-3 py-2 bg-neutral-100 dark:bg-white/6 rounded text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 border border-neutral-200 dark:border-white/8 focus:border-blue-500 outline-none transition-colors"
         />
 
         {error && (
@@ -141,7 +141,7 @@ export function SaveWalletModal({ show, onConfirm, onCancel, hasMnemonic }: Save
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onCancel}
-            className="flex-1 py-2 bg-neutral-200 dark:bg-neutral-700 rounded text-neutral-700 dark:text-white hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+            className="flex-1 py-2 bg-neutral-200 dark:bg-white/10 rounded text-neutral-700 dark:text-white hover:bg-neutral-300 dark:hover:bg-white/12 transition-colors"
           >
             Cancel
           </motion.button>
@@ -149,7 +149,7 @@ export function SaveWalletModal({ show, onConfirm, onCancel, hasMnemonic }: Save
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleConfirm}
-            className="flex-1 py-2 bg-linear-to-br from-blue-600 to-blue-700 rounded text-white hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20"
+            className="flex-1 py-2 bg-linear-to-br from-orange-500 to-orange-600 rounded text-white hover:from-orange-400 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/20"
           >
             Save
           </motion.button>

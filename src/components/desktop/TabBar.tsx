@@ -53,14 +53,14 @@ export function TabBar({ isFullscreen, onToggleFullscreen }: TabBarProps) {
   };
 
   return (
-    <div data-tutorial="tab-bar" className="flex items-center gap-2 mx-1 py-2 shrink-0">
+    <div data-tutorial="tab-bar" className="flex items-stretch gap-2 mx-1 py-2 shrink-0">
       {/* Show Desktop button — standalone */}
       <motion.button
         data-tutorial="show-desktop"
         onClick={handleShowDesktop}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-2 px-4 py-2 rounded-full shrink-0 bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium shadow-md shadow-orange-500/20 dark:shadow-brand-orange-border"
+        className="flex items-center justify-center gap-2 px-4 rounded-full shrink-0 bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium shadow-md shadow-orange-500/20 dark:shadow-brand-orange-border"
         title="Show Desktop"
       >
         <LayoutGrid className="w-3.5 h-3.5" />
@@ -68,56 +68,57 @@ export function TabBar({ isFullscreen, onToggleFullscreen }: TabBarProps) {
       </motion.button>
 
       {/* Toolbar — tabs + controls */}
-      <div className="flex-1 flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-full bg-neutral-100/80 dark:bg-[#060606]/30 backdrop-blur-xl overflow-x-auto scrollbar-hide min-w-0">
-        {/* Open tabs with dividers */}
-        {openTabs.map((tab, index) => {
-          const isActive = tab.id === activeTabId;
-          const agent = getAgentConfig(tab.appId);
-          const TabIcon = agent?.Icon;
+      <div className="flex-1 flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-full bg-neutral-100/80 dark:bg-[#060606]/30 backdrop-blur-xl min-w-0">
+        {/* Scrollable tabs area */}
+        <div className="flex-1 flex items-center overflow-x-auto scrollbar-hide min-w-0">
+          {openTabs.map((tab, index) => {
+            const isActive = tab.id === activeTabId;
+            const agent = getAgentConfig(tab.appId);
+            const TabIcon = agent?.Icon;
 
-          return (
-            <div key={tab.id} className="flex items-center shrink-0">
-              {index > 0 && (
-                <div className="h-4 w-px bg-neutral-300/50 dark:bg-[rgba(255,255,255,0.08)] mx-1" />
-              )}
-              <motion.button
-                layout
-                onClick={() => handleActivateTab(tab)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'text-neutral-900 dark:text-white'
-                    : 'text-neutral-400 dark:text-[rgba(255,255,255,0.35)] hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)]'
-                }`}
-              >
-                {TabIcon && <TabIcon className={`w-3.5 h-3.5 ${isActive ? 'text-orange-500 dark:text-brand-orange' : ''}`} />}
-                <span className="max-w-24 truncate hidden sm:inline">{tab.label}</span>
-                {tab.appId === 'dm' && dmUnreadCount > 0 && (
-                  <span className="min-w-4 h-4 px-1 flex items-center justify-center text-[9px] font-bold rounded-full bg-orange-500 dark:bg-brand-orange text-white">
-                    {dmUnreadCount > 99 ? '99+' : dmUnreadCount}
-                  </span>
+            return (
+              <div key={tab.id} className="flex items-center shrink-0">
+                {index > 0 && (
+                  <div className="h-4 w-px bg-neutral-300/50 dark:bg-white/8 mx-1" />
                 )}
-                {tab.appId === 'group-chat' && groupUnreadCount > 0 && (
-                  <span className="min-w-4 h-4 px-1 flex items-center justify-center text-[9px] font-bold rounded-full bg-orange-500 dark:bg-brand-orange text-white">
-                    {groupUnreadCount > 99 ? '99+' : groupUnreadCount}
-                  </span>
-                )}
-                <span
-                  role="button"
-                  onClick={(e) => handleCloseTab(e, tab.id)}
-                  className="p-0.5 rounded-full transition-colors duration-150 hover:bg-neutral-200/60 dark:hover:bg-[rgba(255,255,255,0.08)]"
-                  title={`Close ${tab.label}`}
+                <motion.button
+                  onClick={() => handleActivateTab(tab)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs font-medium transition-colors duration-200 ${
+                    isActive
+                      ? 'text-neutral-900 dark:text-white'
+                      : 'text-neutral-400 dark:text-white/35 hover:text-neutral-600 dark:hover:text-white/60'
+                  }`}
                 >
-                  <X className="w-3 h-3" />
-                </span>
-              </motion.button>
-            </div>
-          );
-        })}
+                  {TabIcon && <TabIcon className={`w-3.5 h-3.5 ${isActive ? 'text-orange-500 dark:text-brand-orange' : ''}`} />}
+                  <span className="max-w-24 truncate hidden sm:inline">{tab.label}</span>
+                  {tab.appId === 'dm' && dmUnreadCount > 0 && (
+                    <span className="min-w-4 h-4 px-1 flex items-center justify-center text-[9px] font-bold rounded-full bg-orange-500 dark:bg-brand-orange text-white">
+                      {dmUnreadCount > 99 ? '99+' : dmUnreadCount}
+                    </span>
+                  )}
+                  {tab.appId === 'group-chat' && groupUnreadCount > 0 && (
+                    <span className="min-w-4 h-4 px-1 flex items-center justify-center text-[9px] font-bold rounded-full bg-orange-500 dark:bg-brand-orange text-white">
+                      {groupUnreadCount > 99 ? '99+' : groupUnreadCount}
+                    </span>
+                  )}
+                  <span
+                    role="button"
+                    onClick={(e) => handleCloseTab(e, tab.id)}
+                    className="p-0.5 rounded-full transition-colors duration-150 hover:bg-neutral-200/60 dark:hover:bg-white/8"
+                    title={`Close ${tab.label}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </span>
+                </motion.button>
+              </div>
+            );
+          })}
+        </div>
 
-        {/* Right side controls — pushed to the right */}
-        <div className="ml-auto flex items-center gap-1 shrink-0">
+        {/* Right side controls — always visible */}
+        <div className="flex items-center gap-1 shrink-0">
           {/* Fullscreen toggle */}
           {onToggleFullscreen && (
             <button

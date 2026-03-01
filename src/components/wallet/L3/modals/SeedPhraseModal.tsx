@@ -63,10 +63,10 @@ export function SeedPhraseModal({ isOpen, onClose, seedPhrase }: SeedPhraseModal
                     transition={{ delay: index * 0.03 }}
                     className="relative"
                   >
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 dark:text-neutral-600 font-medium z-10">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 dark:text-white/25 font-medium z-10">
                       {index + 1}.
                     </span>
-                    <div className="w-full bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/50 rounded-lg py-2 pl-7 pr-2 text-xs text-neutral-900 dark:text-white font-mono">
+                    <div className="w-full bg-neutral-100 dark:bg-white/4 border border-neutral-200 dark:border-white/8 rounded-lg py-2 pl-7 pr-2 text-xs text-neutral-900 dark:text-white font-mono">
                       {word}
                     </div>
                   </motion.div>
@@ -92,7 +92,7 @@ export function SeedPhraseModal({ isOpen, onClose, seedPhrase }: SeedPhraseModal
         </div>
 
         {/* Info */}
-        <div className="text-xs text-neutral-500 dark:text-neutral-400 text-center">
+        <div className="text-xs text-neutral-500 dark:text-white/45 text-center">
           Write down these 12 words in order and store them safely. You'll need them to recover your wallet.
         </div>
       </div>

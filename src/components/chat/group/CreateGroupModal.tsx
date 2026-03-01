@@ -76,12 +76,12 @@ export function CreateGroupModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl z-[100000] overflow-hidden"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-modal-bg rounded-2xl shadow-2xl z-[100000] overflow-hidden border border-neutral-200 dark:border-white/10"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                   <Hash className="w-5 h-5 text-white" />
                 </div>
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
@@ -91,7 +91,7 @@ export function CreateGroupModal({
               <button
                 onClick={handleClose}
                 disabled={isCreating}
-                className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/8 text-neutral-500 transition-colors disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -101,7 +101,7 @@ export function CreateGroupModal({
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-white/65 mb-1">
                   Group Name *
                 </label>
                 <input
@@ -111,13 +111,13 @@ export function CreateGroupModal({
                   placeholder="Enter group name..."
                   disabled={isCreating}
                   autoFocus
-                  className="w-full px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-neutral-100 dark:bg-white/6 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl border border-neutral-200 dark:border-white/8 focus:outline-none focus:border-orange-500 transition-colors disabled:opacity-50"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-white/65 mb-1">
                   Description
                 </label>
                 <textarea
@@ -126,13 +126,13 @@ export function CreateGroupModal({
                   placeholder="What's this group about?"
                   disabled={isCreating}
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:border-blue-500 transition-colors resize-none disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-neutral-100 dark:bg-white/6 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl border border-neutral-200 dark:border-white/8 focus:outline-none focus:border-orange-500 transition-colors resize-none disabled:opacity-50"
                 />
               </div>
 
               {/* Visibility */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-white/65 mb-2">
                   Visibility
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -142,8 +142,8 @@ export function CreateGroupModal({
                     disabled={isCreating}
                     className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${
                       visibility === GroupVisibility.PUBLIC
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-600'
+                        ? 'bg-blue-50 dark:bg-orange-900/20 border-orange-500 text-blue-600 dark:text-orange-400'
+                        : 'bg-neutral-50 dark:bg-white/6 border-neutral-200 dark:border-white/8 text-neutral-600 dark:text-white/45 hover:border-neutral-300 dark:hover:border-neutral-600'
                     } disabled:opacity-50`}
                   >
                     <Globe className="w-5 h-5" />
@@ -158,8 +158,8 @@ export function CreateGroupModal({
                     disabled={isCreating}
                     className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${
                       visibility === GroupVisibility.PRIVATE
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-600'
+                        ? 'bg-blue-50 dark:bg-orange-900/20 border-orange-500 text-blue-600 dark:text-orange-400'
+                        : 'bg-neutral-50 dark:bg-white/6 border-neutral-200 dark:border-white/8 text-neutral-600 dark:text-white/45 hover:border-neutral-300 dark:hover:border-neutral-600'
                     } disabled:opacity-50`}
                   >
                     <Lock className="w-5 h-5" />
@@ -182,7 +182,7 @@ export function CreateGroupModal({
               <button
                 type="submit"
                 disabled={isCreating || !name.trim()}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition-shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-lg shadow-orange-500/30 hover:shadow-orange-500/40 transition-shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isCreating ? (
                   <>

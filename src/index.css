@@ -113,6 +113,16 @@ body {
   }
 }
 
+/* Hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /* Hide scrollbar for swipeable containers */
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -134,6 +144,9 @@ body {
   --color-brand-text-light: #E0E0E0;
   --color-brand-text-dark: #1A1A1A;
   --color-brand-text-dim: #B2B4AE;
+
+  /* Modal background (warm dark brown for dark mode) */
+  --color-modal-bg: #120800;
 
   /* Splash-screen orange palette */
   --color-brand-orange: #FF6F00;
@@ -222,6 +235,13 @@ body {
 @keyframes intentFlash {
   0%, 100% { opacity: 0; transform: translateX(-50%) translateY(4px) scale(0.95); }
   15%, 85% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* Modal entry animation — opacity only, NO transform.
+   Any transform (CSS or JS) creates a compositing layer that breaks backdrop-filter. */
+@keyframes modalIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Theme transition utility */

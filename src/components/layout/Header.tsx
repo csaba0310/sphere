@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ThemeToggle } from '../theme';
+// import { ThemeToggle } from '../theme';
 import { STORAGE_KEYS } from '../../config/storageKeys';
 import { IpfsSyncIndicator } from './IpfsSyncIndicator';
 import { useDesktopState } from '../../hooks/useDesktopState';
@@ -70,23 +70,28 @@ export function Header() {
 
   return (
     <>
-    <header data-tutorial="header" className="sticky top-0 z-50 w-full shrink-0">
-      <div className="px-12 sm:px-20 lg:px-28 pt-3 pb-5 lg:pb-7">
-        <div className="flex items-end">
+    <header data-tutorial="header" className={`sticky top-0 z-50 w-full shrink-0 transition-colors duration-300 ${
+      mobileMenuOpen ? 'bg-white dark:bg-modal-bg lg:bg-transparent lg:dark:bg-transparent' : ''
+    }`}>
+      <div className="px-4 sm:px-12 lg:px-28 pt-2 sm:pt-3 pb-1 sm:pb-3 lg:pb-7">
+        <div className="flex items-center sm:items-end">
           {/* Logo — translate down so its center aligns with the line (like splash screen) */}
           <button
             onClick={() => { showDesktop(); navigate('/home'); }}
-            className="shrink-0 pr-2 sm:pr-3 group cursor-pointer translate-y-1/2 relative z-10"
+            className="shrink-0 pr-2 sm:pr-3 group cursor-pointer sm:translate-y-1/2 relative z-10"
           >
             <img
               src={logoUrl}
               alt="Logo"
-              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 transition-transform duration-200 group-hover:scale-110 dark:brightness-0 dark:invert"
+              className="w-7 h-7 sm:w-12 sm:h-12 lg:w-14 lg:h-14 transition-transform duration-200 group-hover:scale-110 dark:brightness-0 dark:invert"
             />
           </button>
 
-          {/* Right side: nav above the line, line at the bottom */}
-          <div className="flex-1 flex flex-col min-w-0">
+          {/* Mobile: simple spacer between logo and hamburger */}
+          <div className="flex-1 sm:hidden" />
+
+          {/* Desktop/tablet: nav above the line, line at the bottom */}
+          <div className="hidden sm:flex flex-1 flex-col min-w-0">
             <div className="flex items-end pb-1.5">
               <nav className="hidden lg:flex items-center gap-12 xl:gap-14 ml-8 xl:ml-12" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
                 {navItems.map((item) => (
@@ -140,25 +145,28 @@ export function Header() {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 lg:gap-3">
+              {/* Desktop: IPFS sync indicator */}
+              <div className="hidden lg:flex items-center gap-3">
                 <IpfsSyncIndicator />
-                <ThemeToggle />
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="lg:hidden p-2 hover:bg-neutral-100 dark:hover:bg-brand-orange-dim rounded-lg transition-all"
-                >
-                  {mobileMenuOpen ? (
-                    <X className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
-                  ) : (
-                    <Menu className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
-                  )}
-                </button>
+                {/* <ThemeToggle /> */}
               </div>
             </div>
 
-            {/* Line — at the bottom of this column, aligned with logo center via translate */}
+            {/* Line */}
             <div className="h-0.5 bg-neutral-300 dark:bg-[#fefefe] rounded-[10px]" />
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden shrink-0 p-2 hover:bg-neutral-100 dark:hover:bg-brand-orange-dim rounded-lg transition-all sm:ml-2 sm:translate-y-1/2 relative z-10"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6 text-neutral-500 dark:text-neutral-400" />
+            ) : (
+              <Menu className="w-6 h-6 text-neutral-500 dark:text-neutral-400" />
+            )}
+          </button>
         </div>
       </div>
     </header>
@@ -171,18 +179,18 @@ export function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35, ease: 'easeInOut' }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden fixed inset-0 top-[60px] bg-black/20 backdrop-blur-sm z-60"
+            className="lg:hidden fixed inset-0 top-[50px] bg-black/40 z-60"
           />
           <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: 'auto' }}
-            exit={{ height: 0 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-            className="lg:hidden fixed left-0 right-0 top-[60px] backdrop-blur-xl border-b z-60 shadow-xl overflow-hidden bg-white/95 dark:bg-[#060606]/80 border-neutral-200 dark:border-[rgba(255,111,0,0.12)]"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            className="lg:hidden fixed left-0 right-0 top-[50px] z-60 overflow-hidden bg-white dark:bg-modal-bg border-b border-neutral-200 dark:border-brand-orange-border shadow-2xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.5)]"
           >
-          <nav className="px-4 py-3 space-y-1" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
+          <nav className="px-4 py-2 space-y-0.5" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
             {navItems.map((item) => (
               item.external ? (
                 <a
@@ -191,7 +199,7 @@ export function Header() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center px-4 py-3 rounded-xl text-base font-medium transition-all text-neutral-600 dark:text-[rgba(255,255,255,0.45)] hover:bg-neutral-100 dark:hover:bg-brand-orange-dim"
+                  className="w-full flex items-center px-4 py-3 rounded-xl text-base font-medium transition-all text-neutral-500 dark:text-white/55 hover:bg-neutral-100 dark:hover:bg-brand-orange-dim"
                 >
                   {item.label}
                 </a>
@@ -202,7 +210,7 @@ export function Header() {
                   className={`relative w-full flex items-center px-4 py-3 rounded-xl text-base font-medium transition-all text-left ${
                     isActive(item.path)
                       ? 'text-neutral-900 dark:text-white'
-                      : 'text-neutral-600 dark:text-[rgba(255,255,255,0.45)] hover:bg-neutral-100 dark:hover:bg-brand-orange-dim'
+                      : 'text-neutral-500 dark:text-white/55 hover:bg-neutral-100 dark:hover:bg-brand-orange-dim'
                   }`}
                 >
                   {isActive(item.path) && (
@@ -217,6 +225,11 @@ export function Header() {
                 </button>
               )
             ))}
+
+            {/* IPFS sync — mobile only */}
+            <div className="px-4 pt-2 border-t border-neutral-200 dark:border-brand-orange-border mt-1">
+              <IpfsSyncIndicator />
+            </div>
           </nav>
         </motion.div>
         </>

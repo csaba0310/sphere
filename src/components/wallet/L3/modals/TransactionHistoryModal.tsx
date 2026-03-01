@@ -56,14 +56,14 @@ function DetailRow({ label, value, copyKey, copiedKey, onCopy }: {
 }) {
   return (
     <div className="flex items-center justify-between gap-2 py-1">
-      <span className="text-[11px] text-neutral-500 dark:text-neutral-400 shrink-0">{label}</span>
+      <span className="text-[11px] text-neutral-500 dark:text-white/45 shrink-0">{label}</span>
       <div className="flex items-center gap-1 min-w-0">
-        <span className="text-[11px] text-neutral-700 dark:text-neutral-300 font-mono truncate">
+        <span className="text-[11px] text-neutral-700 dark:text-white/65 font-mono truncate">
           {truncateMiddle(value)}
         </span>
         <button
           onClick={(e) => { e.stopPropagation(); onCopy(value, copyKey); }}
-          className="shrink-0 p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded transition-colors"
+          className="shrink-0 p-0.5 hover:bg-neutral-200 dark:hover:bg-white/10 rounded transition-colors"
           title="Copy"
         >
           {copiedKey === copyKey
@@ -141,7 +141,7 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/50 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                  className="bg-neutral-50 dark:bg-white/4 border border-neutral-200 dark:border-white/8 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors cursor-pointer"
                   onClick={() => toggleExpand(entry.id)}
                 >
                   {/* Main row */}
@@ -151,13 +151,13 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                       {entry.iconUrl ? (
                         <img src={entry.iconUrl} className="w-10 h-10 rounded-full" alt="" />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center">
-                          <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                        <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-white/10 flex items-center justify-center">
+                          <span className="text-sm font-medium text-neutral-500 dark:text-white/45">
                             {entry.symbol.slice(0, 2)}
                           </span>
                         </div>
                       )}
-                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-neutral-50 dark:border-neutral-800 ${
+                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-neutral-50 dark:border-white/10 ${
                         entry.type === 'RECEIVED'
                           ? 'bg-emerald-500'
                           : 'bg-orange-500'
@@ -175,7 +175,7 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                       <div className="text-sm font-medium text-neutral-900 dark:text-white">
                         {entry.type === 'RECEIVED' ? 'Received' : 'Sent'}
                         {peerLabel && (
-                          <span className="text-neutral-500 dark:text-neutral-400 font-normal ml-1">
+                          <span className="text-neutral-500 dark:text-white/45 font-normal ml-1">
                             {entry.type === 'RECEIVED' ? 'from' : 'to'} {peerLabel}
                           </span>
                         )}
@@ -184,7 +184,7 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                         {entry.date} • {entry.time}
                       </div>
                       {entry.memo && (
-                        <div className="text-[11px] text-neutral-500 dark:text-neutral-400 italic truncate mt-0.5">
+                        <div className="text-[11px] text-neutral-500 dark:text-white/45 italic truncate mt-0.5">
                           &ldquo;{entry.memo}&rdquo;
                         </div>
                       )}
@@ -213,7 +213,7 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="px-4 pb-3 pt-0 border-t border-neutral-200/50 dark:border-neutral-700/30">
+                        <div className="px-4 pb-3 pt-0 border-t border-neutral-200/50 dark:border-white/6">
                           <div className="pt-2 space-y-0.5">
                             {/* Peer info */}
                             {entry.type === 'RECEIVED' && (
@@ -246,8 +246,8 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                             {/* Memo */}
                             {entry.memo && (
                               <div className="py-1">
-                                <span className="text-[11px] text-neutral-500 dark:text-neutral-400">Memo</span>
-                                <div className="text-[11px] text-neutral-700 dark:text-neutral-300 italic mt-0.5">
+                                <span className="text-[11px] text-neutral-500 dark:text-white/45">Memo</span>
+                                <div className="text-[11px] text-neutral-700 dark:text-white/65 italic mt-0.5">
                                   &ldquo;{entry.memo}&rdquo;
                                 </div>
                               </div>
@@ -256,12 +256,12 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                             {/* Token breakdown (V6 combined transfers) */}
                             {entry.formattedTokenIds && entry.formattedTokenIds.length > 1 && (
                               <div className="py-1">
-                                <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                                <span className="text-[11px] text-neutral-500 dark:text-white/45">
                                   Tokens ({entry.formattedTokenIds.length})
                                 </span>
                                 <div className="mt-1 space-y-1">
                                   {entry.formattedTokenIds.map((t, idx) => (
-                                    <div key={idx} className="flex items-center justify-between gap-2 pl-2 border-l-2 border-neutral-200 dark:border-neutral-700">
+                                    <div key={idx} className="flex items-center justify-between gap-2 pl-2 border-l-2 border-neutral-200 dark:border-white/8">
                                       <div className="flex items-center gap-1.5 min-w-0">
                                         <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
                                           t.source === 'split'
@@ -270,12 +270,12 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                                         }`}>
                                           {t.source}
                                         </span>
-                                        <span className="text-[11px] text-neutral-700 dark:text-neutral-300 font-mono truncate">
+                                        <span className="text-[11px] text-neutral-700 dark:text-white/65 font-mono truncate">
                                           {truncateMiddle(t.id, 8, 6)}
                                         </span>
                                         <button
                                           onClick={(e) => { e.stopPropagation(); copy(t.id, `${entry.id}-tid-${idx}`); }}
-                                          className="shrink-0 p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded transition-colors"
+                                          className="shrink-0 p-0.5 hover:bg-neutral-200 dark:hover:bg-white/10 rounded transition-colors"
                                           title="Copy Token ID"
                                         >
                                           {copiedKey === `${entry.id}-tid-${idx}`
@@ -284,7 +284,7 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                                           }
                                         </button>
                                       </div>
-                                      <span className="text-[11px] text-neutral-600 dark:text-neutral-400 font-mono shrink-0">
+                                      <span className="text-[11px] text-neutral-600 dark:text-white/45 font-mono shrink-0">
                                         {t.formattedAmount} {entry.symbol}
                                       </span>
                                     </div>
@@ -301,8 +301,8 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
                               <DetailRow label="Transfer ID" value={entry.transferId} copyKey={`${entry.id}-txid`} copiedKey={copiedKey} onCopy={copy} />
                             )}
                             <div className="flex items-center justify-between py-1">
-                              <span className="text-[11px] text-neutral-500 dark:text-neutral-400">Amount (raw)</span>
-                              <span className="text-[11px] text-neutral-700 dark:text-neutral-300 font-mono">{entry.amount}</span>
+                              <span className="text-[11px] text-neutral-500 dark:text-white/45">Amount (raw)</span>
+                              <span className="text-[11px] text-neutral-700 dark:text-white/65 font-mono">{entry.amount}</span>
                             </div>
                           </div>
                         </div>

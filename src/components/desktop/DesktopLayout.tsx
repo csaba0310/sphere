@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useDesktopState } from '../../hooks/useDesktopState';
 import { useUIState } from '../../hooks/useUIState';
 import { getAgentConfig, type AgentConfig } from '../../config/activities';
@@ -25,7 +24,7 @@ const CUSTOM_URL_PRESETS = [
 
 export function DesktopLayout() {
   const navigate = useNavigate();
-  const { openTabs, activeTabId, openTab, walletOpen, toggleWallet, setWalletOpen } = useDesktopState();
+  const { openTabs, activeTabId, openTab, walletOpen, setWalletOpen } = useDesktopState();
   const { isFullscreen, toggleFullscreen, setFullscreen } = useUIState();
   const [customUrlInput, setCustomUrlInput] = useState('');
 
@@ -164,7 +163,7 @@ export function DesktopLayout() {
     }`}>
       {/* Activity ticker — hidden in fullscreen */}
       {!isFullscreen && (
-        <div className="shrink-0 mt-2">
+        <div className="shrink-0 mt-0 sm:mt-2">
           <ActivityTicker />
         </div>
       )}
@@ -178,10 +177,37 @@ export function DesktopLayout() {
       </div>
 
       {/* Content + wallet row */}
-      <div className="flex-1 min-h-0 flex">
-          {/* Content area with rounded corners */}
-          <div className="flex-1 min-w-0 relative">
-            <div className="h-full lg:rounded-2xl overflow-hidden bg-white dark:bg-[#0a0a0a]/60 dark:backdrop-blur-sm">
+      <div className="flex-1 min-h-0 flex mx-1">
+          {/* Mobile: stack content and wallet in same space */}
+          <div className="flex-1 min-w-0 lg:hidden relative overflow-hidden rounded-2xl">
+            {/* Content area */}
+            <div className={`absolute inset-0 bg-white dark:bg-[#0a0a0a]/60 dark:backdrop-blur-sm transition-transform duration-300 ease-in-out ${
+              walletOpen ? '-translate-x-full' : 'translate-x-0'
+            }`}>
+              {activeTabId === null && <DesktopShortcuts />}
+              {openTabs.map((tab) => (
+                <div
+                  key={tab.id}
+                  className={tab.id === activeTabId ? 'h-full' : 'hidden'}
+                >
+                  {renderTabContent(tab.id, tab.appId, tab.url)}
+                </div>
+              ))}
+            </div>
+            {/* Wallet panel — slides in from right */}
+            <div
+              data-tutorial="wallet-panel-mobile"
+              className={`absolute inset-0 transition-transform duration-300 ease-in-out ${
+                walletOpen ? 'translate-x-0' : 'translate-x-full'
+              }`}
+            >
+              <WalletPanel />
+            </div>
+          </div>
+
+          {/* Desktop: content + wallet side by side */}
+          <div className="hidden lg:block flex-1 min-w-0">
+            <div className="h-full rounded-2xl overflow-hidden bg-white dark:bg-[#0a0a0a]/60 dark:backdrop-blur-sm">
               {activeTabId === null && <DesktopShortcuts />}
               {openTabs.map((tab) => (
                 <div
@@ -197,43 +223,18 @@ export function DesktopLayout() {
           {/* Wallet panel — desktop: inline side panel with slide transition */}
           <div
             data-tutorial="wallet-panel"
-            className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-              walletOpen ? 'w-104 xl:w-lg' : 'w-0'
+            className={`hidden lg:block shrink-0 transition-[width] duration-300 ease-in-out overflow-hidden rounded-2xl ml-1 ${
+              walletOpen ? 'w-88 xl:w-104' : 'w-0'
             }`}
           >
-            <div className="w-104 xl:w-lg h-full">
+            <div className="w-88 xl:w-104 h-full">
               <WalletPanel />
             </div>
           </div>
-
-          {/* Wallet panel — mobile: overlay sliding from right */}
-          <AnimatePresence>
-            {walletOpen && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="lg:hidden absolute inset-0 bg-black/50 z-40"
-                  onClick={toggleWallet}
-                />
-                <motion.div
-                  data-tutorial="wallet-panel-mobile"
-                  initial={{ x: '100%' }}
-                  animate={{ x: 0 }}
-                  exit={{ x: '100%' }}
-                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                  className="lg:hidden absolute inset-0 z-50"
-                >
-                  <WalletPanel />
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
         </div>
 
-        {/* Footer with social icons */}
-        {!isFullscreen && <Footer />}
+        {/* Footer with social icons — hidden on mobile */}
+        {!isFullscreen && <div className="hidden lg:block"><Footer /></div>}
     </div>
   );
 }

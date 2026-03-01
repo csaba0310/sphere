@@ -179,14 +179,14 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} size="lg" className="max-h-[92%]">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
+      <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-white/10 shrink-0">
         <div className="flex items-center gap-3">
           {viewMode === "history" && (
             <button
               onClick={() => setViewMode("main")}
-              className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
+              <ChevronLeft className="w-5 h-5 text-neutral-600 dark:text-white/45" />
             </button>
           )}
           <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center">
@@ -198,7 +198,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
         </div>
         <button
           onClick={onClose}
-          className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+          className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
         >
           <X className="w-5 h-5 text-neutral-500" />
         </button>
@@ -227,7 +227,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
               transactions.map((tx: L1Transaction) => {
                 const isIncoming = tx.type === "incoming";
                 return (
-                  <div key={tx.txid} className="flex items-center gap-3 p-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl">
+                  <div key={tx.txid} className="flex items-center gap-3 p-3 bg-neutral-100 dark:bg-white/4 rounded-xl">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isIncoming ? "bg-green-500/20" : "bg-red-500/20"}`}>
                       {isIncoming ? (
                         <ArrowDownLeft className="w-4 h-4 text-green-500" />
@@ -267,7 +267,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
           <div className="p-4 space-y-4">
             {/* Balance */}
             <div className="text-center py-4">
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">Total Balance</p>
+              <p className="text-sm text-neutral-500 dark:text-white/45 mb-1">Total Balance</p>
               <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">
                 {showBalances ? `${formatBalance(totalBalance)} ALPHA` : "••••••"}
               </h2>
@@ -281,21 +281,21 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
             />
 
             {/* Active Address */}
-            <div className="bg-neutral-100 dark:bg-neutral-800/50 rounded-xl p-3">
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2 flex items-center gap-1.5">
+            <div className="bg-neutral-100 dark:bg-white/4 rounded-xl p-3">
+              <p className="text-xs text-neutral-500 dark:text-white/45 mb-2 flex items-center gap-1.5">
                 {isSwitching && <Loader2 className="w-3 h-3 animate-spin" />}
                 {isSwitching ? "Switching..." : "Active Address"}
               </p>
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown(prev => !prev)}
-                  className="w-full flex items-center justify-between gap-2 p-2 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors"
+                  className="w-full flex items-center justify-between gap-2 p-2 bg-white dark:bg-white/6 rounded-lg border border-neutral-200 dark:border-white/8 hover:bg-neutral-50 dark:hover:bg-white/8 transition-colors"
                 >
                   <span className="flex flex-col text-xs">
                     {nametag && (
                       <span className="font-medium text-blue-600 dark:text-blue-400">@{nametag}</span>
                     )}
-                    <span className="font-mono text-neutral-700 dark:text-neutral-300 truncate">
+                    <span className="font-mono text-neutral-700 dark:text-white/65 truncate">
                       {selectedAddress.slice(0, 16)}...{selectedAddress.slice(-8)}
                     </span>
                   </span>
@@ -316,7 +316,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute z-20 mt-2 w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl max-h-40 overflow-y-auto"
+                        className="absolute z-20 mt-2 w-full bg-white dark:bg-[#1a1a1a] border border-neutral-200 dark:border-white/8 rounded-xl shadow-xl max-h-40 overflow-y-auto"
                       >
                         {sortedAddresses.map(addr => {
                           const isSelected = addr.index === currentAddressIndex;
@@ -325,14 +325,14 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
                               key={addr.l1Address}
                               onClick={() => handleSelectAddress(addr.index)}
                               disabled={isSwitching}
-                              className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors disabled:opacity-50 ${isSelected ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
+                              className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors disabled:opacity-50 ${isSelected ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
                             >
                               <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-blue-500" : "bg-transparent"}`} />
                               <div className="flex-1 min-w-0">
                                 {addr.nametag && (
                                   <span className="text-blue-600 dark:text-blue-400 font-medium block">@{addr.nametag}</span>
                                 )}
-                                <span className="font-mono text-neutral-700 dark:text-neutral-300 truncate block">
+                                <span className="font-mono text-neutral-700 dark:text-white/65 truncate block">
                                   {addr.l1Address.slice(0, 12)}...{addr.l1Address.slice(-6)}
                                 </span>
                               </div>
@@ -343,7 +343,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
                         {/* New address button */}
                         <button
                           onClick={handleDeriveNew}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors border-t border-neutral-200 dark:border-neutral-700"
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors border-t border-neutral-200 dark:border-white/8"
                         >
                           <Plus className="w-3 h-3 text-orange-500" />
                           <span className="text-orange-600 dark:text-orange-400 font-medium">New Address</span>
@@ -355,7 +355,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
               </div>
 
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <span className="text-sm font-medium text-neutral-700 dark:text-white/65">
                   {showBalances ? `${formatBalance(balance)} ALPHA` : "••••••"}
                 </span>
                 <div className="flex-1" />
@@ -365,7 +365,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  className={`p-1.5 rounded-lg transition-colors ${copied ? "bg-green-500 text-white" : "hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-500"}`}
+                  className={`p-1.5 rounded-lg transition-colors ${copied ? "bg-green-500 text-white" : "hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-500"}`}
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </button>
@@ -373,7 +373,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
                   href={`https://www.unicity.network/address/${selectedAddress}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-500 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-500 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                 </a>

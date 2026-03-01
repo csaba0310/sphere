@@ -109,13 +109,13 @@ export function PaymentRequestsModal({ isOpen, onClose, requests, pendingCount, 
 
       {/* Footer - Fixed */}
       {hasProcessed && (
-        <div className="relative shrink-0 p-4 border-t border-neutral-200/50 dark:border-neutral-700/50 backdrop-blur-xl z-20">
+        <div className="relative shrink-0 p-4 border-t border-neutral-200/50 dark:border-white/8 backdrop-blur-xl z-20">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={clearProcessed}
             disabled={isGlobalProcessing}
-            className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50 border border-neutral-200/50 dark:border-neutral-700/50 hover:border-red-500/30"
+            className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50 border border-neutral-200/50 dark:border-white/8 hover:border-red-500/30"
           >
             <Trash2 className="w-4 h-4" /> Clear History
           </motion.button>
@@ -155,12 +155,11 @@ function RequestCard({ req, error, onPay, onReject, isProcessing, isGlobalDisabl
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
       className={`relative rounded-2xl overflow-hidden border transition-all duration-300 ${isPending
-        ? 'bg-white/60 dark:bg-neutral-800/60 border-neutral-200/60 dark:border-neutral-700/60 shadow-xl shadow-black/10 dark:shadow-black/30 backdrop-blur-xl'
+        ? 'bg-white/60 dark:bg-neutral-800/60 border-neutral-200/60 dark:border-white/8 shadow-xl shadow-black/10 dark:shadow-black/30 backdrop-blur-xl'
         : 'bg-neutral-100/40 dark:bg-neutral-800/40 border-neutral-200/40 dark:border-neutral-700/40 opacity-70'
         } ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}
     >
@@ -180,7 +179,7 @@ function RequestCard({ req, error, onPay, onReject, isProcessing, isGlobalDisabl
               </span>
             </div>
           </div>
-          <div className="bg-neutral-200/50 dark:bg-neutral-700/50 px-2.5 py-1 rounded-lg text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">
+          <div className="bg-neutral-200/50 dark:bg-white/4 px-2.5 py-1 rounded-lg text-[10px] text-neutral-500 dark:text-white/45 font-medium">
             {timeAgo}
           </div>
         </div>
@@ -194,7 +193,7 @@ function RequestCard({ req, error, onPay, onReject, isProcessing, isGlobalDisabl
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 text-xs text-neutral-700 dark:text-neutral-300 bg-neutral-200/50 dark:bg-neutral-700/50 px-4 py-2 rounded-xl border border-neutral-300/50 dark:border-neutral-600/50 backdrop-blur-sm max-w-full"
+              className="mt-4 text-xs text-neutral-700 dark:text-white/65 bg-neutral-200/50 dark:bg-white/4 px-4 py-2 rounded-xl border border-neutral-300/50 dark:border-neutral-600/50 backdrop-blur-sm max-w-full"
             >
               <span className="text-neutral-500">"</span>{req.message}<span className="text-neutral-500">"</span>
             </motion.div>
@@ -203,7 +202,7 @@ function RequestCard({ req, error, onPay, onReject, isProcessing, isGlobalDisabl
       </div>
 
       {/* Bottom: Actions */}
-      <div className="p-4 bg-neutral-100/50 dark:bg-neutral-900/50 border-t border-neutral-200/50 dark:border-neutral-700/50 backdrop-blur-sm">
+      <div className="p-4 bg-neutral-100/50 dark:bg-white/4 border-t border-neutral-200/50 dark:border-white/8 backdrop-blur-sm">
         {isPending ? (
           <div className="flex flex-col gap-3">
 
@@ -228,7 +227,7 @@ function RequestCard({ req, error, onPay, onReject, isProcessing, isGlobalDisabl
                 whileTap={{ scale: 0.97 }}
                 onClick={onReject}
                 disabled={isGlobalDisabled}
-                className="py-3 rounded-xl font-bold text-xs bg-neutral-200/80 dark:bg-neutral-800/80 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-300/80 dark:hover:bg-neutral-700/80 border border-neutral-300/60 dark:border-neutral-700/60 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all"
+                className="py-3 rounded-xl font-bold text-xs bg-neutral-200/80 dark:bg-white/6 text-neutral-500 dark:text-white/45 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-300/80 dark:hover:bg-white/10 border border-neutral-300/60 dark:border-white/8 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all"
               >
                 Decline
               </motion.button>

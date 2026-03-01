@@ -28,13 +28,13 @@ export function ComingSoonModal({ isOpen, onClose, title = 'Get API Key' }: Comi
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md p-4"
           >
-            <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-2xl overflow-hidden">
+            <div className="bg-white dark:bg-white/6 rounded-2xl border border-neutral-200 dark:border-white/8 shadow-2xl overflow-hidden">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
+              <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-white/8">
                 <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">{title}</h3>
                 <button
                   onClick={onClose}
-                  className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
+                  className="p-1 hover:bg-neutral-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 text-neutral-500" />
                 </button>
@@ -46,7 +46,7 @@ export function ComingSoonModal({ isOpen, onClose, title = 'Get API Key' }: Comi
                   <span className="text-3xl">🚀</span>
                 </div>
                 <h4 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">Coming Soon</h4>
-                <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+                <p className="text-neutral-600 dark:text-white/45 mb-6">
                   API keys will be available soon. Join our Discord to be notified when we launch!
                 </p>
                 <div className="flex gap-3 justify-center">
@@ -60,7 +60,7 @@ export function ComingSoonModal({ isOpen, onClose, title = 'Get API Key' }: Comi
                   </a>
                   <button
                     onClick={onClose}
-                    className="px-5 py-2.5 rounded-xl font-medium border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition"
+                    className="px-5 py-2.5 rounded-xl font-medium border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-white/65 hover:bg-neutral-100 dark:hover:bg-white/10 transition"
                   >
                     Close
                   </button>

@@ -86,7 +86,7 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.8, opacity: 0, y: 20 }}
         transition={{ type: "spring", duration: 0.5 }}
-        className="relative w-full max-w-sm bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-sm bg-white dark:bg-modal-bg/80 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <motion.div
@@ -96,7 +96,7 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
           className="text-center mb-4"
         >
           <h3 className="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white mb-1">Receive ALPHA</h3>
-          <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="text-xs sm:text-sm text-neutral-500 dark:text-white/45">
             Scan QR code to receive payment
           </p>
         </motion.div>
@@ -139,9 +139,9 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-neutral-100 dark:bg-neutral-800/50 rounded-xl p-3 sm:p-4 mb-4 border border-neutral-200 dark:border-neutral-700/50 backdrop-blur-sm"
+          className="bg-neutral-100 dark:bg-white/4 rounded-xl p-3 sm:p-4 mb-4 border border-neutral-200 dark:border-white/8 backdrop-blur-sm"
         >
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2 text-center">
+          <p className="text-xs text-neutral-500 dark:text-white/45 mb-2 text-center">
             Your Address
           </p>
           <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
               className={`p-2 rounded-lg transition-all ${
                 copied
                   ? "bg-green-600 hover:bg-green-500 shadow-lg shadow-green-500/20"
-                  : "bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600"
+                  : "bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/10"
               } text-neutral-800 dark:text-white`}
               title={copied ? "Copied!" : "Copy address"}
             >
@@ -187,7 +187,7 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onClose}
-          className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-linear-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold shadow-lg shadow-blue-500/20 transition-all text-sm sm:text-base"
+          className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-linear-to-br from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25 transition-all text-sm sm:text-base"
         >
           Close
         </motion.button>

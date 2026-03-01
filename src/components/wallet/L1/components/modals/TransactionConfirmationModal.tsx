@@ -25,28 +25,28 @@ export function TransactionConfirmationModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="relative w-full max-w-md bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden">
+      <div className="relative w-full max-w-md bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden">
         <h3 className="text-xl text-neutral-900 dark:text-white font-bold mb-4">
           Confirm Transaction
         </h3>
 
         <div className="space-y-3 mb-6">
           <div className="flex justify-between text-sm">
-            <span className="text-neutral-500 dark:text-neutral-400">Recipient</span>
+            <span className="text-neutral-500 dark:text-white/45">Recipient</span>
             <span className="text-neutral-900 dark:text-white font-mono truncate max-w-[200px]">
               {destination}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-neutral-500 dark:text-neutral-400">Amount</span>
+            <span className="text-neutral-500 dark:text-white/45">Amount</span>
             <span className="text-neutral-900 dark:text-white">{amount} ALPHA</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-neutral-500 dark:text-neutral-400">Transactions</span>
+            <span className="text-neutral-500 dark:text-white/45">Transactions</span>
             <span className="text-neutral-900 dark:text-white">{txPlan.transactions.length}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-neutral-500 dark:text-neutral-400">Total Fee</span>
+            <span className="text-neutral-500 dark:text-white/45">Total Fee</span>
             <span className="text-neutral-900 dark:text-white">
               {(txPlan.transactions.length * 10000) / 100000000} ALPHA
             </span>
@@ -56,14 +56,14 @@ export function TransactionConfirmationModal({
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+            className="flex-1 px-4 py-3 rounded-xl bg-neutral-100 dark:bg-white/6 text-neutral-900 dark:text-white font-semibold hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
             disabled={isSending}
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-4 py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-500 flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
+            className="flex-1 px-4 py-3 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
             disabled={isSending}
           >
             {isSending ? (

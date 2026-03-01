@@ -51,29 +51,29 @@ export function MenuButton({
       whileTap={disabled ? undefined : { scale: 0.99 }}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={`w-full flex items-center gap-4 p-4 bg-neutral-50 dark:bg-[rgba(255,255,255,0.03)] rounded-2xl transition-colors group ${
+      className={`w-full flex items-center gap-4 p-4 bg-neutral-50 dark:bg-white/3 rounded-2xl transition-colors group ${
         disabled
           ? 'opacity-50 cursor-not-allowed'
           : danger
             ? 'hover:bg-red-50 dark:hover:bg-red-900/20'
-            : 'hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.06)]'
+            : 'hover:bg-neutral-100 dark:hover:bg-white/6'
       }`}
     >
       <div className={`w-12 h-12 rounded-xl ${colorConfig.bg} flex items-center justify-center shrink-0`}>
         <Icon className={`w-6 h-6 ${colorConfig.icon}`} />
       </div>
       <div className="flex-1 text-left min-w-0">
-        <span className={`font-semibold block ${danger ? 'text-red-500' : 'text-neutral-900 dark:text-[#fefefe]'}`}>
+        <span className={`font-semibold block ${danger ? 'text-red-500' : 'text-neutral-900 dark:text-white'}`}>
           {label}
         </span>
         {subtitle && (
-          <span className="text-xs text-neutral-500 dark:text-[rgba(255,255,255,0.45)] truncate block">
+          <span className="text-xs text-neutral-500 dark:text-white/45 truncate block">
             {subtitle}
           </span>
         )}
       </div>
       {showChevron && !danger && !disabled && (
-        <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors shrink-0" />
+        <ChevronRight className="w-5 h-5 text-neutral-400 dark:text-white/35 group-hover:text-neutral-600 dark:group-hover:text-white/55 transition-colors shrink-0" />
       )}
     </motion.button>
   );

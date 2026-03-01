@@ -116,9 +116,9 @@ export function NewConversationModal({
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-100001"
           >
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">
+            <div className="bg-white dark:bg-modal-bg rounded-2xl shadow-2xl border border-neutral-200 dark:border-white/10 overflow-hidden">
               {/* Header */}
-              <div className="p-4 border-b border-neutral-200 dark:border-neutral-800/50 flex items-center justify-between">
+              <div className="p-4 border-b border-neutral-200 dark:border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-linear-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
                     <User className="w-5 h-5 text-white" />
@@ -127,14 +127,14 @@ export function NewConversationModal({
                     <h3 className="text-neutral-900 dark:text-white font-medium">
                       New Conversation
                     </h3>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-xs text-neutral-500 dark:text-white/45">
                       Start a private chat
                     </p>
                   </div>
                 </div>
                 <motion.button
                   onClick={onClose}
-                  className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800/50 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors"
+                  className="p-2 rounded-lg bg-neutral-100 dark:bg-white/4 text-neutral-500 dark:text-white/45 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
@@ -145,7 +145,7 @@ export function NewConversationModal({
               {/* Content */}
               <div className="p-4 space-y-4">
                 <div>
-                  <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-2">
+                  <label className="block text-sm text-neutral-600 dark:text-white/45 mb-2">
                     Enter unicity id or direct address
                   </label>
                   <div className="relative">
@@ -156,11 +156,11 @@ export function NewConversationModal({
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="e.g., alice or DIRECT://..."
-                      className="w-full pl-10 pr-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl border border-neutral-200 dark:border-neutral-700/50 focus:outline-none focus:border-orange-500 transition-colors"
+                      className="w-full pl-10 pr-4 py-3 bg-neutral-100 dark:bg-white/4 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl border border-neutral-200 dark:border-white/8 focus:outline-none focus:border-orange-500 transition-colors"
                       autoFocus
                     />
                   </div>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
+                  <p className="text-xs text-neutral-500 dark:text-white/45 mt-2">
                     You can enter a unicity id (without @) or a direct address
                   </p>
                 </div>
@@ -177,10 +177,10 @@ export function NewConversationModal({
               </div>
 
               {/* Footer */}
-              <div className="p-4 border-t border-neutral-200 dark:border-neutral-800/50 flex gap-3">
+              <div className="p-4 border-t border-neutral-200 dark:border-white/10 flex gap-3">
                 <motion.button
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-800/50 text-neutral-700 dark:text-neutral-300 font-medium border border-neutral-200 dark:border-neutral-700/50 hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-neutral-100 dark:bg-white/4 text-neutral-700 dark:text-white/65 font-medium border border-neutral-200 dark:border-white/8 hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
