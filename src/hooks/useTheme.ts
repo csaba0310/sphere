@@ -9,13 +9,14 @@ function getStoredTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
 
   const stored = localStorage.getItem(STORAGE_KEYS.THEME);
-  if (stored === 'light' || stored === 'dark') {
-    return stored;
+
+  // Migrate users who had light theme — UI is dark-mode only now
+  if (stored === 'light') {
+    localStorage.removeItem(STORAGE_KEYS.THEME);
   }
 
-  // Check system preference
-  if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-    return 'light';
+  if (stored === 'dark') {
+    return 'dark';
   }
 
   return 'dark';
