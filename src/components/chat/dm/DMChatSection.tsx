@@ -132,10 +132,6 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
   // Chat content (shared between normal and fullscreen modes)
   const chatContent = (
     <>
-      {/* Background decorative elements */}
-      <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
-
       {/* Left Sidebar - Conversation List */}
       <DMConversationList
         conversations={filteredConversations}
@@ -156,15 +152,15 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
       {/* Main Chat Area */}
       <div className="grid grid-rows-[auto_1fr_auto] z-10 min-w-0 h-full min-h-0">
         {/* Chat Header */}
-        <div className="shrink-0 px-3 py-2 border-b border-neutral-200 dark:border-neutral-800/50 flex items-center justify-between bg-linear-to-br from-white/80 dark:from-neutral-900/80 to-neutral-50/40 dark:to-neutral-800/40 backdrop-blur-sm relative z-20 theme-transition">
-          <div className="flex items-center gap-2 relative z-10">
+        <div className="shrink-0 px-4 py-2.5 border-b border-neutral-100 dark:border-[rgba(255,255,255,0.06)] flex items-center justify-between relative z-20">
+          <div className="flex items-center gap-2">
             {/* Desktop expand sidebar button (when collapsed) */}
             {sidebarCollapsed && (
               <motion.button
                 onClick={() => setSidebarCollapsed(false)}
-                className="hidden lg:flex p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800/50 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors border border-neutral-200 dark:border-neutral-700/50"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                className="hidden lg:flex p-1.5 rounded-lg text-neutral-400 dark:text-[rgba(255,255,255,0.35)] hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 title="Expand sidebar"
               >
                 <PanelLeft className="w-4 h-4" />
@@ -173,19 +169,19 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
             {/* Mobile sidebar button */}
             <motion.button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800/50 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors border border-neutral-200 dark:border-neutral-700/50"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              className="lg:hidden p-1.5 rounded-lg text-neutral-400 dark:text-[rgba(255,255,255,0.35)] hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               title="Show conversations"
             >
               <PanelLeft className="w-4 h-4" />
             </motion.button>
 
             {/* Conversation or default header */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {selectedConversation ? (
                 <>
-                  <div className={`relative w-8 h-8 rounded-lg bg-linear-to-br ${getColorFromPubkey(selectedConversation.peerPubkey).gradient} flex items-center justify-center text-white text-sm font-medium`}>
+                  <div className={`relative w-8 h-8 rounded-xl bg-linear-to-br ${getColorFromPubkey(selectedConversation.peerPubkey).gradient} flex items-center justify-center text-white text-sm font-medium`}>
                     {getAvatar(selectedConversation.peerPubkey, selectedConversation.peerNametag)}
                   </div>
                   <h3 className="text-sm text-neutral-900 dark:text-white font-medium">
@@ -194,14 +190,14 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
                 </>
               ) : (
                 <>
-                  <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-800/50 flex items-center justify-center border border-neutral-200 dark:border-neutral-700/50">
-                    <MessageCircle className="w-4 h-4 text-neutral-400" />
+                  <div className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] flex items-center justify-center">
+                    <MessageCircle className="w-4 h-4 text-neutral-400 dark:text-[rgba(255,255,255,0.35)]" />
                   </div>
                   <div>
                     <h3 className="text-sm text-neutral-900 dark:text-white font-medium">
                       Direct Messages
                     </h3>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.35)]">
                       Select a conversation to start
                     </p>
                   </div>
@@ -219,19 +215,19 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="w-24 h-24 rounded-2xl bg-neutral-100 dark:bg-neutral-800/50 flex items-center justify-center mb-4"
+              className="w-20 h-20 rounded-2xl bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] flex items-center justify-center mb-4"
             >
-              <MessageCircle className="w-12 h-12 text-neutral-400" />
+              <MessageCircle className="w-10 h-10 text-neutral-300 dark:text-[rgba(255,255,255,0.2)]" />
             </motion.div>
-            <p className="text-neutral-500 dark:text-neutral-400">
-              Welcome to Direct Messages
+            <p className="text-neutral-600 dark:text-[rgba(255,255,255,0.6)] font-medium">
+              Direct Messages
             </p>
-            <p className="text-neutral-400 dark:text-neutral-500 text-sm mt-1">
+            <p className="text-neutral-400 dark:text-[rgba(255,255,255,0.3)] text-sm mt-1">
               Select a conversation or start a new one
             </p>
             <motion.button
               onClick={() => setShowNewConversation(true)}
-              className="mt-4 px-6 py-3 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 text-white font-medium shadow-lg shadow-orange-500/30"
+              className="mt-5 px-6 py-2.5 rounded-full bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium shadow-md shadow-orange-500/20 dark:shadow-brand-orange-border"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -242,7 +238,7 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
 
         {/* Message Input */}
         {selectedConversation && (
-          <div className="shrink-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm theme-transition">
+          <div className="shrink-0">
             <DMChatInput
               ref={inputRef}
               value={messageInput}
@@ -273,7 +269,7 @@ export function DMChatSection({ pendingRecipient, onPendingRecipientHandled }: D
 
   return (
     <>
-      <div className="bg-white/60 dark:bg-neutral-900/70 backdrop-blur-xl rounded-none border-0 overflow-hidden grid grid-cols-1 lg:grid-cols-[auto_1fr] relative lg:shadow-none h-full min-h-0 theme-transition">
+      <div className="bg-white dark:bg-transparent overflow-hidden grid grid-cols-1 lg:grid-cols-[auto_1fr] relative h-full min-h-0">
         {chatContent}
       </div>
       {modalElement}

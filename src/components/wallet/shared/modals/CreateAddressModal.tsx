@@ -124,7 +124,7 @@ export function CreateAddressModal({ isOpen, onClose, existingAddress }: CreateA
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              className="relative w-full max-w-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl pointer-events-auto overflow-hidden"
+              className="relative w-full max-w-sm bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl pointer-events-auto overflow-hidden"
             >
               {/* Close button */}
               {canClose && (
@@ -132,7 +132,7 @@ export function CreateAddressModal({ isOpen, onClose, existingAddress }: CreateA
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleClose}
-                  className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-500 transition-colors"
+                  className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/6 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-500 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </motion.button>
@@ -207,7 +207,7 @@ function StepDeriving() {
       {/* Animated Loading Spinner */}
       <div className="relative mx-auto w-20 h-20 mb-5">
         <motion.div
-          className="absolute inset-0 border-3 border-neutral-200 dark:border-neutral-800/50 rounded-full"
+          className="absolute inset-0 border-3 border-neutral-200 dark:border-white/10 rounded-full"
           animate={{ rotate: 360 }}
           transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
         />
@@ -230,7 +230,7 @@ function StepDeriving() {
       <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
         Creating New Address
       </h3>
-      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+      <p className="text-sm text-neutral-500 dark:text-white/45">
         Generating cryptographic keys...
       </p>
     </motion.div>
@@ -276,17 +276,17 @@ function StepNametagInput({
       </h3>
 
       {/* Address preview */}
-      <div className="mb-4 p-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl">
+      <div className="mb-4 p-3 bg-neutral-100 dark:bg-white/4 rounded-xl">
         <div className="flex items-center gap-2 mb-1">
           <Wallet className="w-4 h-4 text-neutral-400" />
           <span className="text-xs text-neutral-500">New Address #{newAddress.index + 1}</span>
         </div>
-        <p className="text-xs font-mono text-neutral-600 dark:text-neutral-400 truncate">
+        <p className="text-xs font-mono text-neutral-600 dark:text-white/45 truncate">
           {newAddress.l1Address}
         </p>
       </div>
 
-      <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4 text-center">
+      <p className="text-sm text-neutral-500 dark:text-white/45 mb-4 text-center">
         Choose a unique{' '}
         <span className="text-orange-500 font-semibold">Unicity ID</span>{' '}
         for this address.
@@ -304,7 +304,7 @@ function StepNametagInput({
           onKeyDown={onKeyDown}
           placeholder="id"
           disabled={isCheckingAvailability}
-          className="w-full bg-neutral-100 dark:bg-neutral-800/50 border-2 border-neutral-200 dark:border-neutral-700/50 rounded-xl py-3 pl-4 pr-24 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-neutral-800 transition-all disabled:opacity-50"
+          className="w-full bg-neutral-100 dark:bg-white/4 border-2 border-neutral-200 dark:border-white/8 rounded-xl py-3 pl-4 pr-24 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-white/6 transition-all disabled:opacity-50"
           autoFocus
         />
       </div>
@@ -372,7 +372,7 @@ function StepProcessing({ step, progress }: { step: CreateAddressStep; progress:
       {/* Animated Loading Spinner */}
       <div className="relative mx-auto w-20 h-20 mb-5">
         <motion.div
-          className="absolute inset-0 border-3 border-neutral-200 dark:border-neutral-800/50 rounded-full"
+          className="absolute inset-0 border-3 border-neutral-200 dark:border-white/10 rounded-full"
           animate={{ rotate: 360 }}
           transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
         />
@@ -401,7 +401,7 @@ function StepProcessing({ step, progress }: { step: CreateAddressStep; progress:
         key={info.subtitle}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 bg-orange-50 dark:bg-orange-900/20 px-3 py-2.5 rounded-lg border border-orange-200 dark:border-orange-700/30"
+        className="flex items-center gap-2 text-neutral-700 dark:text-white/65 bg-orange-50 dark:bg-orange-900/20 px-3 py-2.5 rounded-lg border border-orange-200 dark:border-orange-700/30"
       >
         <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
@@ -451,7 +451,7 @@ function StepComplete({ nametag, onClose }: { nametag: string; onClose: () => vo
         Address Created!
       </h3>
 
-      <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-2">
+      <p className="text-sm text-neutral-500 dark:text-white/45 mb-2">
         Your new Unicity ID is ready:
       </p>
 
@@ -504,7 +504,7 @@ function StepError({
       <div className="flex gap-3">
         <button
           onClick={onClose}
-          className="flex-1 py-3 px-4 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+          className="flex-1 py-3 px-4 rounded-xl bg-neutral-100 dark:bg-white/6 text-neutral-700 dark:text-white/65 font-medium hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
         >
           Cancel
         </button>

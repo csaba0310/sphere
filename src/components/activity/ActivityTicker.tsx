@@ -4,13 +4,7 @@ import { useMarketFeed } from '../../hooks/useMarketFeed';
 import { IntentIcon } from './ActivityIcon';
 import { getIntentTitle, getIntentDescription, formatTimeAgo } from './utils';
 
-const INTENT_DOT: Record<string, string> = {
-  sell: 'bg-purple-500',
-  buy: 'bg-indigo-500',
-  service: 'bg-cyan-500',
-  announcement: 'bg-amber-500',
-  other: 'bg-emerald-500',
-};
+const GEIST_MONO = "'Geist Mono', 'SF Mono', 'Fira Code', monospace";
 
 export function ActivityTicker() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -29,18 +23,17 @@ export function ActivityTicker() {
 
   if (listings.length === 0) {
     return (
-      <div className="flex items-center gap-2 px-2 sm:px-3 py-1 bg-neutral-50/80 dark:bg-neutral-900/40 border-b border-neutral-200/50 dark:border-neutral-800/30 shrink-0 overflow-hidden">
-        <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-3 px-3 py-2 shrink-0 overflow-hidden" style={{ fontFamily: GEIST_MONO }}>
+        <div className="flex items-center gap-2 shrink-0">
           <div className="relative flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-            <div className="absolute w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping opacity-75" />
+            <div className="w-2 h-2 rounded-full bg-orange-500" />
+            <div className="absolute w-2 h-2 rounded-full bg-orange-400 animate-ping opacity-75" />
           </div>
-          <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">Live</span>
+          <span className="text-[11px] font-semibold text-orange-500 dark:text-brand-orange uppercase tracking-wider">Live</span>
         </div>
-        <div className="h-3 w-px bg-neutral-300 dark:bg-neutral-700 shrink-0" />
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-5 w-24 rounded-full bg-neutral-200/60 dark:bg-neutral-700/40 animate-pulse" />
+            <div key={i} className="h-7 w-28 rounded-lg bg-neutral-100/50 dark:bg-[rgba(255,255,255,0.04)] animate-pulse" />
           ))}
         </div>
       </div>
@@ -52,57 +45,58 @@ export function ActivityTicker() {
   };
 
   return (
-    <div className="flex items-center gap-2 px-2 sm:px-3 py-1 bg-neutral-50/80 dark:bg-neutral-900/40 border-b border-neutral-200/50 dark:border-neutral-800/30 shrink-0 overflow-hidden">
+    <div className="flex items-center gap-3 px-3 py-2 shrink-0 overflow-hidden" style={{ fontFamily: GEIST_MONO }}>
       {/* Live / Paused badge */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         <div className="relative flex items-center justify-center">
-          <div className={`w-1.5 h-1.5 rounded-full ${expandedId ? 'bg-neutral-400' : 'bg-orange-500'}`} />
+          <div className={`w-2 h-2 rounded-full ${expandedId ? 'bg-neutral-400' : 'bg-orange-500'}`} />
           {!expandedId && (
-            <div className="absolute w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping opacity-75" />
+            <div className="absolute w-2 h-2 rounded-full bg-orange-400 animate-ping opacity-75" />
           )}
         </div>
-        <span className={`text-[10px] font-semibold uppercase tracking-wider ${expandedId ? 'text-neutral-500 dark:text-neutral-400' : 'text-orange-600 dark:text-orange-400'}`}>
+        <span className={`text-[11px] font-semibold uppercase tracking-wider ${expandedId ? 'text-neutral-500 dark:text-neutral-400' : 'text-orange-500 dark:text-brand-orange'}`}>
           {expandedId ? 'Paused' : 'Live'}
         </span>
       </div>
 
-      <div className="h-3 w-px bg-neutral-300 dark:bg-neutral-700 shrink-0" />
-
       {/* Scrollable items */}
       <div
         ref={scrollContainerRef}
-        className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide"
+        className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
       >
         <AnimatePresence initial={false}>
           {listings.map((listing) => {
             const isNew = newListingIds.has(listing.id);
-            const dotColor = INTENT_DOT[listing.type] || INTENT_DOT.other;
             const isExpanded = expandedId === listing.id;
 
             return (
               <motion.div
                 key={listing.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.25 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => toggleExpand(listing.id)}
-                className="flex items-center gap-1.5 px-2 py-0.5 rounded-full cursor-pointer shrink-0 bg-white/60 dark:bg-neutral-800/50 border border-neutral-200/60 dark:border-neutral-700/40 hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors select-none"
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer shrink-0 transition-all select-none backdrop-blur-sm ${
+                  isExpanded
+                    ? 'bg-neutral-200/70 dark:bg-[rgba(255,255,255,0.08)] ring-1 ring-neutral-300/60 dark:ring-[rgba(255,255,255,0.1)]'
+                    : 'bg-neutral-100/50 dark:bg-[rgba(255,255,255,0.04)] hover:bg-neutral-200/60 dark:hover:bg-[rgba(255,255,255,0.07)]'
+                }`}
               >
                 <IntentIcon intentType={listing.type} size="sm" />
-                <span className="text-[11px] font-medium text-neutral-700 dark:text-neutral-300 whitespace-nowrap">
+                <span className="text-[11px] font-medium text-neutral-700 dark:text-[rgba(255,255,255,0.7)] whitespace-nowrap">
                   {getIntentTitle(listing.type)}
                 </span>
                 <span
-                  className={`text-[11px] text-neutral-500 dark:text-neutral-400 ${isExpanded ? '' : 'max-w-28 truncate'}`}
+                  className={`text-[11px] text-neutral-500 dark:text-[rgba(255,255,255,0.4)] ${isExpanded ? '' : 'max-w-28 truncate'}`}
                 >
                   {getIntentDescription(listing)}
                 </span>
-                <span className="text-[9px] text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
+                <span className="text-[9px] text-neutral-400 dark:text-[rgba(255,255,255,0.25)] whitespace-nowrap">
                   {formatTimeAgo(listing.createdAt)}
                 </span>
                 {isNew && (
-                  <span className={`w-1.5 h-1.5 rounded-full ${dotColor} shrink-0`} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-brand-orange shrink-0" />
                 )}
               </motion.div>
             );

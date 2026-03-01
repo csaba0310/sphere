@@ -27,7 +27,7 @@ export function SettingsModal({
 
   return (
     <>
-      <BaseModal isOpen={isOpen} onClose={onClose} size="sm" showOrbs={false}>
+      <BaseModal isOpen={isOpen} onClose={onClose} size="sm">
         <ModalHeader title="Settings" icon={Settings} iconVariant="neutral" onClose={onClose} />
 
         <div className="p-4 space-y-2 overflow-y-auto">

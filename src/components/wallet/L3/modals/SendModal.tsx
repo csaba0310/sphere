@@ -196,7 +196,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} showOrbs={false}>
+    <BaseModal isOpen={isOpen} onClose={handleClose}>
       <ModalHeader title={getTitle()} onClose={handleClose} />
 
       <div className="px-6 py-3 flex-1 flex flex-col justify-center overflow-y-auto">
@@ -206,7 +206,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
           {step === 'recipient' && (
             <motion.div key="rec" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="mb-6">
-                <label className="text-sm text-neutral-500 dark:text-neutral-400 block mb-2">
+                <label className="text-sm text-neutral-500 dark:text-white/45 block mb-2">
                   {recipientMode === 'nametag' ? 'Unicity Nametag' : 'Direct Address'}
                 </label>
                 <div className="relative">
@@ -218,7 +218,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                     value={recipient}
                     onChange={handleRecipientChange}
                     onKeyDown={(e) => e.key === 'Enter' && handleRecipientNext()}
-                    className={`w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl py-3 pr-4 text-neutral-900 dark:text-white focus:border-orange-500 outline-none ${recipientMode === 'nametag' ? 'pl-8' : 'pl-4 font-mono text-sm'}`}
+                    className={`w-full bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-xl py-3 pr-4 text-neutral-900 dark:text-white focus:border-orange-500 outline-none ${recipientMode === 'nametag' ? 'pl-8' : 'pl-4 font-mono text-sm'}`}
                     placeholder={recipientMode === 'nametag' ? 'Unicity ID' : 'DIRECT://...'}
                   />
                 </div>
@@ -252,12 +252,12 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                 <button
                   key={asset.coinId}
                   onClick={() => { setSelectedAsset(asset); setStep('amount'); }}
-                  className="w-full p-3 flex items-center gap-3 bg-neutral-50 dark:bg-neutral-900/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-white/5 rounded-xl transition-colors text-left"
+                  className="w-full p-3 flex items-center gap-3 bg-neutral-50 dark:bg-white/4 hover:bg-neutral-100 dark:hover:bg-white/8 border border-neutral-200 dark:border-white/5 rounded-xl transition-colors text-left"
                 >
                   <img src={asset.iconUrl || ''} className="w-8 h-8 rounded-full" alt="" />
                   <div className="flex-1">
                     <div className="text-neutral-900 dark:text-white font-medium">{asset.symbol}</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400">{formatAmount(asset.totalAmount, asset.decimals)} available</div>
+                    <div className="text-xs text-neutral-500 dark:text-white/45">{formatAmount(asset.totalAmount, asset.decimals)} available</div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-neutral-400 dark:text-neutral-600" />
                 </button>
@@ -272,8 +272,8 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
             <motion.div key="amt" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="mb-6">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-neutral-500 dark:text-neutral-400">Amount</span>
-                  <span className="text-neutral-500 dark:text-neutral-400">
+                  <span className="text-neutral-500 dark:text-white/45">Amount</span>
+                  <span className="text-neutral-500 dark:text-white/45">
                     Available: <span className="text-neutral-900 dark:text-white">{formatAmount(selectedAsset.totalAmount, selectedAsset.decimals)}</span>
                   </span>
                 </div>
@@ -287,12 +287,12 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                       const v = e.target.value;
                       if (v === '' || /^\d*\.?\d*$/.test(v)) setAmountInput(v);
                     }}
-                    className={`w-full bg-neutral-100 dark:bg-neutral-900 border rounded-xl py-3 px-4 text-neutral-900 dark:text-white text-2xl font-mono outline-none ${insufficientBalance ? 'border-red-500 focus:border-red-500' : 'border-neutral-200 dark:border-white/10 focus:border-orange-500'}`}
+                    className={`w-full bg-neutral-100 dark:bg-white/6 border rounded-xl py-3 px-4 text-neutral-900 dark:text-white text-2xl font-mono outline-none ${insufficientBalance ? 'border-red-500 focus:border-red-500' : 'border-neutral-200 dark:border-white/10 focus:border-orange-500'}`}
                     placeholder="0.00"
                   />
                   <button
                     onClick={() => setAmountInput(formatAmount(selectedAsset.totalAmount, selectedAsset.decimals))}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs bg-neutral-200 dark:bg-neutral-800 text-orange-500 dark:text-orange-400 px-2 py-1 rounded hover:bg-neutral-300 dark:hover:bg-neutral-700"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs bg-neutral-200 dark:bg-white/6 text-orange-500 dark:text-orange-400 px-2 py-1 rounded hover:bg-neutral-300 dark:hover:bg-white/10"
                   >
                     MAX
                   </button>
@@ -301,12 +301,12 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                 {recipientError && <p className="text-red-500 text-sm mt-2">{recipientError}</p>}
               </div>
               <div className="mb-6">
-                <label className="text-sm text-neutral-500 dark:text-neutral-400 block mb-2">Memo (optional)</label>
+                <label className="text-sm text-neutral-500 dark:text-white/45 block mb-2">Memo (optional)</label>
                 <input
                   type="text"
                   value={memoInput}
                   onChange={(e) => setMemoInput(e.target.value)}
-                  className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white outline-none focus:border-orange-500 text-sm"
+                  className="w-full bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white outline-none focus:border-orange-500 text-sm"
                   placeholder="Add a note to this transfer"
                 />
               </div>
@@ -326,8 +326,8 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
             <motion.div key="conf" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
               {/* Summary Card */}
-              <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-6 border border-neutral-200 dark:border-white/10 text-center">
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">You are sending</div>
+              <div className="bg-neutral-100 dark:bg-white/6 rounded-2xl p-5 mb-6 border border-neutral-200 dark:border-white/10 text-center">
+                <div className="text-sm text-neutral-500 dark:text-white/45 mb-1">You are sending</div>
                 <div className="text-3xl font-bold text-neutral-900 dark:text-white">
                   {amountInput} <span className="text-orange-500">{selectedAsset.symbol}</span>
                 </div>
@@ -340,13 +340,13 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
 
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5">
-                    <div className="flex items-center gap-2 text-sm bg-neutral-200 dark:bg-neutral-800/50 p-2 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm bg-neutral-200 dark:bg-white/4 p-2 rounded-lg">
                       {recipientMode === 'direct' ? (
-                        <Hash className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+                        <Hash className="w-4 h-4 text-neutral-500 dark:text-white/45" />
                       ) : (
-                        <User className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+                        <User className="w-4 h-4 text-neutral-500 dark:text-white/45" />
                       )}
-                      <span className={`text-neutral-700 dark:text-neutral-300 ${recipientMode === 'direct' ? 'font-mono text-xs break-all' : ''}`}>
+                      <span className={`text-neutral-700 dark:text-white/65 ${recipientMode === 'direct' ? 'font-mono text-xs break-all' : ''}`}>
                         {recipientMode === 'direct' ? recipient : `@${recipient}`}
                       </span>
                     </div>
@@ -356,7 +356,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                         recipientMode === 'direct' ? recipient : `@${recipient}`,
                         'recipient'
                       )}
-                      className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg transition-colors"
+                      className="p-1.5 hover:bg-neutral-200 dark:hover:bg-white/10 rounded-lg transition-colors"
                       title="Copy"
                     >
                       {copiedKey === 'recipient'
@@ -378,7 +378,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                       <button
                         type="button"
                         onClick={() => copyToClipboard(resolvedAddress, 'address')}
-                        className="p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded transition-colors"
+                        className="p-0.5 hover:bg-neutral-200 dark:hover:bg-white/10 rounded transition-colors"
                         title="Copy address"
                       >
                         {copiedKey === 'address'
@@ -390,7 +390,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                   )}
                 </div>
                 {memoInput && (
-                  <div className="text-sm text-neutral-300 dark:text-neutral-400 mt-3 italic">
+                  <div className="text-sm text-neutral-300 dark:text-white/45 mt-3 italic">
                     &ldquo;{memoInput}&rdquo;
                   </div>
                 )}
@@ -402,7 +402,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                   <Coins className="w-5 h-5 text-emerald-500 dark:text-emerald-400 mt-0.5" />
                   <div>
                     <div className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">Smart Transfer</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                    <div className="text-xs text-neutral-500 dark:text-white/45 mt-1">
                       Token splitting and transfer optimization is handled automatically.
                     </div>
                   </div>
@@ -437,10 +437,10 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
                 <CheckCircle className="w-8 h-8 text-emerald-500" />
               </div>
               <h3 className="text-neutral-900 dark:text-white font-bold text-2xl mb-2">Success!</h3>
-              <p className="text-neutral-500 dark:text-neutral-400">
+              <p className="text-neutral-500 dark:text-white/45">
                 Successfully sent <b>{amountInput} {selectedAsset?.symbol}</b> to <b>{recipientMode === 'direct' ? recipient : `@${recipient}`}</b>
               </p>
-              <button onClick={handleSuccessClose} className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white transition-colors">
+              <button onClick={handleSuccessClose} className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-white/6 rounded-lg hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-900 dark:text-white transition-colors">
                 Close
               </button>
             </motion.div>

@@ -35,7 +35,6 @@ export function Taskbar() {
           return (
             <motion.button
               key={tab.id}
-              layout
               onClick={() => activateTab(tab.id)}
               className={`relative flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors duration-150 shrink-0 ${
                 isActive

@@ -20,12 +20,12 @@ interface ModalHeaderProps {
 
 const iconVariantClasses: Record<IconVariant, { badge: string; icon: string }> = {
   gradient: {
-    badge: 'bg-linear-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/30',
+    badge: 'bg-linear-to-br from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark',
     icon: 'text-white',
   },
   neutral: {
-    badge: 'bg-neutral-100 dark:bg-neutral-800',
-    icon: 'text-neutral-600 dark:text-neutral-400',
+    badge: 'bg-neutral-100 dark:bg-white/6',
+    icon: 'text-neutral-600 dark:text-white/45',
   },
 };
 
@@ -33,14 +33,14 @@ export function ModalHeader({
   title,
   onClose,
   icon: Icon,
-  iconVariant = 'gradient',
+  iconVariant = 'neutral',
   subtitle,
   closeDisabled = false,
 }: ModalHeaderProps) {
   const iconStyles = iconVariantClasses[iconVariant];
 
   return (
-    <div className="relative z-10 px-6 py-3 border-b border-neutral-200/50 dark:border-neutral-700/50 flex justify-between items-center shrink-0">
+    <div className="relative z-10 px-6 py-3 border-b border-neutral-100 dark:border-white/6 flex justify-between items-center shrink-0">
       <div className="flex items-center gap-3">
         {Icon && (
           <motion.div
@@ -53,7 +53,7 @@ export function ModalHeader({
         <div>
           <h3 className="text-lg font-bold text-neutral-900 dark:text-white">{title}</h3>
           {subtitle && (
-            <div className="text-xs text-neutral-500 dark:text-neutral-400">{subtitle}</div>
+            <div className="text-xs text-neutral-500 dark:text-white/45">{subtitle}</div>
           )}
         </div>
       </div>
@@ -65,8 +65,8 @@ export function ModalHeader({
         disabled={closeDisabled}
         className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors ${
           closeDisabled
-            ? 'bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-400 dark:text-neutral-600 cursor-not-allowed'
-            : 'hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-white'
+            ? 'bg-neutral-100 dark:bg-white/5 text-neutral-400 dark:text-white/28 cursor-not-allowed'
+            : 'hover:bg-neutral-100 dark:hover:bg-white/6 text-neutral-400 dark:text-white/35 hover:text-neutral-700 dark:hover:text-white'
         }`}
       >
         <X className="w-4 h-4" />

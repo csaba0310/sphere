@@ -83,7 +83,7 @@ export function IpfsSyncIndicator() {
           )}
         </AnimatePresence>
 
-        <span className={`text-xs font-medium hidden sm:inline ${
+        <span className={`text-xs font-medium ${
           !ipfsEnabled ? 'text-neutral-400 dark:text-neutral-500' :
           isError ? 'text-red-400 dark:text-red-500' :
           isSyncing ? 'text-orange-500' :

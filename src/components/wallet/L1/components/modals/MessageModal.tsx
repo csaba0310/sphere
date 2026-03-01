@@ -59,7 +59,7 @@ function TxidItem({ txid }: { txid: string }) {
   const explorerUrl = `https://www.unicity.network/tx/${txid}`;
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg">
+    <div className="flex items-center gap-2 p-2 bg-neutral-100 dark:bg-white/4 rounded-lg">
       <a
         href={explorerUrl}
         target="_blank"
@@ -73,14 +73,14 @@ function TxidItem({ txid }: { txid: string }) {
         href={explorerUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+        className="p-1.5 text-neutral-500 dark:text-white/45 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
         title="Open in explorer"
       >
         <ExternalLink className="w-4 h-4" />
       </a>
       <button
         onClick={handleCopy}
-        className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
+        className="p-1.5 text-neutral-500 dark:text-white/45 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
         title="Copy TXID"
       >
         {copied ? (
@@ -119,7 +119,7 @@ export function MessageModal({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ type: "spring", duration: 0.4 }}
-        className="relative w-full max-w-md bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden"
+        className="relative w-full max-w-md bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -150,7 +150,7 @@ export function MessageModal({
             </motion.div>
           </motion.div>
           <h3 className="text-neutral-900 dark:text-white text-xl font-bold mb-2">{title}</h3>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm whitespace-pre-wrap">
+          <p className="text-neutral-500 dark:text-white/45 text-sm whitespace-pre-wrap">
             {message}
           </p>
         </motion.div>

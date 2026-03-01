@@ -71,14 +71,14 @@ export function ConnectionApprovalModal() {
 
       <div className="relative z-10 px-6 py-5 overflow-y-auto flex-1">
         {/* dApp info */}
-        <div className="flex items-center gap-3 mb-5 p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl">
+        <div className="flex items-center gap-3 mb-5 p-3 bg-neutral-50 dark:bg-white/4 rounded-xl">
           {dapp.icon && (
             <img src={dapp.icon} alt="" className="w-10 h-10 rounded-lg" />
           )}
           <div>
             <div className="font-semibold text-neutral-900 dark:text-white">{dapp.name}</div>
             {dapp.description && (
-              <div className="text-xs text-neutral-500 dark:text-neutral-400">{dapp.description}</div>
+              <div className="text-xs text-neutral-500 dark:text-white/45">{dapp.description}</div>
             )}
           </div>
         </div>
@@ -86,7 +86,7 @@ export function ConnectionApprovalModal() {
         {/* Permissions */}
         <div className="flex items-center gap-2 mb-3">
           <Shield className="w-4 h-4 text-neutral-500" />
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Permissions</span>
+          <span className="text-sm font-medium text-neutral-700 dark:text-white/65">Permissions</span>
         </div>
 
         <div className="space-y-2">
@@ -95,7 +95,7 @@ export function ConnectionApprovalModal() {
             return (
               <label
                 key={perm}
-                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800/30 cursor-pointer"
+                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-neutral-50 dark:hover:bg-white/4 cursor-pointer"
               >
                 <input
                   type="checkbox"
@@ -104,7 +104,7 @@ export function ConnectionApprovalModal() {
                   disabled={isIdentity}
                   className="w-4 h-4 rounded accent-orange-500"
                 />
-                <span className={`text-sm ${isIdentity ? 'text-neutral-400' : 'text-neutral-700 dark:text-neutral-300'}`}>
+                <span className={`text-sm ${isIdentity ? 'text-neutral-400' : 'text-neutral-700 dark:text-white/65'}`}>
                   {PERMISSION_LABELS[perm] ?? perm}
                 </span>
                 {isIdentity && (
@@ -117,7 +117,7 @@ export function ConnectionApprovalModal() {
       </div>
 
       {/* Actions */}
-      <div className="relative z-10 px-6 py-4 border-t border-neutral-200/50 dark:border-neutral-700/50 flex gap-3 shrink-0">
+      <div className="relative z-10 px-6 py-4 border-t border-neutral-200/50 dark:border-white/8 flex gap-3 shrink-0">
         <Button variant="secondary" fullWidth onClick={handleDeny}>
           Deny
         </Button>

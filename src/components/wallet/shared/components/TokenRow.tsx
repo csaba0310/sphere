@@ -89,7 +89,7 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const className = "p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800/30 border border-neutral-200/50 dark:border-white/5 hover:border-neutral-300 dark:hover:border-white/10 transition-all group";
+  const className = "p-3 rounded-xl bg-neutral-50 dark:bg-[rgba(255,255,255,0.03)] hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.05)] transition-all group";
 
   const amountDisplay = (
     <AnimatedTokenAmount
@@ -110,7 +110,7 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
           )}
         </div>
         <div>
-          <div className="text-neutral-900 dark:text-white font-medium text-sm">
+          <div className="text-neutral-900 dark:text-[#fefefe] font-medium text-sm" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
             {amountDisplay}
           </div>
           <div
@@ -124,21 +124,21 @@ export const TokenRow = memo(function TokenRow({ token, delay, isNew = true }: T
       </div>
       <div className="flex flex-col items-end gap-1">
         {token.status === 'confirmed' ? (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
             Confirmed
           </span>
         ) : token.status === 'transferring' ? (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center gap-1">
             <Loader2 className="w-2.5 h-2.5 animate-spin" />
             Sending
           </span>
         ) : (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <Loader2 className="w-2.5 h-2.5 animate-spin" />
             Pending
           </span>
         )}
-        <span className="text-[10px] text-neutral-400 dark:text-neutral-600">
+        <span className="text-[10px] text-neutral-400 dark:text-[rgba(255,255,255,0.28)]" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
           {new Date(token.createdAt).toLocaleDateString()}
         </span>
       </div>

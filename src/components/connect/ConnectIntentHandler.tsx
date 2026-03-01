@@ -156,7 +156,7 @@ export function ConnectIntentHandler() {
     };
 
     return (
-      <BaseModal isOpen={true} onClose={handleClose} showOrbs={false}>
+      <BaseModal isOpen={true} onClose={handleClose}>
         <ModalHeader title="dApp DM Request" icon={MessageSquare} onClose={handleClose} />
 
         <div className="px-6 py-5 flex-1 flex flex-col justify-center">
@@ -206,7 +206,7 @@ export function ConnectIntentHandler() {
 
   // --- Unknown Intent ---
   return (
-    <BaseModal isOpen={true} onClose={handleClose} showOrbs={false}>
+    <BaseModal isOpen={true} onClose={handleClose}>
       <ModalHeader title="Unknown Request" onClose={handleClose} />
       <div className="px-6 py-5 text-center">
         <p className="text-neutral-500 mb-4">

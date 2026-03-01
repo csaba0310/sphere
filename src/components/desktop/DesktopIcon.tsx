@@ -41,19 +41,19 @@ export function DesktopIcon({ agent, isOpen, badge, onClick }: DesktopIconProps)
 
         {/* Badge */}
         {!!badge && badge > 0 && (
-          <div className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md z-10">
+          <div className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-orange-500 dark:bg-brand-orange text-white text-[10px] font-bold flex items-center justify-center shadow-md z-10">
             {badge > 99 ? '99+' : badge}
           </div>
         )}
 
         {/* Open indicator dot */}
         {isOpen && (
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-orange-500 shadow-sm" />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-brand-orange shadow-sm" />
         )}
       </div>
 
       {/* Label */}
-      <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors truncate max-w-20 sm:max-w-24 text-center leading-tight">
+      <span className="text-xs sm:text-sm font-medium text-neutral-500 dark:text-[rgba(255,255,255,0.45)] group-hover:text-neutral-900 dark:group-hover:text-white transition-colors truncate max-w-20 sm:max-w-24 text-center leading-tight">
         {name}
       </span>
     </motion.button>

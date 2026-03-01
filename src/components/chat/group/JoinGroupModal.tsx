@@ -133,30 +133,30 @@ export function JoinGroupModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-2xl shadow-xl overflow-hidden"
+            className="w-full max-w-md bg-white dark:bg-modal-bg rounded-2xl shadow-xl overflow-hidden border border-neutral-200 dark:border-white/10"
           >
             {/* Header */}
-            <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
+            <div className="p-4 border-b border-neutral-200 dark:border-white/10">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-medium text-neutral-900 dark:text-white">
                   Join Group
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
                 >
                   <X className="w-5 h-5 text-neutral-500" />
                 </button>
               </div>
 
               {/* Tabs */}
-              <div className="flex gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+              <div className="flex gap-1 p-1 bg-neutral-100 dark:bg-white/6 rounded-lg">
                 <button
                   onClick={() => { setActiveTab('browse'); resetState(); }}
                   className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     activeTab === 'browse'
-                      ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
-                      : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
+                      ? 'bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-white/65'
                   }`}
                 >
                   <Hash className="w-4 h-4" />
@@ -166,8 +166,8 @@ export function JoinGroupModal({
                   onClick={() => { setActiveTab('invite'); resetState(); }}
                   className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     activeTab === 'invite'
-                      ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
-                      : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
+                      ? 'bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-white/65'
                   }`}
                 >
                   <Link className="w-4 h-4" />
@@ -190,13 +190,13 @@ export function JoinGroupModal({
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search groups..."
                         autoFocus
-                        className="w-full pl-9 pr-3 py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl text-sm border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full pl-9 pr-3 py-2.5 bg-neutral-100 dark:bg-white/6 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl text-sm border border-neutral-200 dark:border-white/8 focus:outline-none focus:border-orange-500 transition-colors"
                       />
                     </div>
                     <motion.button
                       onClick={onRefresh}
                       disabled={isLoading}
-                      className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 transition-colors disabled:opacity-50"
+                      className="p-2.5 rounded-xl bg-neutral-100 dark:bg-white/6 text-neutral-500 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-white/8 transition-colors disabled:opacity-50"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -211,7 +211,7 @@ export function JoinGroupModal({
                         <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
                       </div>
                     ) : filteredGroups.length === 0 ? (
-                      <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
+                      <div className="text-center py-8 text-neutral-500 dark:text-white/45">
                         <p>No groups found</p>
                         <p className="text-sm mt-1">Try refreshing or check back later</p>
                       </div>
@@ -222,8 +222,8 @@ export function JoinGroupModal({
                           onClick={() => setSelectedGroupId(group.id)}
                           className={`w-full p-3 rounded-xl text-left transition-all ${
                             selectedGroupId === group.id
-                              ? 'bg-blue-500/10 border-2 border-blue-500'
-                              : 'bg-neutral-50 dark:bg-neutral-800/50 border-2 border-transparent hover:border-neutral-200 dark:hover:border-neutral-700'
+                              ? 'bg-orange-500/10 border-2 border-orange-500'
+                              : 'bg-neutral-50 dark:bg-white/4 border-2 border-transparent hover:border-neutral-200 dark:hover:border-white/8'
                           }`}
                           whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.99 }}
@@ -232,8 +232,8 @@ export function JoinGroupModal({
                             <div
                               className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                                 selectedGroupId === group.id
-                                  ? 'bg-blue-500 text-white'
-                                  : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400'
+                                  ? 'bg-orange-500 text-white'
+                                  : 'bg-neutral-200 dark:bg-white/10 text-neutral-500 dark:text-white/45'
                               }`}
                             >
                               {group.visibility === GroupVisibility.PRIVATE ? (
@@ -255,7 +255,7 @@ export function JoinGroupModal({
                                 )}
                               </div>
                               {group.description && (
-                                <p className="text-sm text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
+                                <p className="text-sm text-neutral-500 dark:text-white/45 truncate mt-0.5">
                                   {group.description}
                                 </p>
                               )}
@@ -269,7 +269,7 @@ export function JoinGroupModal({
                   {/* Invite Code (if selected group is private) */}
                   {selectedGroup?.visibility === GroupVisibility.PRIVATE && (
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-white/65 mb-1">
                         Invite Code
                       </label>
                       <input
@@ -277,7 +277,7 @@ export function JoinGroupModal({
                         value={inviteCode}
                         onChange={(e) => setInviteCode(e.target.value)}
                         placeholder="Enter invite code..."
-                        className="w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl text-sm border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full px-3 py-2.5 bg-neutral-100 dark:bg-white/6 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl text-sm border border-neutral-200 dark:border-white/8 focus:outline-none focus:border-orange-500 transition-colors"
                       />
                     </div>
                   )}
@@ -289,13 +289,13 @@ export function JoinGroupModal({
                     <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-500/10 flex items-center justify-center">
                       <Lock className="w-6 h-6 text-blue-500" />
                     </div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    <p className="text-sm text-neutral-500 dark:text-white/45">
                       Enter the invite link shared by the group admin
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-white/65 mb-1">
                       Invite Link
                     </label>
                     <input
@@ -303,7 +303,7 @@ export function JoinGroupModal({
                       value={inviteLink}
                       onChange={(e) => { setInviteLink(e.target.value); setError(null); }}
                       placeholder="groupId/inviteCode"
-                      className="w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl text-sm border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:border-blue-500 transition-colors font-mono"
+                      className="w-full px-3 py-2.5 bg-neutral-100 dark:bg-white/6 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl text-sm border border-neutral-200 dark:border-white/8 focus:outline-none focus:border-orange-500 transition-colors font-mono"
                     />
                     <p className="mt-1.5 text-xs text-neutral-400">
                       Format: groupId/inviteCode
@@ -319,10 +319,10 @@ export function JoinGroupModal({
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 flex gap-3">
+            <div className="p-4 border-t border-neutral-200 dark:border-white/10 flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-neutral-100 dark:bg-white/6 text-neutral-700 dark:text-white/65 font-medium hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
               >
                 Cancel
               </button>
@@ -330,7 +330,7 @@ export function JoinGroupModal({
                 <motion.button
                   onClick={handleJoin}
                   disabled={!selectedGroupId || isJoining}
-                  className="flex-1 py-2.5 rounded-xl bg-linear-to-r from-blue-500 to-purple-600 text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -347,7 +347,7 @@ export function JoinGroupModal({
                 <motion.button
                   onClick={handleJoinWithInvite}
                   disabled={!inviteLink.trim() || isJoining}
-                  className="flex-1 py-2.5 rounded-xl bg-linear-to-r from-blue-500 to-purple-600 text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl bg-linear-to-r from-orange-500 to-orange-600 text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >

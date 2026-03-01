@@ -139,10 +139,6 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
   // Chat content (shared between normal and fullscreen modes)
   const chatContent = (
     <>
-      {/* Background decorative elements */}
-      <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
-
       {/* Left Sidebar - Group List */}
       <GroupList
         groups={filteredGroups}
@@ -171,15 +167,15 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
       {/* Main Chat Area */}
       <div className="grid grid-rows-[auto_1fr_auto] z-10 min-w-0 h-full min-h-0">
         {/* Chat Header */}
-        <div className="shrink-0 px-3 py-2 border-b border-neutral-200 dark:border-neutral-800/50 flex items-center justify-between bg-linear-to-br from-white/80 dark:from-neutral-900/80 to-neutral-50/40 dark:to-neutral-800/40 backdrop-blur-sm relative z-20 theme-transition">
-          <div className="flex items-center gap-2 relative z-10">
+        <div className="shrink-0 px-4 py-2.5 border-b border-neutral-100 dark:border-[rgba(255,255,255,0.06)] flex items-center justify-between relative z-20">
+          <div className="flex items-center gap-2">
             {/* Desktop expand sidebar button (when collapsed) */}
             {sidebarCollapsed && (
               <motion.button
                 onClick={() => setSidebarCollapsed(false)}
-                className="hidden lg:flex p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800/50 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors border border-neutral-200 dark:border-neutral-700/50"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                className="hidden lg:flex p-1.5 rounded-lg text-neutral-400 dark:text-[rgba(255,255,255,0.35)] hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 title="Expand sidebar"
               >
                 <PanelLeft className="w-4 h-4" />
@@ -188,19 +184,19 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
             {/* Mobile sidebar button */}
             <motion.button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800/50 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors border border-neutral-200 dark:border-neutral-700/50"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              className="lg:hidden p-1.5 rounded-lg text-neutral-400 dark:text-[rgba(255,255,255,0.35)] hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               title="Show groups"
             >
               <PanelLeft className="w-4 h-4" />
             </motion.button>
 
             {/* Group or default header */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {selectedGroup ? (
                 <>
-                  <div className="relative w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+                  <div className="relative w-8 h-8 rounded-xl bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
                     <Hash className="w-4 h-4" />
                   </div>
                   <div>
@@ -210,7 +206,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
                     {selectedGroup.memberCount !== undefined && (
                       <button
                         onClick={() => setShowMemberList(true)}
-                        className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                        className="text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.35)] flex items-center gap-1 hover:text-orange-500 dark:hover:text-brand-orange transition-colors"
                       >
                         <Users className="w-3 h-3" />
                         {selectedGroup.memberCount} members
@@ -220,12 +216,12 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
                 </>
               ) : (
                 <>
-                  <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-800/50 flex items-center justify-center border border-neutral-200 dark:border-neutral-700/50">
-                    <Hash className="w-4 h-4 text-neutral-400" />
+                  <div className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] flex items-center justify-center">
+                    <Hash className="w-4 h-4 text-neutral-400 dark:text-[rgba(255,255,255,0.35)]" />
                   </div>
                   <div>
                     <h3 className="text-sm text-neutral-900 dark:text-white font-medium">Group Chat</h3>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.35)]">
                       {isConnected ? 'Select a group to start' : 'Connecting...'}
                     </p>
                   </div>
@@ -262,17 +258,17 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="w-24 h-24 rounded-2xl bg-neutral-100 dark:bg-neutral-800/50 flex items-center justify-center mb-4"
+              className="w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-[rgba(255,255,255,0.06)] flex items-center justify-center mb-3"
             >
-              <Hash className="w-12 h-12 text-neutral-400" />
+              <Hash className="w-8 h-8 text-neutral-300 dark:text-[rgba(255,255,255,0.2)]" />
             </motion.div>
-            <p className="text-neutral-500 dark:text-neutral-400">Welcome to Group Chat</p>
-            <p className="text-neutral-400 dark:text-neutral-500 text-sm mt-1">
+            <p className="text-neutral-500 dark:text-[rgba(255,255,255,0.45)] text-sm">Welcome to Group Chat</p>
+            <p className="text-neutral-400 dark:text-[rgba(255,255,255,0.25)] text-xs mt-1">
               Select a group or join a new one
             </p>
             <motion.button
               onClick={() => setShowJoinGroup(true)}
-              className="mt-4 px-6 py-3 rounded-xl bg-linear-to-r from-blue-500 to-purple-600 text-white font-medium shadow-lg shadow-blue-500/30"
+              className="mt-4 px-6 py-2.5 rounded-full bg-linear-to-r from-orange-500 to-orange-600 dark:from-brand-orange dark:to-brand-orange-dark text-white text-sm font-medium"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -283,7 +279,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
 
         {/* Message Input */}
         {selectedGroup && (
-          <div className="shrink-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm theme-transition">
+          <div className="shrink-0">
             {/* Reply preview */}
             <AnimatePresence>
               {replyingTo && (
@@ -291,12 +287,12 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="border-t border-neutral-200 dark:border-neutral-700/50"
+                  className="border-t border-neutral-100 dark:border-[rgba(255,255,255,0.06)]"
                 >
-                  <div className="px-4 py-2 flex items-center gap-3 bg-neutral-50 dark:bg-neutral-800/50">
-                    <Reply className="w-4 h-4 text-blue-500 shrink-0" />
+                  <div className="px-4 py-2 flex items-center gap-3 bg-neutral-50 dark:bg-[rgba(255,255,255,0.03)]">
+                    <Reply className="w-4 h-4 text-orange-500 dark:text-brand-orange shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs text-blue-500 font-medium">
+                      <div className="text-xs text-orange-500 dark:text-brand-orange font-medium">
                         Replying to {getMessageSenderDisplayName(replyingTo)}
                       </div>
                       <div className="text-sm text-neutral-500 dark:text-neutral-400 truncate">
@@ -305,7 +301,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
                     </div>
                     <button
                       onClick={cancelReply}
-                      className="p-1 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-500 transition-colors"
+                      className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-[rgba(255,255,255,0.06)] text-neutral-400 dark:text-[rgba(255,255,255,0.35)] transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -362,7 +358,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
   );
 
   return (
-    <div className="bg-white/60 dark:bg-neutral-900/70 backdrop-blur-xl rounded-none border-0 overflow-hidden grid grid-cols-1 lg:grid-cols-[auto_1fr] relative lg:shadow-none h-full min-h-0 theme-transition">
+    <div className="bg-white dark:bg-transparent overflow-hidden grid grid-cols-1 lg:grid-cols-[auto_1fr] relative h-full min-h-0">
       {chatContent}
     </div>
   );

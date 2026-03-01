@@ -9,8 +9,6 @@ interface BaseModalProps {
   children: ReactNode;
   /** Modal max-width: sm (384px), md (448px), lg (512px) */
   size?: ModalSize;
-  /** Show decorative background orbs */
-  showOrbs?: boolean;
   /** Additional className for the modal container */
   className?: string;
 }
@@ -26,7 +24,6 @@ export function BaseModal({
   onClose,
   children,
   size = 'md',
-  showOrbs = true,
   className = '',
 }: BaseModalProps) {
   return (
@@ -50,16 +47,8 @@ export function BaseModal({
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
               onClick={(e) => e.stopPropagation()}
-              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-150 bg-white dark:bg-[#111] border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden ${className}`}
+              className={`relative w-full ${sizeClasses[size]} max-h-[70dvh] sm:max-h-150 bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl dark:shadow-[0_0_60px_rgba(0,0,0,0.5)] pointer-events-auto flex flex-col overflow-hidden ${className}`}
             >
-              {/* Background Orbs */}
-              {showOrbs && (
-                <>
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-                </>
-              )}
-
               {children}
             </motion.div>
           </div>

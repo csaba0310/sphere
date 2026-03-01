@@ -216,7 +216,7 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} showOrbs={false}>
+    <BaseModal isOpen={isOpen} onClose={handleClose}>
       <ModalHeader title={getTitle()} onClose={handleClose} />
 
       <div className="px-6 py-3 flex-1 flex flex-col justify-center overflow-y-auto">
@@ -226,26 +226,26 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
           {step === 'recipient' && (
             <motion.div key="rec" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="mb-6">
-                <label className="text-sm text-neutral-500 dark:text-neutral-400 block mb-2">
+                <label className="text-sm text-neutral-500 dark:text-white/45 block mb-2">
                   {recipientMode === 'nametag' ? 'Who should pay you?' : 'Direct Address'}
                 </label>
                 <div className="relative">
                   {recipientMode === 'nametag' && (
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500">@</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-white/45">@</span>
                   )}
                   <input
                     autoFocus
                     value={recipient}
                     onChange={handleRecipientChange}
                     onKeyDown={(e) => e.key === 'Enter' && handleRecipientNext()}
-                    className={`w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl py-3 pr-4 text-neutral-900 dark:text-white focus:border-orange-500 outline-none ${recipientMode === 'nametag' ? 'pl-8' : 'pl-4 font-mono text-sm'}`}
+                    className={`w-full bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-xl py-3 pr-4 text-neutral-900 dark:text-white focus:border-orange-500 outline-none ${recipientMode === 'nametag' ? 'pl-8' : 'pl-4 font-mono text-sm'}`}
                     placeholder={recipientMode === 'nametag' ? 'Unicity ID' : 'DIRECT://...'}
                   />
                 </div>
                 {recipientError && <p className="text-red-500 text-sm mt-2">{recipientError}</p>}
                 <button
                   onClick={() => { setRecipientMode(recipientMode === 'nametag' ? 'direct' : 'nametag'); setRecipient(''); setRecipientError(null); }}
-                  className="text-[11px] text-neutral-400 dark:text-neutral-500 hover:text-orange-500 dark:hover:text-orange-400 mt-2 transition-colors"
+                  className="text-[11px] text-neutral-400 dark:text-white/45 hover:text-orange-500 dark:hover:text-orange-400 mt-2 transition-colors"
                 >
                   {recipientMode === 'nametag' ? 'Use direct address instead' : 'Use nametag instead'}
                 </button>
@@ -272,19 +272,19 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
                 <button
                   key={coin.coinId}
                   onClick={() => { setSelectedCoin(coin); setStep('amount'); }}
-                  className="w-full p-3 flex items-center gap-3 bg-neutral-50 dark:bg-neutral-900/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-white/5 rounded-xl transition-colors text-left"
+                  className="w-full p-3 flex items-center gap-3 bg-neutral-50 dark:bg-white/4 hover:bg-neutral-100 dark:hover:bg-white/8 border border-neutral-200 dark:border-white/5 rounded-xl transition-colors text-left"
                 >
                   {coin.iconUrl ? (
                     <img src={coin.iconUrl} className="w-8 h-8 rounded-full" alt="" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-xs font-bold text-neutral-500">
+                    <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-white/10 flex items-center justify-center text-xs font-bold text-neutral-500">
                       {coin.symbol.slice(0, 2)}
                     </div>
                   )}
                   <div className="flex-1">
                     <div className="text-neutral-900 dark:text-white font-medium">{coin.symbol}</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-neutral-400 dark:text-neutral-600" />
+                  <ArrowRight className="w-4 h-4 text-neutral-400 dark:text-white/35" />
                 </button>
               ))}
             </motion.div>
@@ -294,7 +294,7 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
           {step === 'amount' && selectedCoin && (
             <motion.div key="amt" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="mb-6">
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-2">
+                <div className="text-sm text-neutral-500 dark:text-white/45 mb-2">
                   Amount ({selectedCoin.symbol})
                 </div>
                 <input
@@ -306,17 +306,17 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
                     const v = e.target.value;
                     if (v === '' || /^\d*\.?\d*$/.test(v)) setAmountInput(v);
                   }}
-                  className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white text-2xl font-mono outline-none focus:border-orange-500"
+                  className="w-full bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white text-2xl font-mono outline-none focus:border-orange-500"
                   placeholder="0.00"
                 />
               </div>
               <div className="mb-6">
-                <label className="text-sm text-neutral-500 dark:text-neutral-400 block mb-2">Message (optional)</label>
+                <label className="text-sm text-neutral-500 dark:text-white/45 block mb-2">Message (optional)</label>
                 <input
                   type="text"
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
-                  className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white outline-none focus:border-orange-500 text-sm"
+                  className="w-full bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-xl py-3 px-4 text-neutral-900 dark:text-white outline-none focus:border-orange-500 text-sm"
                   placeholder="e.g. Payment for order #1234"
                 />
               </div>
@@ -335,25 +335,25 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
             <motion.div key="conf" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
               {/* Summary Card */}
-              <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-6 border border-neutral-200 dark:border-white/10 text-center">
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">You are requesting</div>
+              <div className="bg-neutral-100 dark:bg-white/6 rounded-2xl p-5 mb-6 border border-neutral-200 dark:border-white/10 text-center">
+                <div className="text-sm text-neutral-500 dark:text-white/45 mb-1">You are requesting</div>
                 <div className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">
                   {amountInput} <span className="text-orange-500">{selectedCoin.symbol}</span>
                 </div>
 
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">from</div>
-                <div className="flex items-center justify-center gap-2 text-sm bg-neutral-200 dark:bg-neutral-800/50 p-2 rounded-lg mx-auto max-w-max">
+                <div className="text-sm text-neutral-500 dark:text-white/45 mb-1">from</div>
+                <div className="flex items-center justify-center gap-2 text-sm bg-neutral-200 dark:bg-white/4 p-2 rounded-lg mx-auto max-w-max">
                   {recipientMode === 'direct' ? (
-                    <Hash className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+                    <Hash className="w-4 h-4 text-neutral-500 dark:text-white/45" />
                   ) : (
-                    <User className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+                    <User className="w-4 h-4 text-neutral-500 dark:text-white/45" />
                   )}
-                  <span className={`text-neutral-700 dark:text-neutral-300 ${recipientMode === 'direct' ? 'font-mono text-xs break-all' : ''}`}>
+                  <span className={`text-neutral-700 dark:text-white/65 ${recipientMode === 'direct' ? 'font-mono text-xs break-all' : ''}`}>
                     {recipientMode === 'direct' ? recipient : `@${recipient}`}
                   </span>
                 </div>
                 {messageInput && (
-                  <div className="text-xs text-neutral-400 dark:text-neutral-500 mt-3 italic">
+                  <div className="text-xs text-neutral-400 dark:text-white/45 mt-3 italic">
                     &ldquo;{messageInput}&rdquo;
                   </div>
                 )}
@@ -365,7 +365,7 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
                   <Receipt className="w-5 h-5 text-blue-500 dark:text-blue-400 mt-0.5" />
                   <div>
                     <div className="text-blue-600 dark:text-blue-400 text-sm font-medium">Payment Request</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                    <div className="text-xs text-neutral-500 dark:text-white/45 mt-1">
                       The recipient will receive a notification and can choose to pay or decline.
                     </div>
                   </div>
@@ -399,10 +399,10 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
                 <CheckCircle className="w-8 h-8 text-emerald-500" />
               </div>
               <h3 className="text-neutral-900 dark:text-white font-bold text-2xl mb-2">Request Sent!</h3>
-              <p className="text-neutral-500 dark:text-neutral-400">
+              <p className="text-neutral-500 dark:text-white/45">
                 Payment request for <b>{amountInput} {selectedCoin?.symbol}</b> sent to <b>{recipientMode === 'direct' ? recipient : `@${recipient}`}</b>
               </p>
-              <button onClick={handleSuccessClose} className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white transition-colors">
+              <button onClick={handleSuccessClose} className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-white/6 rounded-lg hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-900 dark:text-white transition-colors">
                 Close
               </button>
             </motion.div>

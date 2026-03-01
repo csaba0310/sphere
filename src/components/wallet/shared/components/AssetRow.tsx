@@ -93,7 +93,7 @@ export const AssetRow = memo(function AssetRow({ asset, showBalances, delay, onC
   const fiatValue = asset.fiatValueUsd ?? 0;
   const numericAmount = Number(asset.totalAmount) / Math.pow(10, asset.decimals);
 
-  const className = `p-3 rounded-xl transition-all group border border-transparent hover:border-neutral-200/50 dark:hover:border-white/5 ${onClick ? 'cursor-pointer hover:translate-x-1' : ''}`;
+  const className = `p-3 rounded-xl transition-all group hover:bg-neutral-50 dark:hover:bg-[rgba(255,255,255,0.03)] ${onClick ? 'cursor-pointer hover:translate-x-1' : ''}`;
 
   const content = (
     <div className="flex items-center justify-between">
@@ -112,12 +112,12 @@ export const AssetRow = memo(function AssetRow({ asset, showBalances, delay, onC
 
         <div>
           <div className="flex items-center gap-2">
-            <div className="text-neutral-900 dark:text-white font-medium text-sm">{asset.symbol}</div>
+            <div className="text-neutral-900 dark:text-[#fefefe] font-medium text-sm" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>{asset.symbol}</div>
             {layer && (
               <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
                 layer === 'L1'
                   ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
-                  : 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                  : 'bg-orange-500/20 text-orange-600 dark:text-brand-orange'
               }`}>
                 {layer}
               </span>
@@ -150,7 +150,7 @@ export const AssetRow = memo(function AssetRow({ asset, showBalances, delay, onC
       </div>
 
       <div className="text-right">
-        <div className="text-neutral-900 dark:text-white font-medium text-sm">
+        <div className="text-neutral-900 dark:text-[#fefefe] font-medium text-sm" style={{ fontFamily: "'Geist Mono', 'SF Mono', 'Fira Code', monospace" }}>
           <AnimatedFiatValue value={fiatValue} showBalances={showBalances} />
         </div>
         <div className={`text-xs ${changeColor} flex justify-end items-center`}>

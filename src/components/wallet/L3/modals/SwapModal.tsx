@@ -235,8 +235,8 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} showOrbs={false}>
-      <ModalHeader title={getTitle()} onClose={handleClose} />
+    <BaseModal isOpen={isOpen} onClose={handleClose}>
+      <ModalHeader title={getTitle()} onClose={handleClose} icon={ArrowDownUp} />
 
       <div className="p-6 flex-1 min-h-0 overflow-y-auto">
         <AnimatePresence mode="wait">
@@ -260,13 +260,13 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
                   )}
                 </div>
 
-                <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-2xl p-3 sm:p-4">
+                <div className="bg-neutral-50 dark:bg-white/4 rounded-2xl p-3 sm:p-4">
                   <div className="flex items-center gap-2 sm:gap-3">
                     {/* Token Selector */}
                     <div className="relative shrink-0">
                       <button
                         onClick={() => setShowFromDropdown(!showFromDropdown)}
-                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors whitespace-nowrap"
+                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-white dark:bg-white/6 border border-neutral-200 dark:border-white/8 rounded-xl hover:bg-neutral-50 dark:hover:bg-white/10 transition-colors whitespace-nowrap"
                       >
                         {fromAsset ? (
                           <>
@@ -281,7 +281,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                       {/* From Dropdown */}
                       {showFromDropdown && (
-                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-48 overflow-y-auto">
+                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-[#1a1a1a] border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-48 overflow-y-auto">
                           {assets.map(asset => (
                             <button
                               key={asset.coinId}
@@ -290,7 +290,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                 setShowFromDropdown(false);
                                 setFromAmount('');
                               }}
-                              className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors text-left"
+                              className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-white/8 transition-colors text-left"
                             >
                               <img src={asset.iconUrl || ''} className="w-6 h-6 rounded-full" alt="" />
                               <div className="flex-1 min-w-0">
@@ -326,9 +326,9 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
               <div className="flex justify-center items-center mt-4 mb-1 relative z-10">
                 <button
                   onClick={handleFlipAssets}
-                  className="p-2 bg-white dark:bg-neutral-900 border-2 border-neutral-200 dark:border-neutral-700 rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                  className="p-2 bg-white dark:bg-white/6 border-2 border-neutral-200 dark:border-white/10 rounded-full hover:bg-neutral-50 dark:hover:bg-white/10 transition-colors"
                 >
-                  <ArrowDownUp className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
+                  <ArrowDownUp className="w-5 h-5 text-neutral-600 dark:text-white/45" />
                 </button>
               </div>
 
@@ -343,13 +343,13 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
                   )}
                 </div>
 
-                <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-2xl p-3 sm:p-4">
+                <div className="bg-neutral-50 dark:bg-white/4 rounded-2xl p-3 sm:p-4">
                   <div className="flex items-center gap-2 sm:gap-3">
                     {/* Token Selector */}
                     <div className="relative shrink-0">
                       <button
                         onClick={() => setShowToDropdown(!showToDropdown)}
-                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors whitespace-nowrap"
+                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-white dark:bg-white/6 border border-neutral-200 dark:border-white/8 rounded-xl hover:bg-neutral-50 dark:hover:bg-white/10 transition-colors whitespace-nowrap"
                       >
                         {toAsset ? (
                           <>
@@ -364,7 +364,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                       {/* To Dropdown - Shows ALL available coins for swap */}
                       {showToDropdown && (
-                        <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-48 overflow-y-auto">
+                        <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-[#1a1a1a] border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-48 overflow-y-auto">
                           {allSwappableAssets.map(asset => (
                             <button
                               key={asset.coinId}
@@ -372,7 +372,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                 setToAsset(asset);
                                 setShowToDropdown(false);
                               }}
-                              className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors text-left"
+                              className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-white/8 transition-colors text-left"
                             >
                               <img src={asset.iconUrl || ''} className="w-6 h-6 rounded-full" alt="" />
                               <div className="flex-1 min-w-0">
@@ -401,12 +401,12 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
               {/* Exchange Rate Info */}
               {exchangeInfo && fromAsset && toAsset && (
-                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl">
+                <div className="mb-4 p-4 bg-neutral-50 dark:bg-white/4 border border-neutral-200 dark:border-white/8 rounded-xl">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Exchange Rate</span>
+                    <TrendingUp className="w-4 h-4 text-neutral-500 dark:text-white/45" />
+                    <span className="text-sm font-medium text-neutral-600 dark:text-white/55">Exchange Rate</span>
                   </div>
-                  <div className="text-sm text-neutral-700 dark:text-neutral-300">
+                  <div className="text-sm text-neutral-700 dark:text-white/75">
                     1 {fromAsset.symbol} = {exchangeInfo.rate.toFixed(6)} {toAsset.symbol}
                   </div>
                 </div>
@@ -465,7 +465,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
               </p>
               <button
                 onClick={handleClose}
-                className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white transition-colors"
+                className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-white/6 rounded-lg hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-900 dark:text-white transition-colors"
               >
                 Close
               </button>

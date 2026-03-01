@@ -70,12 +70,12 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
 
   return (
     <>
-      <BaseModal isOpen={isOpen} onClose={handleClose} showOrbs={false}>
+      <BaseModal isOpen={isOpen} onClose={handleClose}>
         <ModalHeader title="Top Up" icon={Plus} onClose={handleClose} />
 
         {/* Tab Switcher */}
         <div className="px-6 mb-4">
-          <div className="flex p-1 bg-neutral-100 dark:bg-neutral-900/50 rounded-xl border border-neutral-200 dark:border-neutral-800">
+          <div className="flex p-1 bg-neutral-100 dark:bg-white/4 rounded-xl border border-neutral-200 dark:border-white/10">
             <button
               onClick={() => setActiveTab('faucet')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all relative ${activeTab === 'faucet' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-400'}`}
@@ -83,7 +83,7 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
               {activeTab === 'faucet' && (
                 <motion.div
                   layoutId="topUpTab"
-                  className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-lg shadow-sm"
+                  className="absolute inset-0 bg-white dark:bg-white/6 rounded-lg shadow-sm"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -98,7 +98,7 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
               {activeTab === 'request' && (
                 <motion.div
                   layoutId="topUpTab"
-                  className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-lg shadow-sm"
+                  className="absolute inset-0 bg-white dark:bg-white/6 rounded-lg shadow-sm"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -121,7 +121,7 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                 exit={{ opacity: 0, x: 10 }}
                 className="flex flex-col items-center text-center py-4"
               >
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
+                <p className="text-sm text-neutral-500 dark:text-white/45 mb-6">
                   Request test tokens from the Unicity faucet
                 </p>
 
@@ -175,7 +175,7 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                 exit={{ opacity: 0, x: -10 }}
                 className="flex flex-col items-center text-center py-4"
               >
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
+                <p className="text-sm text-neutral-500 dark:text-white/45 mb-6">
                   Send a payment request to someone
                 </p>
 
