@@ -244,6 +244,28 @@ input[type="number"] {
   to { opacity: 1; }
 }
 
+/* Dark mode: text readability over video background.
+   Text shadow creates a dark halo around letters so they're legible
+   even when the bright sphere in the background video sits behind them. */
+.dark h1,
+.dark h2,
+.dark h3 {
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Gradient text uses text-transparent — inherited text-shadow bleeds through
+   the transparent fill and renders as black. Reset it. */
+.dark .bg-clip-text {
+  text-shadow: none;
+}
+
+/* Cards with backdrop-blur already provide a dark surface — no text-shadow needed. */
+.no-text-shadow h1,
+.no-text-shadow h2,
+.no-text-shadow h3 {
+  text-shadow: none;
+}
+
 /* Theme transition utility */
 .theme-transition {
   transition: background-color 0.3s ease,

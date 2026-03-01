@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Github, Linkedin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 // import { ThemeToggle } from '../theme';
 import { STORAGE_KEYS } from '../../config/storageKeys';
 import { IpfsSyncIndicator } from './IpfsSyncIndicator';
 import { useDesktopState } from '../../hooks/useDesktopState';
+import { DiscordIcon, XIcon } from '../icons/SocialIcons';
 
 function devReset(): void {
   localStorage.removeItem(STORAGE_KEYS.DEV_AGGREGATOR_URL);
@@ -70,8 +71,10 @@ export function Header() {
 
   return (
     <>
-    <header data-tutorial="header" className={`sticky top-0 z-50 w-full shrink-0 transition-colors duration-300 ${
-      mobileMenuOpen ? 'bg-white dark:bg-modal-bg lg:bg-transparent lg:dark:bg-transparent' : ''
+    <header data-tutorial="header" className={`sticky top-0 z-50 w-full shrink-0 transition-colors duration-300 backdrop-blur-md ${
+      mobileMenuOpen
+        ? 'bg-white dark:bg-modal-bg'
+        : 'bg-white/70 dark:bg-transparent'
     }`}>
       <div className="px-4 sm:px-12 lg:px-28 pt-2 sm:pt-3 pb-1 sm:pb-3 lg:pb-7">
         <div className="flex items-center sm:items-end">
@@ -226,9 +229,29 @@ export function Header() {
               )
             ))}
 
-            {/* IPFS sync — mobile only */}
-            <div className="px-4 pt-2 border-t border-neutral-200 dark:border-brand-orange-border mt-1">
+            {/* IPFS sync + Social links — mobile only */}
+            <div className="px-4 py-3 border-t border-neutral-200 dark:border-brand-orange-border mt-1 flex items-center">
               <IpfsSyncIndicator />
+              <div className="flex-1" />
+              <div className="flex items-center gap-5">
+                {[
+                  { href: 'https://x.com/unicity_labs', icon: <XIcon className="w-5 h-5" />, label: 'X' },
+                  { href: 'https://discord.com/invite/PGzNZT5uVp', icon: <DiscordIcon className="w-5 h-5" />, label: 'Discord' },
+                  { href: 'https://github.com/unicity-sphere/sphere', icon: <Github className="w-5 h-5" />, label: 'GitHub' },
+                  { href: 'https://www.linkedin.com/company/unicity-labs/', icon: <Linkedin className="w-5 h-5" />, label: 'LinkedIn' },
+                ].map(({ href, icon, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="text-neutral-400 dark:text-white/35 hover:text-orange-500 dark:hover:text-brand-orange transition-colors"
+                  >
+                    {icon}
+                  </a>
+                ))}
+              </div>
             </div>
           </nav>
         </motion.div>
