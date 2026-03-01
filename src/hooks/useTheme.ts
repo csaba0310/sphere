@@ -5,20 +5,18 @@ import { STORAGE_KEYS } from '../config/storageKeys';
 export type Theme = 'light' | 'dark';
 const THEME_QUERY_KEY = ['theme'] as const;
 
+// Migrate users who had light theme — runs immediately on module load before React
+if (typeof window !== 'undefined') {
+  if (localStorage.getItem(STORAGE_KEYS.THEME) === 'light') {
+    localStorage.removeItem(STORAGE_KEYS.THEME);
+  }
+}
+
 function getStoredTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
 
   const stored = localStorage.getItem(STORAGE_KEYS.THEME);
-
-  // Migrate users who had light theme — UI is dark-mode only now
-  if (stored === 'light') {
-    localStorage.removeItem(STORAGE_KEYS.THEME);
-  }
-
-  if (stored === 'dark') {
-    return 'dark';
-  }
-
+  if (stored === 'dark') return 'dark';
   return 'dark';
 }
 
