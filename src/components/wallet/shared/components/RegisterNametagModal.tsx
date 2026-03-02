@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { WalletScreen } from '../../ui/WalletScreen';
 import { ModalHeader } from '../../ui';
 import { useQueryClient } from '@tanstack/react-query';
