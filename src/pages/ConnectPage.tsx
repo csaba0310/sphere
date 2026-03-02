@@ -6,41 +6,12 @@ import { PostMessageTransport } from '@unicitylabs/sphere-sdk/connect/browser';
 import { useSphereContext } from '../sdk/hooks/core/useSphere';
 import { useConnectContext } from '../components/connect/ConnectContext';
 import { WalletPanel } from '../components/wallet/WalletPanel';
-
-/** localStorage key for remembering approved origins (localStorage persists across popup windows) */
-const APPROVED_SESSIONS_KEY = 'sphere-connect:approved';
-
-interface ApprovedSession {
-  origin: string;
-  dappName: string;
-  permissions: PermissionScope[];
-  approvedAt: number;
-}
-
-function getApprovedSession(origin: string): ApprovedSession | null {
-  try {
-    const data = localStorage.getItem(APPROVED_SESSIONS_KEY);
-    if (!data) return null;
-    const sessions: ApprovedSession[] = JSON.parse(data);
-    return sessions.find((s) => s.origin === origin) ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function saveApprovedSession(session: ApprovedSession): void {
-  try {
-    const data = localStorage.getItem(APPROVED_SESSIONS_KEY);
-    const sessions: ApprovedSession[] = data ? JSON.parse(data) : [];
-    const idx = sessions.findIndex((s) => s.origin === session.origin);
-    if (idx >= 0) {
-      sessions[idx] = session;
-    } else {
-      sessions.push(session);
-    }
-    localStorage.setItem(APPROVED_SESSIONS_KEY, JSON.stringify(sessions));
-  } catch { /* ignore */ }
-}
+import {
+  getApprovedOrigin,
+  saveApprovedOrigin,
+  updateLastSeen,
+  revokeApprovedOrigin,
+} from '../utils/connected-sites';
 
 export function ConnectPage() {
   const [searchParams] = useSearchParams();
@@ -97,26 +68,31 @@ export function ConnectPage() {
     const host = new ConnectHost({
       sphere: currentSphere,
       transport,
-      onConnectionRequest: async (dapp: DAppMetadata, perms: PermissionScope[]) => {
-        // Check if this origin was already approved in this browser session
-        const saved = getApprovedSession(origin);
+      onConnectionRequest: async (dapp: DAppMetadata, perms: PermissionScope[], silent?: boolean) => {
+        // Check if this origin was already approved
+        const saved = getApprovedOrigin(origin);
         if (saved) {
-          setConnectedDapp(saved.dappName);
+          updateLastSeen(origin);
+          setConnectedDapp(saved.dapp.name);
           return { approved: true, grantedPermissions: saved.permissions };
+        }
+
+        // Silent mode: reject immediately without showing UI
+        if (silent) {
+          return { approved: false, grantedPermissions: [] };
         }
 
         // First time — show approval modal
         const result = await requestApprovalRef.current(dapp, perms);
         if (result.approved) {
           setConnectedDapp(dapp.name);
-          saveApprovedSession({
-            origin,
-            dappName: dapp.name,
-            permissions: result.grantedPermissions,
-            approvedAt: Date.now(),
-          });
+          saveApprovedOrigin(origin, dapp, result.grantedPermissions);
         }
         return result;
+      },
+      onDisconnect: () => {
+        revokeApprovedOrigin(origin);
+        setConnectedDapp(null);
       },
       onIntent: (action, params) =>
         requestIntentRef.current(action, params),

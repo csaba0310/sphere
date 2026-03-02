@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Settings, Layers, Download, LogOut, Key, AtSign } from 'lucide-react';
+import { Settings, Layers, Download, LogOut, Key, AtSign, Link } from 'lucide-react';
 import { BaseModal, ModalHeader, MenuButton } from '../../ui';
 import { LookupModal } from './LookupModal';
 import { AddressManagerModal } from './AddressManagerModal';
+import { ConnectedSitesModal } from './ConnectedSitesModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export function SettingsModal({
 }: SettingsModalProps) {
   const [isLookupOpen, setIsLookupOpen] = useState(false);
   const [isAddressManagerOpen, setIsAddressManagerOpen] = useState(false);
+  const [isConnectedSitesOpen, setIsConnectedSitesOpen] = useState(false);
 
   return (
     <>
@@ -63,6 +65,16 @@ export function SettingsModal({
           />
 
           <MenuButton
+            icon={Link}
+            color="neutral"
+            label="Connected Sites"
+            onClick={() => {
+              onClose();
+              setIsConnectedSitesOpen(true);
+            }}
+          />
+
+          <MenuButton
             icon={Download}
             color="green"
             label="Backup Wallet"
@@ -95,6 +107,11 @@ export function SettingsModal({
       <AddressManagerModal
         isOpen={isAddressManagerOpen}
         onClose={() => setIsAddressManagerOpen(false)}
+      />
+
+      <ConnectedSitesModal
+        isOpen={isConnectedSitesOpen}
+        onClose={() => setIsConnectedSitesOpen(false)}
       />
     </>
   );
