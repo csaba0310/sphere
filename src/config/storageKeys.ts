@@ -28,6 +28,9 @@ export const STORAGE_KEYS = {
   // Desktop state (open tabs, active tab)
   DESKTOP_STATE: 'sphere_desktop_state',
 
+  // Connected Sites (approved dApp origins)
+  CONNECTED_SITES: 'sphere_connected_sites',
+
   // Dev Settings
   DEV_AGGREGATOR_URL: 'sphere_dev_aggregator_url',
   DEV_SKIP_TRUST_BASE: 'sphere_dev_skip_trust_base',

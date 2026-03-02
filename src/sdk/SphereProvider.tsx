@@ -26,6 +26,10 @@ import type {
   ImportFromFileResult,
 } from './SphereContext';
 import { clearAllSphereData, STORAGE_KEYS } from '../config/storageKeys';
+import { migrateApprovedSessions } from '../utils/connected-sites';
+
+// One-time migration from old approved sessions format (idempotent)
+migrateApprovedSessions();
 
 // SDK debug logging: off by default, opt-in via console commands.
 // Print hint in dev mode so developers know how to enable it.

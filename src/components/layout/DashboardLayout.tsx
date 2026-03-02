@@ -5,6 +5,7 @@ import { useUIState } from '../../hooks/useUIState';
 import { useDesktopState } from '../../hooks/useDesktopState';
 import { TutorialOverlay } from '../tutorial/TutorialOverlay';
 import { useTutorial } from '../../hooks/useTutorial';
+import bgVideoUrl from '/kling_20260226_VIDEO_Take_Image_1650_0.mp4';
 
 export function DashboardLayout() {
   const location = useLocation();
@@ -28,7 +29,7 @@ export function DashboardLayout() {
           muted
           loop
           playsInline
-          src="/kling_20260226_VIDEO_Take_Image_1650_0.mp4"
+          src={bgVideoUrl}
         />
         <div className="absolute inset-0 bg-black/60" />
       </div>
