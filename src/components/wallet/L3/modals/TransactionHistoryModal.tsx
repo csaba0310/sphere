@@ -3,7 +3,8 @@ import { ArrowUpRight, ArrowDownLeft, Loader2, Clock, ChevronDown, Copy, Check }
 import { useTransactionHistory } from '../../../../sdk';
 import { TokenRegistry } from '@unicitylabs/sphere-sdk';
 import { useMemo, useState, useCallback } from 'react';
-import { BaseModal, ModalHeader, EmptyState } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader, EmptyState } from '../../ui';
 
 const registry = TokenRegistry.getInstance();
 
@@ -112,8 +113,8 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
-      <ModalHeader title="Transaction History" icon={Clock} onClose={onClose} />
+    <WalletScreen isOpen={isOpen} onClose={onClose}>
+      <ModalHeader variant="screen" title="Transaction History" icon={Clock} onClose={onClose} />
 
       {/* Content - Scrollable */}
       <div className="relative flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 z-10 min-h-0 bg-transparent">
@@ -315,6 +316,6 @@ export function TransactionHistoryModal({ isOpen, onClose }: TransactionHistoryM
           </div>
         )}
       </div>
-    </BaseModal>
+    </WalletScreen>
   );
 }

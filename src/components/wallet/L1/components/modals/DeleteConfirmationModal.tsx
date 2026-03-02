@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, Download, Loader2, ShieldAlert, X, Trash2 } from "lucide-react";
+import { AlertTriangle, Download, Loader2, ShieldAlert, Trash2 } from "lucide-react";
 import { useGlobalSyncStatus } from "../../../../../hooks/useGlobalSyncStatus";
+import { WalletScreen } from "../../../ui/WalletScreen";
+import { ModalHeader } from "../../../ui";
 
 interface DeleteConfirmationModalProps {
   show: boolean;
@@ -18,8 +20,6 @@ export function DeleteConfirmationModal({
 }: DeleteConfirmationModalProps) {
   const { isAnySyncing, statusMessage } = useGlobalSyncStatus();
   const [showSyncWarning, setShowSyncWarning] = useState(false);
-
-  if (!show) return null;
 
   const handleDeleteClick = () => {
     if (isAnySyncing) {
@@ -40,31 +40,21 @@ export function DeleteConfirmationModal({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={onCancel}
-    >
+    <WalletScreen isOpen={show} onClose={onCancel}>
+      <ModalHeader
+        variant="screen"
+        title={showSyncWarning ? "Sync in Progress" : "Delete Wallet"}
+        onClose={showSyncWarning ? handleCloseSyncWarning : onCancel}
+      />
+      <div className="px-6 py-8 flex flex-col flex-1">
       <AnimatePresence mode="wait">
         {showSyncWarning ? (
           <motion.div
             key="sync-warning"
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-md bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
           >
-            <button
-              onClick={handleCloseSyncWarning}
-              className="absolute top-4 right-4 p-1.5 rounded-full bg-neutral-100 dark:bg-white/6 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-500 dark:text-white/45 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -147,12 +137,9 @@ export function DeleteConfirmationModal({
         ) : (
           <motion.div
             key="delete-confirm"
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-md bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, x: 20 }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -225,6 +212,7 @@ export function DeleteConfirmationModal({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+      </div>
+    </WalletScreen>
   );
 }

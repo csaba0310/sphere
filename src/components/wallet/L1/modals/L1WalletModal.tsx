@@ -1,8 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import {
-  X,
   Loader2,
-  ChevronLeft,
   ChevronDown,
   Copy,
   Check,
@@ -27,7 +25,8 @@ import {
   SendModal,
 } from "../components/modals";
 import { MessageModal, type MessageType } from "../components/modals/MessageModal";
-import { BaseModal, MenuButton } from "../../ui";
+import { MenuButton, ModalHeader } from "../../ui";
+import { WalletScreen } from "../../ui/WalletScreen";
 
 interface L1WalletModalProps {
   isOpen: boolean;
@@ -178,32 +177,13 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
   }, [addresses]);
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="lg" className="max-h-[92%]">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-white/10 shrink-0">
-        <div className="flex items-center gap-3">
-          {viewMode === "history" && (
-            <button
-              onClick={() => setViewMode("main")}
-              className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5 text-neutral-600 dark:text-white/45" />
-            </button>
-          )}
-          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">L1</span>
-          </div>
-          <span className="text-lg font-semibold text-neutral-900 dark:text-white">
-            {viewMode === "history" ? "Transaction History" : "L1 Wallet"}
-          </span>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
-        >
-          <X className="w-5 h-5 text-neutral-500" />
-        </button>
-      </div>
+    <WalletScreen isOpen={isOpen} onClose={onClose}>
+      <div className="relative overflow-hidden flex flex-col flex-1">
+      <ModalHeader
+        variant="screen"
+        title={viewMode === "history" ? "Transaction History" : "L1 Wallet"}
+        onClose={viewMode === "history" ? () => setViewMode("main") : onClose}
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
@@ -434,6 +414,7 @@ export function L1WalletModal({ isOpen, onClose, showBalances }: L1WalletModalPr
         txids={messageModal.txids}
         onClose={closeMessage}
       />
-    </BaseModal>
+      </div>
+    </WalletScreen>
   );
 }

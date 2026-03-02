@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertTriangle, Download, LogOut, Loader2, Check } from 'lucide-react';
+import { AlertTriangle, Download, LogOut, Loader2, Check } from 'lucide-react';
 import { useGlobalSyncStatus } from '../../../../hooks/useGlobalSyncStatus';
-import { BaseModal, Button, DangerButton } from '../../ui';
+import { Button, DangerButton, ModalHeader } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
 
 interface LogoutConfirmModalProps {
   isOpen: boolean;
@@ -64,11 +65,15 @@ export function LogoutConfirmModal({
   const canLogout = !isAnySyncing || acceptedRisk;
 
   return (
-    <BaseModal
+    <WalletScreen
       isOpen={isOpen}
       onClose={showSyncWarning ? handleCloseSyncWarning : onClose}
-      size="sm"
     >
+      <ModalHeader
+        variant="screen"
+        title={showSyncWarning ? "Sync in Progress" : "Logout"}
+        onClose={showSyncWarning ? handleCloseSyncWarning : onClose}
+      />
       <AnimatePresence mode="wait">
         {showSyncWarning ? (
           <motion.div
@@ -77,17 +82,7 @@ export function LogoutConfirmModal({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            {/* Close button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleCloseSyncWarning}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80 text-neutral-500 transition-colors z-20"
-            >
-              <X className="w-4 h-4" />
-            </motion.button>
-
-            <div className="relative px-6 py-5 flex flex-col items-center text-center">
+            <div className="flex-1 flex flex-col px-6 py-8 items-center text-center">
               {/* Animated spinner */}
               {isAnySyncing ? (
                 <div className="relative w-20 h-20 mb-4">
@@ -149,7 +144,7 @@ export function LogoutConfirmModal({
               )}
             </div>
 
-            <div className="px-6 pb-6 space-y-4">
+            <div className="px-6 pb-8 space-y-4">
               {isAnySyncing && (
                 <label className="flex items-start gap-3 cursor-pointer group">
                   <div className="relative shrink-0 mt-0.5">
@@ -193,17 +188,7 @@ export function LogoutConfirmModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, x: 20 }}
           >
-            {/* Close button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80 text-neutral-500 transition-colors z-20"
-            >
-              <X className="w-4 h-4" />
-            </motion.button>
-
-            <div className="relative px-6 py-5 flex flex-col items-center text-center">
+            <div className="flex-1 flex flex-col px-6 py-8 items-center text-center">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -226,7 +211,7 @@ export function LogoutConfirmModal({
               )}
             </div>
 
-            <div className="px-6 pb-6 pt-2 space-y-3">
+            <div className="px-6 pb-8 pt-2 space-y-3">
               {isLoggingOut ? (
                 <div className="flex flex-col items-center gap-4 py-4">
                   {/* Animated spinner */}
@@ -313,6 +298,6 @@ export function LogoutConfirmModal({
           </motion.div>
         )}
       </AnimatePresence>
-    </BaseModal>
+    </WalletScreen>
   );
 }

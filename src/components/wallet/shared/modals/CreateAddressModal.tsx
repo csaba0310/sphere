@@ -9,8 +9,9 @@
  */
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader } from '../../ui';
 import {
-  X,
   Loader2,
   ShieldCheck,
   ArrowRight,
@@ -105,91 +106,62 @@ export function CreateAddressModal({ isOpen, onClose, existingAddress }: CreateA
   const canClose = state.step !== 'creating';
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={canClose ? handleClose : undefined}
-            className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm"
-          />
+    <WalletScreen isOpen={isOpen} onClose={canClose ? handleClose : () => {}}>
+      <ModalHeader
+        variant="screen"
+        title="Create Address"
+        onClose={canClose ? handleClose : () => {}}
+        closeDisabled={!canClose}
+      />
 
-          {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              className="relative w-full max-w-sm bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl pointer-events-auto overflow-hidden"
-            >
-              {/* Close button */}
-              {canClose && (
-                <motion.button
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleClose}
-                  className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/6 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-500 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </motion.button>
-              )}
+      {/* Content */}
+      <div className="px-6 py-8 flex-1 flex flex-col justify-center">
+        <AnimatePresence mode="wait">
+          {/* Deriving Step */}
+          {state.step === 'deriving' && (
+            <StepDeriving />
+          )}
 
-              {/* Content */}
-              <div className="px-6 py-8">
-                <AnimatePresence mode="wait">
-                  {/* Deriving Step */}
-                  {state.step === 'deriving' && (
-                    <StepDeriving />
-                  )}
+          {/* Nametag Input Step */}
+          {state.step === 'nametag_input' && state.newAddress && (
+            <StepNametagInput
+              newAddress={state.newAddress}
+              nametagInput={nametagInput}
+              isCheckingAvailability={isCheckingAvailability}
+              availabilityError={availabilityError}
+              onNametagChange={handleNametagChange}
+              onKeyDown={handleKeyDown}
+              onSubmit={handleSubmitNametag}
+            />
+          )}
 
-                  {/* Nametag Input Step */}
-                  {state.step === 'nametag_input' && state.newAddress && (
-                    <StepNametagInput
-                      newAddress={state.newAddress}
-                      nametagInput={nametagInput}
-                      isCheckingAvailability={isCheckingAvailability}
-                      availabilityError={availabilityError}
-                      onNametagChange={handleNametagChange}
-                      onKeyDown={handleKeyDown}
-                      onSubmit={handleSubmitNametag}
-                    />
-                  )}
+          {/* Processing Steps */}
+          {isProcessing && state.step !== 'deriving' && (
+            <StepProcessing step={state.step} progress={state.progress} />
+          )}
 
-                  {/* Processing Steps */}
-                  {isProcessing && state.step !== 'deriving' && (
-                    <StepProcessing step={state.step} progress={state.progress} />
-                  )}
+          {/* Complete Step */}
+          {state.step === 'complete' && state.newAddress && (
+            <StepComplete
+              nametag={nametagInput}
+              onClose={onClose}
+            />
+          )}
 
-                  {/* Complete Step */}
-                  {state.step === 'complete' && state.newAddress && (
-                    <StepComplete
-                      nametag={nametagInput}
-                      onClose={onClose}
-                    />
-                  )}
-
-                  {/* Error Step */}
-                  {state.step === 'error' && (
-                    <StepError
-                      error={state.error}
-                      onRetry={() => {
-                        reset();
-                        startCreateAddress();
-                      }}
-                      onClose={onClose}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          </div>
-        </>
-      )}
-    </AnimatePresence>
+          {/* Error Step */}
+          {state.step === 'error' && (
+            <StepError
+              error={state.error}
+              onRetry={() => {
+                reset();
+                startCreateAddress();
+              }}
+              onClose={onClose}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+    </WalletScreen>
   );
 }
 

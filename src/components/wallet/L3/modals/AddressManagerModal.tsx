@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MapPin, Eye, EyeOff, Plus, Loader2 } from 'lucide-react';
-import { BaseModal, ModalHeader } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader } from '../../ui';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
 import type { TrackedAddress } from '@unicitylabs/sphere-sdk';
 
@@ -66,16 +67,16 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="sm">
-      <ModalHeader title="Address Manager" icon={MapPin} iconVariant="neutral" onClose={onClose} />
+    <WalletScreen isOpen={isOpen} onClose={onClose}>
+      <ModalHeader variant="screen" title="Address Manager" icon={MapPin} iconVariant="neutral" onClose={onClose} />
 
-      <div className="p-4 space-y-2">
+      <div className="flex flex-col flex-1 p-4 space-y-2 min-h-0">
         {addresses.length === 0 ? (
           <p className="text-sm text-neutral-500 dark:text-white/45 text-center py-4">
             No addresses found
           </p>
         ) : (
-          <div className="space-y-1.5 max-h-80 overflow-y-auto custom-scrollbar">
+          <div className="space-y-1.5 flex-1 overflow-y-auto custom-scrollbar min-h-0">
             {addresses.map((addr) => {
               const isCurrent = addr.index === currentIndex;
               const isToggling = togglingIndex === addr.index;
@@ -103,7 +104,7 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
                   {/* Address info */}
                   <div className="flex-1 min-w-0">
                     {addr.nametag && (
-                      <span className="text-xs font-medium text-blue-600 dark:text-blue-400 block">
+                      <span className="text-xs font-medium text-orange-600 dark:text-orange-400 block">
                         @{addr.nametag}
                       </span>
                     )}
@@ -165,6 +166,6 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
           Derive New Address
         </button>
       </div>
-    </BaseModal>
+    </WalletScreen>
   );
 }

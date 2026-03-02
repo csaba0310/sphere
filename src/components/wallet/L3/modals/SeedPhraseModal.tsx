@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Copy, Check, ShieldAlert } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { BaseModal, ModalHeader, AlertMessage, Button, SecondaryButton } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader, AlertMessage, Button, SecondaryButton } from '../../ui';
 
 interface SeedPhraseModalProps {
   isOpen: boolean;
@@ -32,8 +33,8 @@ export function SeedPhraseModal({ isOpen, onClose, seedPhrase }: SeedPhraseModal
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
-      <ModalHeader title="Recovery Phrase" onClose={onClose} />
+    <WalletScreen isOpen={isOpen} onClose={onClose}>
+      <ModalHeader variant="screen" title="Recovery Phrase" onClose={onClose} />
 
       {/* Content */}
       <div className="relative flex-1 overflow-y-auto custom-scrollbar p-6 z-10 min-h-0">
@@ -96,6 +97,6 @@ export function SeedPhraseModal({ isOpen, onClose, seedPhrase }: SeedPhraseModal
           Write down these 12 words in order and store them safely. You'll need them to recover your wallet.
         </div>
       </div>
-    </BaseModal>
+    </WalletScreen>
   );
 }

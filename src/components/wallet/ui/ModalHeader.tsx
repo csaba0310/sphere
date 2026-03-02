@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, ChevronLeft } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -16,6 +16,8 @@ interface ModalHeaderProps {
   subtitle?: ReactNode;
   /** Disable close button */
   closeDisabled?: boolean;
+  /** 'modal' (default): X on right. 'screen': ‹ back on left, title centred. */
+  variant?: 'modal' | 'screen';
 }
 
 const iconVariantClasses: Record<IconVariant, { badge: string; icon: string }> = {
@@ -36,8 +38,33 @@ export function ModalHeader({
   iconVariant = 'neutral',
   subtitle,
   closeDisabled = false,
+  variant = 'modal',
 }: ModalHeaderProps) {
   const iconStyles = iconVariantClasses[iconVariant];
+
+  if (variant === 'screen') {
+    return (
+      <div className="relative z-10 px-4 py-3 border-b border-neutral-100 dark:border-white/6 flex items-center shrink-0">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onClose}
+          disabled={closeDisabled}
+          className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors hover:bg-neutral-100 dark:hover:bg-white/6 text-neutral-400 dark:text-white/35 hover:text-neutral-700 dark:hover:text-white"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </motion.button>
+        <div className="flex-1 text-center">
+          <h3 className="text-base font-semibold font-mono text-neutral-900 dark:text-white">{title}</h3>
+          {subtitle && (
+            <div className="text-xs text-neutral-500 dark:text-white/45">{subtitle}</div>
+          )}
+        </div>
+        {/* spacer to balance the back button and keep title centred */}
+        <div className="w-9" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative z-10 px-6 py-3 border-b border-neutral-100 dark:border-white/6 flex justify-between items-center shrink-0">
@@ -51,7 +78,7 @@ export function ModalHeader({
           </motion.div>
         )}
         <div>
-          <h3 className="text-lg font-bold text-neutral-900 dark:text-white">{title}</h3>
+          <h3 className="text-lg font-bold font-mono text-neutral-900 dark:text-white">{title}</h3>
           {subtitle && (
             <div className="text-xs text-neutral-500 dark:text-white/45">{subtitle}</div>
           )}

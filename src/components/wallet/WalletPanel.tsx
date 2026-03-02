@@ -237,7 +237,7 @@ export function WalletPanel() {
       </div>
 
       {/* CONTENT AREA - L3 Only */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         <L3WalletView
           showBalances={showBalances}
           setShowBalances={setShowBalances}

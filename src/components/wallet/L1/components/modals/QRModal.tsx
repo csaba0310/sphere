@@ -3,6 +3,8 @@ import { Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import QRCodeStyling from "qr-code-styling";
 import unicityLogo from "/images/unicity_logo.svg";
+import { WalletScreen } from "../../../ui/WalletScreen";
+import { ModalHeader } from "../../../ui";
 
 interface QRModalProps {
   show: boolean;
@@ -71,65 +73,43 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
     }
   }, [show, address, qrSize]);
 
-  if (!show) return null;
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.8, opacity: 0, y: 20 }}
-        transition={{ type: "spring", duration: 0.5 }}
-        className="relative w-full max-w-sm bg-white dark:bg-modal-bg/80 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-center mb-4"
-        >
-          <h3 className="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white mb-1">Receive ALPHA</h3>
-          <p className="text-xs sm:text-sm text-neutral-500 dark:text-white/45">
-            Scan QR code to receive payment
-          </p>
-        </motion.div>
+    <WalletScreen isOpen={show} onClose={onClose}>
+      <ModalHeader variant="screen" title="Receive ALPHA" onClose={onClose} />
+      <div className="px-6 py-8 flex flex-col flex-1 items-center">
+        <p className="text-xs sm:text-sm text-neutral-500 dark:text-white/45 mb-6 text-center">
+          Scan QR code to receive payment
+        </p>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, type: "spring" }}
-          className="relative bg-neutral-900 p-4 sm:p-6 rounded-2xl shadow-inner mb-4 flex items-center justify-center"
+          transition={{ delay: 0.1, type: "spring" }}
+          className="relative bg-neutral-900 p-4 sm:p-6 rounded-2xl shadow-inner mb-6 flex items-center justify-center"
         >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="absolute top-2 left-2 w-5 h-5 sm:w-6 sm:h-6 border-t-[3px] border-l-[3px] sm:border-t-4 sm:border-l-4 border-orange-500 rounded-tl-lg"
+          ></motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.25 }}
+            className="absolute top-2 right-2 w-5 h-5 sm:w-6 sm:h-6 border-t-[3px] border-r-[3px] sm:border-t-4 sm:border-r-4 border-orange-500 rounded-tr-lg"
+          ></motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="absolute top-2 left-2 w-5 h-5 sm:w-6 sm:h-6 border-t-[3px] border-l-[3px] sm:border-t-4 sm:border-l-4 border-blue-500 rounded-tl-lg"
+            className="absolute bottom-2 left-2 w-5 h-5 sm:w-6 sm:h-6 border-b-[3px] border-l-[3px] sm:border-b-4 sm:border-l-4 border-orange-500 rounded-bl-lg"
           ></motion.div>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35 }}
-            className="absolute top-2 right-2 w-5 h-5 sm:w-6 sm:h-6 border-t-[3px] border-r-[3px] sm:border-t-4 sm:border-r-4 border-blue-500 rounded-tr-lg"
-          ></motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="absolute bottom-2 left-2 w-5 h-5 sm:w-6 sm:h-6 border-b-[3px] border-l-[3px] sm:border-b-4 sm:border-l-4 border-blue-500 rounded-bl-lg"
-          ></motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.45 }}
-            className="absolute bottom-2 right-2 w-5 h-5 sm:w-6 sm:h-6 border-b-[3px] border-r-[3px] sm:border-b-4 sm:border-r-4 border-blue-500 rounded-br-lg"
+            className="absolute bottom-2 right-2 w-5 h-5 sm:w-6 sm:h-6 border-b-[3px] border-r-[3px] sm:border-b-4 sm:border-r-4 border-orange-500 rounded-br-lg"
           ></motion.div>
 
           <div ref={qrCodeRef} style={{ width: qrSize, height: qrSize }}></div>
@@ -138,8 +118,8 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-neutral-100 dark:bg-white/4 rounded-xl p-3 sm:p-4 mb-4 border border-neutral-200 dark:border-white/8 backdrop-blur-sm"
+          transition={{ delay: 0.4 }}
+          className="w-full bg-neutral-100 dark:bg-white/4 rounded-xl p-3 sm:p-4 mb-6 border border-neutral-200 dark:border-white/8"
         >
           <p className="text-xs text-neutral-500 dark:text-white/45 mb-2 text-center">
             Your Address
@@ -149,7 +129,7 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
               href={`https://www.unicity.network/address/${address}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 text-xs font-mono text-blue-500 dark:text-blue-400 hover:text-blue-400 dark:hover:text-blue-300 break-all text-center transition-colors"
+              className="flex-1 text-xs font-mono text-orange-500 dark:text-orange-400 hover:text-orange-400 dark:hover:text-orange-300 break-all text-center transition-colors"
             >
               {address}
             </a>
@@ -187,11 +167,11 @@ export function QRModal({ show, address, onClose }: QRModalProps) {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onClose}
-          className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-linear-to-br from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25 transition-all text-sm sm:text-base"
+          className="w-full px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg shadow-orange-500/25 transition-all"
         >
           Close
         </motion.button>
-      </motion.div>
-    </motion.div>
+      </div>
+    </WalletScreen>
   );
 }

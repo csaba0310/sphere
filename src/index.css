@@ -70,6 +70,10 @@ body {
   touch-action: manipulation;
 }
 
+input, textarea, select {
+  font-family: var(--font-sans);
+}
+
 /* Mobile: prevent page scroll, only content should scroll */
 @media screen and (max-width: 1023px) {
   html, body, #root {
@@ -158,6 +162,7 @@ input[type="number"] {
 
   /* Typography */
   --font-display: 'Anton', sans-serif;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
 
   /* Semantic theme colors for components */

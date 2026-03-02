@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Sparkles, Receipt, CheckCircle, XCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Sparkles, Receipt, CheckCircle, XCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useIdentity } from '../../../../sdk';
 import { getErrorMessage } from '../../../../sdk/errors';
 import { FaucetService } from '../../../../services/FaucetService';
 import { showToast } from '../../../ui/toast-utils';
-import { BaseModal, ModalHeader, Button } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader } from '../../ui';
 import { SendPaymentRequestModal } from './SendPaymentRequestModal';
-
-type TopUpTab = 'faucet' | 'request';
 
 interface TopUpModalProps {
   isOpen: boolean;
@@ -18,14 +17,13 @@ interface TopUpModalProps {
 export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
   const { nametag } = useIdentity();
 
-  const [activeTab, setActiveTab] = useState<TopUpTab>('faucet');
   const [isFaucetLoading, setIsFaucetLoading] = useState(false);
   const [faucetSuccess, setFaucetSuccess] = useState(false);
   const [faucetError, setFaucetError] = useState<string | null>(null);
   const [isPaymentRequestOpen, setIsPaymentRequestOpen] = useState(false);
 
   const handleFaucetRequest = async () => {
-    if (!nametag) return;
+    if (!nametag || isFaucetLoading) return;
 
     setIsFaucetLoading(true);
     setFaucetError(null);
@@ -70,128 +68,80 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
 
   return (
     <>
-      <BaseModal isOpen={isOpen} onClose={handleClose}>
-        <ModalHeader title="Top Up" icon={Plus} onClose={handleClose} />
+      <WalletScreen isOpen={isOpen} onClose={handleClose}>
+        <ModalHeader variant="screen" title="Top Up" onClose={handleClose} />
 
-        {/* Tab Switcher */}
-        <div className="px-6 mb-4">
-          <div className="flex p-1 bg-neutral-100 dark:bg-white/4 rounded-xl border border-neutral-200 dark:border-white/10">
-            <button
-              onClick={() => setActiveTab('faucet')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all relative ${activeTab === 'faucet' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-400'}`}
-            >
-              {activeTab === 'faucet' && (
-                <motion.div
-                  layoutId="topUpTab"
-                  className="absolute inset-0 bg-white dark:bg-white/6 rounded-lg shadow-sm"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
+        <div className="flex flex-col px-6 py-6 gap-3">
+
+          {/* Faucet card */}
+          <motion.button
+            whileHover={!nametag || isFaucetLoading ? {} : { scale: 1.01 }}
+            whileTap={!nametag || isFaucetLoading ? {} : { scale: 0.99 }}
+            onClick={handleFaucetRequest}
+            disabled={!nametag || isFaucetLoading}
+            className={`w-full p-5 flex items-center gap-4 rounded-2xl border text-left transition-colors ${
+              faucetSuccess
+                ? 'bg-emerald-500/10 border-emerald-500/20'
+                : faucetError
+                  ? 'bg-red-500/10 border-red-500/20'
+                  : 'bg-neutral-50 dark:bg-white/4 border-neutral-200 dark:border-white/8 hover:bg-neutral-100 dark:hover:bg-white/8 disabled:opacity-50 disabled:cursor-not-allowed'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+              faucetSuccess ? 'bg-emerald-500/15' : faucetError ? 'bg-red-500/15' : 'bg-orange-500/10'
+            }`}>
+              {isFaucetLoading ? (
+                <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
+              ) : faucetSuccess ? (
+                <CheckCircle className="w-6 h-6 text-emerald-500" />
+              ) : faucetError ? (
+                <XCircle className="w-6 h-6 text-red-500" />
+              ) : (
+                <Sparkles className="w-6 h-6 text-orange-500" />
               )}
-              <span className="relative z-10 flex items-center gap-2">
-                <Sparkles className="w-3 h-3" /> Faucet
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveTab('request')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all relative ${activeTab === 'request' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-400'}`}
-            >
-              {activeTab === 'request' && (
-                <motion.div
-                  layoutId="topUpTab"
-                  className="absolute inset-0 bg-white dark:bg-white/6 rounded-lg shadow-sm"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-10 flex items-center gap-2">
-                <Receipt className="w-3 h-3" /> Payment Request
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className="px-6 py-3 flex-1 flex flex-col">
-          <AnimatePresence mode="wait">
-
-            {/* FAUCET TAB */}
-            {activeTab === 'faucet' && (
-              <motion.div
-                key="faucet"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                className="flex flex-col items-center text-center py-4"
-              >
-                <p className="text-sm text-neutral-500 dark:text-white/45 mb-6">
-                  Request test tokens from the Unicity faucet
-                </p>
-
-                {!nametag ? (
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500">
-                    Nametag is required to request tokens
-                  </p>
-                ) : (
-                  <>
-                    <Button
-                      variant="primary"
-                      onClick={handleFaucetRequest}
-                      disabled={isFaucetLoading}
-                      loading={isFaucetLoading}
-                      loadingText="Requesting..."
-                      fullWidth
-                    >
-                      {faucetSuccess ? (
-                        <span className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4" /> Success!
-                        </span>
-                      ) : (
-                        'Request All Coins'
-                      )}
-                    </Button>
-
-                    <AnimatePresence>
-                      {faucetError && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="mt-4 w-full flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl"
-                        >
-                          <XCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
-                          <p className="text-xs text-red-600 dark:text-red-400 whitespace-pre-line">{faucetError}</p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </>
-                )}
-              </motion.div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className={`font-semibold font-mono ${
+                faucetSuccess ? 'text-emerald-500' : faucetError ? 'text-red-500' : 'text-neutral-900 dark:text-white'
+              }`}>
+                {isFaucetLoading ? 'Requesting...' : faucetSuccess ? 'Tokens received!' : faucetError ? 'Request failed' : 'Faucet'}
+              </div>
+              <div className="text-xs text-neutral-500 dark:text-white/45 mt-0.5 line-clamp-2">
+                {faucetError
+                  ? faucetError
+                  : faucetSuccess
+                    ? 'Test tokens have been sent to your wallet'
+                    : nametag
+                      ? 'Request test tokens from the Unicity faucet'
+                      : 'Nametag required to use the faucet'}
+              </div>
+            </div>
+            {!isFaucetLoading && !faucetSuccess && !faucetError && nametag && (
+              <ArrowRight className="w-4 h-4 text-neutral-400 dark:text-neutral-600 shrink-0" />
             )}
+          </motion.button>
 
-            {/* PAYMENT REQUEST TAB */}
-            {activeTab === 'request' && (
-              <motion.div
-                key="request"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="flex flex-col items-center text-center py-4"
-              >
-                <p className="text-sm text-neutral-500 dark:text-white/45 mb-6">
-                  Send a payment request to someone
-                </p>
+          {/* Payment Request card */}
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setIsPaymentRequestOpen(true)}
+            className="w-full p-5 flex items-center gap-4 rounded-2xl border bg-neutral-50 dark:bg-white/4 border-neutral-200 dark:border-white/8 hover:bg-neutral-100 dark:hover:bg-white/8 text-left transition-colors"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <Receipt className="w-6 h-6 text-blue-500" />
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold font-mono text-neutral-900 dark:text-white">Payment Request</div>
+              <div className="text-xs text-neutral-500 dark:text-white/45 mt-0.5">
+                Request a payment from someone else
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-neutral-400 dark:text-neutral-600 shrink-0" />
+          </motion.button>
 
-                <Button
-                  variant="primary"
-                  onClick={() => setIsPaymentRequestOpen(true)}
-                  fullWidth
-                >
-                  Create Payment Request
-                </Button>
-              </motion.div>
-            )}
-
-          </AnimatePresence>
         </div>
-      </BaseModal>
+      </WalletScreen>
 
       <SendPaymentRequestModal
         isOpen={isPaymentRequestOpen}

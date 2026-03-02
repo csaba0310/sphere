@@ -12,6 +12,7 @@ import {
 import CryptoJS from "crypto-js";
 import elliptic from "elliptic";
 import { getErrorMessage } from "../../../../../sdk/errors";
+import { WalletScreen } from "../../../ui/WalletScreen";
 
 const ec = new elliptic.ec("secp256k1");
 
@@ -242,25 +243,9 @@ export function BridgeModal({
     }
   };
 
-  if (!show) return null;
-
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          transition={{ type: "spring", duration: 0.4 }}
-          className="relative w-full max-w-md bg-white dark:bg-modal-bg/80 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-4 sm:p-6 max-h-[85vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
+    <WalletScreen isOpen={show} onClose={onClose}>
+        <div className="p-4 sm:p-6 flex flex-col flex-1">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-neutral-900 dark:text-white text-xl font-bold flex items-center gap-2">
@@ -496,8 +481,7 @@ export function BridgeModal({
               )}
             </div>
           )}
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+    </WalletScreen>
   );
 }
