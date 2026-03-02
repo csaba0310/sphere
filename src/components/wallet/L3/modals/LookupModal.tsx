@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Key, Search, Loader2, Copy, Check } from 'lucide-react';
-import { BaseModal, ModalHeader } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader } from '../../ui';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
 import { useIdentity } from '../../../../sdk';
 import { getErrorMessage } from '../../../../sdk/errors';
@@ -119,8 +120,8 @@ export function LookupModal({ isOpen, onClose }: LookupModalProps) {
   const lookupFields = result ? toFields(result, 'lookup') : [];
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="sm">
-      <ModalHeader title="My Public Keys" icon={Key} iconVariant="neutral" onClose={onClose} />
+    <WalletScreen isOpen={isOpen} onClose={onClose}>
+      <ModalHeader variant="screen" title="My Public Keys" icon={Key} iconVariant="neutral" onClose={onClose} />
 
       <div className="overflow-y-auto flex-1">
         {/* My Keys */}
@@ -188,6 +189,6 @@ export function LookupModal({ isOpen, onClose }: LookupModalProps) {
           )}
         </div>
       </div>
-    </BaseModal>
+    </WalletScreen>
   );
 }

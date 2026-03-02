@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowDownUp, Loader2, TrendingUp, CheckCircle, ArrowDown } from 'lucide-react';
+import { ArrowDownUp, Loader2, CheckCircle, ChevronDown } from 'lucide-react';
 import { useIdentity, useAssets, useTransfer } from '../../../../sdk';
 import type { Asset } from '@unicitylabs/sphere-sdk';
 import { toSmallestUnit, toHumanReadable } from '@unicitylabs/sphere-sdk';
@@ -8,20 +8,16 @@ import { TokenRegistry } from '@unicitylabs/sphere-sdk';
 import { FaucetService } from '../../../../services/FaucetService';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
 import { getErrorMessage } from '../../../../sdk/errors';
-import { BaseModal, ModalHeader, Button } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader } from '../../ui';
 
 type Step = 'swap' | 'processing' | 'success';
 
-/**
- * Hardcoded fallback prices (USD) for tokens not yet listed on CoinGecko.
- * Key = token name as used by the faucet / registry (lowercased).
- */
 const FALLBACK_PRICES: Record<string, { priceUsd: number; priceEur: number }> = {
-  unicity:      { priceUsd: 1.0, priceEur: 0.92 },   // UCT
-  'unicity-usd': { priceUsd: 1.0, priceEur: 0.92 },  // USDU
+  unicity:       { priceUsd: 1.0, priceEur: 0.92 },
+  'unicity-usd': { priceUsd: 1.0, priceEur: 0.92 },
 };
 
-/** Format asset amount from smallest unit to human-readable */
 function formatAssetAmount(asset: Asset): string {
   return toHumanReadable(asset.totalAmount, asset.decimals);
 }
@@ -37,7 +33,6 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
   const { transfer } = useTransfer();
   const { providers } = useSphereContext();
 
-  // State
   const [step, setStep] = useState<Step>('swap');
   const [fromAsset, setFromAsset] = useState<Asset | null>(null);
   const [toAsset, setToAsset] = useState<Asset | null>(null);
@@ -46,142 +41,94 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
   const [showToDropdown, setShowToDropdown] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [allSwappableAssets, setAllSwappableAssets] = useState<Asset[]>([]);
+  const [isSwapHovered, setIsSwapHovered] = useState(false);
 
-  // Load all available swappable coins from registry
   useEffect(() => {
     const loadSwappableCoins = async () => {
       const registry = TokenRegistry.getInstance();
       const definitions = registry.getAllDefinitions();
-
-      // Only include coins supported by the faucet for swapping
       const SUPPORTED_SWAP_COINS = ['bitcoin', 'ethereum', 'solana', 'unicity', 'tether', 'usd-coin', 'unicity-usd'];
-
-      // Filter only fungible assets that are supported by faucet
       const fungibleDefs = definitions.filter(def =>
         def.assetKind === 'fungible' && SUPPORTED_SWAP_COINS.includes(def.name.toLowerCase())
       );
-
-      // Fetch prices from SDK price provider if available
       const tokenNames = fungibleDefs.map(def => def.name.toLowerCase());
       let pricesMap = new Map<string, { priceUsd: number; priceEur?: number; change24h?: number }>();
       if (providers?.price) {
-        try {
-          pricesMap = await providers.price.getPrices(tokenNames);
-        } catch (e) {
-          console.warn('Failed to fetch prices:', e);
-        }
+        try { pricesMap = await providers.price.getPrices(tokenNames); }
+        catch (e) { console.warn('Failed to fetch prices:', e); }
       }
-
       const swappableAssets: Asset[] = fungibleDefs.map(def => {
         const symbol = def.symbol || def.name.toUpperCase();
         const priceData = pricesMap.get(def.name.toLowerCase());
         const fallback = FALLBACK_PRICES[def.name.toLowerCase()];
         const iconUrl = registry.getIconUrl(def.id);
-
         return {
-          coinId: def.id,
-          symbol: symbol,
-          name: def.name,
-          totalAmount: '0',
-          decimals: def.decimals || 0,
-          tokenCount: 0,
-          confirmedAmount: '0',
-          unconfirmedAmount: '0',
-          confirmedTokenCount: 0,
-          unconfirmedTokenCount: 0,
-          transferringTokenCount: 0,
+          coinId: def.id, symbol, name: def.name,
+          totalAmount: '0', decimals: def.decimals || 0, tokenCount: 0,
+          confirmedAmount: '0', unconfirmedAmount: '0',
+          confirmedTokenCount: 0, unconfirmedTokenCount: 0, transferringTokenCount: 0,
           iconUrl: iconUrl ?? undefined,
           priceUsd: priceData?.priceUsd || fallback?.priceUsd || 1.0,
           priceEur: priceData?.priceEur || fallback?.priceEur || 0.92,
           change24h: priceData?.change24h ?? 0,
-          fiatValueUsd: null,
-          fiatValueEur: null,
+          fiatValueUsd: null, fiatValueEur: null,
         };
       });
-
       setAllSwappableAssets(swappableAssets);
+
+      // Set defaults immediately while we have both data sources in scope
+      if (assets.length > 0) {
+        setFromAsset(prev => prev ?? assets[0]);
+        setToAsset(prev => {
+          if (prev) return prev;
+          return swappableAssets.find(a => a.coinId !== assets[0]?.coinId) ?? null;
+        });
+      }
     };
+    if (isOpen) loadSwappableCoins();
+  }, [isOpen, providers?.price, assets]);
 
-    if (isOpen) {
-      loadSwappableCoins();
-    }
-  }, [isOpen, providers?.price]);
-
-  // Get user's balance for a specific coin (from their owned assets)
   const getUserBalance = (coinId: string): string => {
     const userAsset = assets.find(a => a.coinId === coinId);
     return userAsset ? formatAssetAmount(userAsset) : '0';
   };
 
-  // Resolve price for an asset, falling back to hardcoded prices for
-  // tokens not yet listed on CoinGecko (UCT, USDU).
   const resolvePrice = (asset: Asset): number => {
     if (asset.priceUsd && asset.priceUsd > 0) return asset.priceUsd;
     const name = (asset.name ?? asset.symbol ?? '').toLowerCase();
     return FALLBACK_PRICES[name]?.priceUsd ?? 0;
   };
 
-  // Calculate exchange rate and output amount
   const exchangeInfo = useMemo(() => {
-    if (!fromAsset || !toAsset || !fromAmount || parseFloat(fromAmount) <= 0) {
-      return null;
-    }
-
+    if (!fromAsset || !toAsset || !fromAmount || parseFloat(fromAmount) <= 0) return null;
     const fromAmountNum = parseFloat(fromAmount);
     const fromPrice = resolvePrice(fromAsset);
     const toPrice = resolvePrice(toAsset);
-
     if (fromPrice === 0 || toPrice === 0) return null;
-
     const rate = fromPrice / toPrice;
     const toAmount = fromAmountNum * rate;
-
-    return {
-      rate,
-      fromValueUSD: fromAmountNum * fromPrice,
-      toAmount,
-      toValueUSD: toAmount * toPrice,
-    };
+    return { rate, fromValueUSD: fromAmountNum * fromPrice, toAmount, toValueUSD: toAmount * toPrice };
   }, [fromAsset, toAsset, fromAmount]);
 
   const reset = () => {
-    setStep('swap');
-    setFromAsset(null);
-    setToAsset(null);
-    setFromAmount('');
-    setError(null);
-    setShowFromDropdown(false);
-    setShowToDropdown(false);
+    setStep('swap'); setFromAsset(null); setToAsset(null); setFromAmount('');
+    setError(null); setShowFromDropdown(false); setShowToDropdown(false);
   };
 
-  const handleClose = () => {
-    reset();
-    onClose();
+  const handleClose = () => { reset(); onClose(); };
+
+  const handleMax = () => {
+    if (!fromAsset) return;
+    setFromAmount(formatAssetAmount(fromAsset));
   };
 
   const handleSwap = async () => {
     if (!fromAsset || !toAsset || !fromAmount || !exchangeInfo || !nametag) return;
-
-    setStep('processing');
-    setError(null);
-
+    setStep('processing'); setError(null);
     try {
-      // Step 1: Send tokens to 'swap' nametag
       const fromAmountSmallestUnit = toSmallestUnit(fromAmount, fromAsset.decimals);
-
-      await transfer({
-        recipient: 'swap',
-        amount: fromAmountSmallestUnit.toString(),
-        coinId: fromAsset.coinId
-      });
-
-      // Step 2: Request swapped tokens from faucet
-      await FaucetService.requestTokens(
-        nametag,
-        toAsset.name!.toLowerCase(), // Use full coin name (bitcoin, ethereum, etc)
-        exchangeInfo.toAmount
-      );
-
+      await transfer({ recipient: 'swap', amount: fromAmountSmallestUnit.toString(), coinId: fromAsset.coinId });
+      await FaucetService.requestTokens(nametag, toAsset.name!.toLowerCase(), exchangeInfo.toAmount);
       setStep('success');
     } catch (e: unknown) {
       setError(getErrorMessage(e));
@@ -191,243 +138,238 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
   const handleFlipAssets = () => {
     if (!fromAsset || !toAsset) return;
-
-    // When flipping, we need to:
-    // 1. Find the user's actual asset for the "to" coin (to become new "from")
-    // 2. Find the swappable asset for the "from" coin (to become new "to")
     const newFromAsset = assets.find(a => a.coinId === toAsset.coinId);
     const newToAsset = allSwappableAssets.find(a => a.coinId === fromAsset.coinId);
-
-    // Only allow flip if user has the "to" asset in their wallet
-    if (!newFromAsset) {
-      setError(`You don't have any ${toAsset.symbol} to swap from`);
-      return;
-    }
-
+    if (!newFromAsset) { setError(`You don't have any ${toAsset.symbol} to swap from`); return; }
     setFromAsset(newFromAsset);
     setToAsset(newToAsset || fromAsset);
     setError(null);
-
-    // Transfer the "to" amount to "from" field (max 6 decimal places)
     if (exchangeInfo && exchangeInfo.toAmount > 0) {
-      const roundedAmount = parseFloat(exchangeInfo.toAmount.toFixed(6));
-      setFromAmount(roundedAmount.toString());
+      setFromAmount(parseFloat(exchangeInfo.toAmount.toFixed(6)).toString());
     } else {
       setFromAmount('');
     }
   };
 
-  // Validate amount
   const isValidAmount = useMemo(() => {
     if (!fromAsset || !fromAmount) return false;
     const amount = parseFloat(fromAmount);
     if (isNaN(amount) || amount <= 0) return false;
-    const maxAmount = parseFloat(formatAssetAmount(fromAsset));
-    return amount <= maxAmount;
+    return amount <= parseFloat(formatAssetAmount(fromAsset));
   }, [fromAsset, fromAmount]);
 
   const getTitle = () => {
     switch (step) {
-      case 'swap': return 'Swap Tokens';
-      case 'processing': return 'Processing Swap...';
+      case 'swap': return 'Swap';
+      case 'processing': return 'Processing...';
       case 'success': return 'Swap Complete!';
     }
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose}>
-      <ModalHeader title={getTitle()} onClose={handleClose} icon={ArrowDownUp} />
+    <WalletScreen isOpen={isOpen} onClose={handleClose}>
+      <ModalHeader variant="screen" title={getTitle()} onClose={handleClose} />
 
-      <div className="p-6 flex-1 min-h-0 overflow-y-auto">
-        <AnimatePresence mode="wait">
+      <div className="px-6 py-8 flex-1 overflow-y-auto">
+        <AnimatePresence>
 
-          {/* SWAP INTERFACE */}
           {step === 'swap' && (
-            <motion.div
-              key="swap"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {/* FROM Section */}
-              <div className="mb-2">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">From</span>
-                  {fromAsset && (
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate ml-2">
-                      Balance: <span className="text-neutral-900 dark:text-white">{formatAssetAmount(fromAsset)}</span>
-                    </span>
-                  )}
+            <motion.div key="swap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+
+              {/* YOU PAY */}
+              <div className="bg-neutral-50 dark:bg-white/4 border border-neutral-100 dark:border-white/5 rounded-2xl p-4 mb-3">
+                <div className="text-xs font-sans text-neutral-400 dark:text-white/35 mb-3">You Pay</div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={fromAmount}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === '' || /^\d*\.?\d*$/.test(v)) setFromAmount(v);
+                    }}
+                    placeholder="0"
+                    disabled={!fromAsset}
+                    className="flex-1 bg-transparent text-3xl font-semibold font-sans text-neutral-900 dark:text-white outline-none placeholder-neutral-300 dark:placeholder-white/20 disabled:opacity-40 min-w-0"
+                  />
+                  <div className="relative shrink-0">
+                    <button
+                      onClick={() => { setShowFromDropdown(!showFromDropdown); setShowToDropdown(false); }}
+                      className="flex items-center gap-2 bg-white dark:bg-white/8 border border-neutral-200 dark:border-white/10 rounded-full pl-2 pr-3 py-2 hover:bg-neutral-100 dark:hover:bg-white/12 transition-colors"
+                    >
+                      {fromAsset ? (
+                        <>
+                          {fromAsset.iconUrl
+                            ? <img src={fromAsset.iconUrl} className="w-5 h-5 rounded-full" alt="" />
+                            : <div className="w-5 h-5 rounded-full bg-neutral-200 dark:bg-white/10 flex items-center justify-center text-[9px] font-bold">{fromAsset.symbol.slice(0, 2)}</div>
+                          }
+                          <span className="text-neutral-900 dark:text-white font-semibold font-mono text-sm">{fromAsset.symbol}</span>
+                        </>
+                      ) : (
+                        <span className="text-neutral-900 dark:text-white font-semibold font-sans text-sm">Select</span>
+                      )}
+                      <ChevronDown className="w-3.5 h-3.5 text-neutral-400 dark:text-white/35" />
+                    </button>
+
+                    {showFromDropdown && (
+                      <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-[#1a0e00] border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-52 overflow-y-auto">
+                        {assets.map(asset => (
+                          <button
+                            key={asset.coinId}
+                            onClick={() => { setFromAsset(asset); setShowFromDropdown(false); setFromAmount(''); }}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-white/8 transition-colors text-left"
+                          >
+                            {asset.iconUrl
+                              ? <img src={asset.iconUrl} className="w-6 h-6 rounded-full" alt="" />
+                              : <div className="w-6 h-6 rounded-full bg-neutral-200 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold">{asset.symbol.slice(0, 2)}</div>
+                            }
+                            <div className="flex-1 min-w-0">
+                              <div className="text-neutral-900 dark:text-white font-medium font-mono text-sm truncate">{asset.symbol}</div>
+                              <div className="text-xs font-sans text-neutral-500 dark:text-white/35 truncate">{formatAssetAmount(asset)}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="bg-neutral-50 dark:bg-white/4 rounded-2xl p-3 sm:p-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Token Selector */}
-                    <div className="relative shrink-0">
+                <div className="flex items-center justify-between mt-2.5">
+                  <span className="text-xs font-sans text-neutral-400 dark:text-white/35">
+                    {fromAmount && fromAsset && parseFloat(fromAmount) > 0
+                      ? `≈ $${(parseFloat(fromAmount) * resolvePrice(fromAsset)).toFixed(2)}`
+                      : '$0.00'}
+                  </span>
+                  {fromAsset && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-sans text-neutral-400 dark:text-white/35">
+                        {formatAssetAmount(fromAsset)} {fromAsset.symbol}
+                      </span>
                       <button
-                        onClick={() => setShowFromDropdown(!showFromDropdown)}
-                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-white dark:bg-white/6 border border-neutral-200 dark:border-white/8 rounded-xl hover:bg-neutral-50 dark:hover:bg-white/10 transition-colors whitespace-nowrap"
+                        onClick={handleMax}
+                        className="text-xs font-mono text-orange-500 hover:text-orange-400 font-semibold transition-colors"
                       >
-                        {fromAsset ? (
-                          <>
-                            <img src={fromAsset.iconUrl || ''} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full shrink-0" alt="" />
-                            <span className="text-neutral-900 dark:text-white font-medium text-sm sm:text-base">{fromAsset.symbol}</span>
-                          </>
-                        ) : (
-                          <span className="text-neutral-500 text-sm sm:text-base">Select</span>
-                        )}
-                        <ArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400 shrink-0" />
+                        Max
                       </button>
-
-                      {/* From Dropdown */}
-                      {showFromDropdown && (
-                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-[#1a1a1a] border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-48 overflow-y-auto">
-                          {assets.map(asset => (
-                            <button
-                              key={asset.coinId}
-                              onClick={() => {
-                                setFromAsset(asset);
-                                setShowFromDropdown(false);
-                                setFromAmount('');
-                              }}
-                              className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-white/8 transition-colors text-left"
-                            >
-                              <img src={asset.iconUrl || ''} className="w-6 h-6 rounded-full" alt="" />
-                              <div className="flex-1 min-w-0">
-                                <div className="text-neutral-900 dark:text-white font-medium text-sm truncate">{asset.symbol}</div>
-                                <div className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{formatAssetAmount(asset)}</div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Amount Input */}
-                    <input
-                      type="number"
-                      value={fromAmount}
-                      onChange={(e) => setFromAmount(e.target.value)}
-                      placeholder="0.00"
-                      disabled={!fromAsset}
-                      className="flex-1 bg-transparent text-right text-xl sm:text-2xl font-mono text-neutral-900 dark:text-white outline-none disabled:opacity-50 min-w-0"
-                    />
-                  </div>
-
-                  {fromAsset && fromAmount && (
-                    <div className="mt-2 text-right text-xs text-neutral-500 dark:text-neutral-400">
-                      ≈ ${(parseFloat(fromAmount) * resolvePrice(fromAsset)).toFixed(2)}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Flip Button */}
-              <div className="flex justify-center items-center mt-4 mb-1 relative z-10">
+              {/* FLIP BUTTON — separated */}
+              <div className="flex justify-center my-3">
                 <button
                   onClick={handleFlipAssets}
-                  className="p-2 bg-white dark:bg-white/6 border-2 border-neutral-200 dark:border-white/10 rounded-full hover:bg-neutral-50 dark:hover:bg-white/10 transition-colors"
+                  disabled={!fromAsset || !toAsset}
+                  className="w-9 h-9 bg-neutral-100 dark:bg-white/6 border border-neutral-200 dark:border-white/10 rounded-full flex items-center justify-center hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors disabled:opacity-50"
                 >
-                  <ArrowDownUp className="w-5 h-5 text-neutral-600 dark:text-white/45" />
+                  <ArrowDownUp className="w-4 h-4 text-neutral-500 dark:text-white/45" />
                 </button>
               </div>
 
-              {/* TO Section */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">To</span>
-                  {toAsset && (
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate ml-2">
-                      Balance: <span className="text-neutral-900 dark:text-white">{getUserBalance(toAsset.coinId)}</span>
-                    </span>
-                  )}
+              {/* YOU RECEIVE */}
+              <div className="bg-neutral-50 dark:bg-white/4 border border-neutral-100 dark:border-white/5 rounded-2xl p-4 mb-5">
+                <div className="text-xs font-sans text-neutral-400 dark:text-white/35 mb-3">You Receive</div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 text-3xl font-semibold font-sans text-neutral-900 dark:text-white min-w-0 truncate">
+                    {exchangeInfo ? exchangeInfo.toAmount.toFixed(6) : '0'}
+                  </div>
+                  <div className="relative shrink-0">
+                    <button
+                      onClick={() => { setShowToDropdown(!showToDropdown); setShowFromDropdown(false); }}
+                      className="flex items-center gap-2 bg-white dark:bg-white/8 border border-neutral-200 dark:border-white/10 rounded-full pl-2 pr-3 py-2 hover:bg-neutral-100 dark:hover:bg-white/12 transition-colors"
+                    >
+                      {toAsset ? (
+                        <>
+                          {toAsset.iconUrl
+                            ? <img src={toAsset.iconUrl} className="w-5 h-5 rounded-full" alt="" />
+                            : <div className="w-5 h-5 rounded-full bg-neutral-200 dark:bg-white/10 flex items-center justify-center text-[9px] font-bold">{toAsset.symbol.slice(0, 2)}</div>
+                          }
+                          <span className="text-neutral-900 dark:text-white font-semibold font-mono text-sm">{toAsset.symbol}</span>
+                        </>
+                      ) : (
+                        <span className="text-neutral-900 dark:text-white font-semibold font-sans text-sm">Select</span>
+                      )}
+                      <ChevronDown className="w-3.5 h-3.5 text-neutral-400 dark:text-white/35" />
+                    </button>
+
+                    {showToDropdown && (
+                      <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-[#1a0e00] border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-52 overflow-y-auto">
+                        {allSwappableAssets.map(asset => (
+                          <button
+                            key={asset.coinId}
+                            onClick={() => { setToAsset(asset); setShowToDropdown(false); }}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-white/8 transition-colors text-left"
+                          >
+                            {asset.iconUrl
+                              ? <img src={asset.iconUrl} className="w-6 h-6 rounded-full" alt="" />
+                              : <div className="w-6 h-6 rounded-full bg-neutral-200 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold">{asset.symbol.slice(0, 2)}</div>
+                            }
+                            <div className="flex-1 min-w-0">
+                              <div className="text-neutral-900 dark:text-white font-medium font-mono text-sm truncate">{asset.symbol}</div>
+                              <div className="text-xs font-sans text-neutral-500 dark:text-white/35 truncate">{getUserBalance(asset.coinId)}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="bg-neutral-50 dark:bg-white/4 rounded-2xl p-3 sm:p-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Token Selector */}
-                    <div className="relative shrink-0">
-                      <button
-                        onClick={() => setShowToDropdown(!showToDropdown)}
-                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-white dark:bg-white/6 border border-neutral-200 dark:border-white/8 rounded-xl hover:bg-neutral-50 dark:hover:bg-white/10 transition-colors whitespace-nowrap"
-                      >
-                        {toAsset ? (
-                          <>
-                            <img src={toAsset.iconUrl || ''} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full shrink-0" alt="" />
-                            <span className="text-neutral-900 dark:text-white font-medium text-sm sm:text-base">{toAsset.symbol}</span>
-                          </>
-                        ) : (
-                          <span className="text-neutral-500 text-sm sm:text-base">Select</span>
-                        )}
-                        <ArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400 shrink-0" />
-                      </button>
-
-                      {/* To Dropdown - Shows ALL available coins for swap */}
-                      {showToDropdown && (
-                        <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-[#1a1a1a] border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl z-60 max-h-48 overflow-y-auto">
-                          {allSwappableAssets.map(asset => (
-                            <button
-                              key={asset.coinId}
-                              onClick={() => {
-                                setToAsset(asset);
-                                setShowToDropdown(false);
-                              }}
-                              className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 dark:hover:bg-white/8 transition-colors text-left"
-                            >
-                              <img src={asset.iconUrl || ''} className="w-6 h-6 rounded-full" alt="" />
-                              <div className="flex-1 min-w-0">
-                                <div className="text-neutral-900 dark:text-white font-medium text-sm truncate">{asset.symbol}</div>
-                                <div className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{getUserBalance(asset.coinId)}</div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Amount Output */}
-                    <div className="flex-1 text-right text-xl sm:text-2xl font-mono text-neutral-900 dark:text-white break-all min-w-0">
-                      {exchangeInfo ? exchangeInfo.toAmount.toFixed(6) : '0.00'}
-                    </div>
-                  </div>
-
-                  {exchangeInfo && (
-                    <div className="mt-2 text-right text-xs text-neutral-500 dark:text-neutral-400">
-                      ≈ ${exchangeInfo.toValueUSD.toFixed(2)}
-                    </div>
+                <div className="flex items-center justify-between mt-2.5">
+                  <span className="text-xs font-sans text-neutral-400 dark:text-white/35">
+                    {exchangeInfo ? `≈ $${exchangeInfo.toValueUSD.toFixed(2)}` : '$0.00'}
+                  </span>
+                  {toAsset && (
+                    <span className="text-xs font-sans text-neutral-400 dark:text-white/35">
+                      Balance: {getUserBalance(toAsset.coinId)} {toAsset.symbol}
+                    </span>
                   )}
                 </div>
               </div>
 
-              {/* Exchange Rate Info */}
+              {/* Exchange rate */}
               {exchangeInfo && fromAsset && toAsset && (
-                <div className="mb-4 p-4 bg-neutral-50 dark:bg-white/4 border border-neutral-200 dark:border-white/8 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-neutral-500 dark:text-white/45" />
-                    <span className="text-sm font-medium text-neutral-600 dark:text-white/55">Exchange Rate</span>
-                  </div>
-                  <div className="text-sm text-neutral-700 dark:text-white/75">
-                    1 {fromAsset.symbol} = {exchangeInfo.rate.toFixed(6)} {toAsset.symbol}
-                  </div>
+                <div className="flex items-center gap-3 px-4 py-4 bg-orange-50 dark:bg-orange-500/8 border border-orange-200 dark:border-orange-500/20 rounded-2xl mb-5">
+                  <ArrowDownUp className="w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0" />
+                  <span className="text-sm font-sans text-orange-600/70 dark:text-orange-300/60">
+                    1{' '}
+                    <span className="font-mono font-semibold text-orange-700 dark:text-orange-300/80">{fromAsset.symbol}</span>
+                    {' = '}
+                    <span className="font-mono font-semibold text-orange-700 dark:text-orange-300/80">{exchangeInfo.rate.toFixed(4)} {toAsset.symbol}</span>
+                  </span>
                 </div>
               )}
 
-              {/* Error Message */}
               {error && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl">
-                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                </div>
+                <p className="text-sm text-red-500 dark:text-red-400 text-center mb-4">{error}</p>
               )}
 
-              {/* Swap Button */}
-              <Button
+              <motion.button
                 onClick={handleSwap}
                 disabled={!isValidAmount || !toAsset || !exchangeInfo}
-                icon={ArrowDownUp}
-                fullWidth
+                onHoverStart={() => setIsSwapHovered(true)}
+                onHoverEnd={() => setIsSwapHovered(false)}
+                whileTap={(!isValidAmount || !toAsset || !exchangeInfo) ? {} : { scale: 0.98 }}
+                className="relative w-full h-14 rounded-full overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: '#FF6F00' }}
               >
-                Swap Tokens
-              </Button>
+                {/* White fill layer — animates from bottom, no border-radius (parent clips) */}
+                <motion.div
+                  className="absolute inset-0 bg-white"
+                  initial={{ y: '100%' }}
+                  animate={{ y: isSwapHovered && isValidAmount && toAsset && exchangeInfo ? '0%' : '100%' }}
+                  transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                />
+                <motion.span
+                  animate={{ color: isSwapHovered && isValidAmount && toAsset && exchangeInfo ? '#7c2d00' : '#ffffff' }}
+                  transition={{ duration: 0.25 }}
+                  className="relative z-10 flex items-center justify-center gap-2 font-semibold font-mono text-base"
+                >
+                  <ArrowDownUp className="w-5 h-5" />
+                  Swap
+                </motion.span>
+              </motion.button>
             </motion.div>
           )}
 
@@ -435,13 +377,12 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
           {step === 'processing' && (
             <motion.div
               key="processing"
-              className="py-10 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              className="flex-1 flex flex-col items-center justify-center text-center py-10"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             >
               <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
               <h3 className="text-neutral-900 dark:text-white font-medium text-lg">Processing Swap...</h3>
-              <p className="text-neutral-500 text-sm mt-2">Sending tokens and requesting swap</p>
+              <p className="text-neutral-500 dark:text-white/45 text-sm mt-2">Sending tokens and requesting swap</p>
             </motion.div>
           )}
 
@@ -449,23 +390,22 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
           {step === 'success' && fromAsset && toAsset && exchangeInfo && (
             <motion.div
               key="success"
-              className="py-10 text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              className="flex-1 flex flex-col items-center justify-center text-center py-10"
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             >
               <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/50">
                 <CheckCircle className="w-8 h-8 text-emerald-500" />
               </div>
               <h3 className="text-neutral-900 dark:text-white font-bold text-2xl mb-2">Swap Complete!</h3>
-              <p className="text-neutral-500 dark:text-neutral-400 mb-1">
+              <p className="text-neutral-500 dark:text-white/45 mb-1">
                 Swapped <b>{fromAmount} {fromAsset.symbol}</b>
               </p>
-              <p className="text-neutral-500 dark:text-neutral-400">
+              <p className="text-neutral-500 dark:text-white/45">
                 for <b>{exchangeInfo.toAmount.toFixed(6)} {toAsset.symbol}</b>
               </p>
               <button
                 onClick={handleClose}
-                className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-white/6 rounded-lg hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-900 dark:text-white transition-colors"
+                className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-white/6 rounded-lg hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-900 dark:text-white transition-colors font-mono"
               >
                 Close
               </button>
@@ -474,6 +414,6 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
         </AnimatePresence>
       </div>
-    </BaseModal>
+    </WalletScreen>
   );
 }

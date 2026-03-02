@@ -351,7 +351,7 @@ export function L3WalletView({
   }
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className="flex flex-col h-full">
       {/* Main Balance - Centered with Eye Toggle */}
       <div className="px-6 mb-6 shrink-0">
         <div className="flex flex-col items-center justify-center mb-6 pt-2">

@@ -1,5 +1,7 @@
 import { Loader2 } from "lucide-react";
 import type { L1 } from "@unicitylabs/sphere-sdk";
+import { WalletScreen } from "../../../ui/WalletScreen";
+import { ModalHeader } from "../../../ui";
 type TransactionPlan = L1.TransactionPlan;
 
 interface TransactionConfirmationModalProps {
@@ -21,15 +23,12 @@ export function TransactionConfirmationModal({
   onConfirm,
   onCancel,
 }: TransactionConfirmationModalProps) {
-  if (!show || !txPlan) return null;
+  if (!txPlan) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="relative w-full max-w-md bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden">
-        <h3 className="text-xl text-neutral-900 dark:text-white font-bold mb-4">
-          Confirm Transaction
-        </h3>
-
+    <WalletScreen isOpen={show} onClose={onCancel}>
+      <ModalHeader variant="screen" title="Confirm Transaction" onClose={onCancel} />
+      <div className="px-6 py-8 flex flex-col flex-1 justify-center">
         <div className="space-y-3 mb-6">
           <div className="flex justify-between text-sm">
             <span className="text-neutral-500 dark:text-white/45">Recipient</span>
@@ -77,6 +76,6 @@ export function TransactionConfirmationModal({
           </button>
         </div>
       </div>
-    </div>
+    </WalletScreen>
   );
 }

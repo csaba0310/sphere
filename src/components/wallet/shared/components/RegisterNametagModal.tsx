@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { X, Loader2, ArrowRight, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader } from '../../ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
 import { SPHERE_KEYS } from '../../../../sdk/queryKeys';
@@ -120,41 +122,12 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          >
-            <div className="w-full max-w-sm bg-white dark:bg-modal-bg/90 rounded-2xl shadow-2xl border border-neutral-200 dark:border-white/10 overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-white/10">
-                <div className="flex items-center gap-2">
-                  <Tag className="w-5 h-5 text-orange-500" />
-                  <span className="text-base font-semibold text-neutral-900 dark:text-white">Register Unicity ID</span>
-                </div>
-                <button
-                  onClick={onClose}
-                  className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
-                >
-                  <X className="w-4 h-4 text-neutral-500" />
-                </button>
-              </div>
+    <WalletScreen isOpen={isOpen} onClose={onClose}>
+      <ModalHeader variant="screen" title="Register Unicity ID" onClose={onClose} />
 
-              {/* Content */}
-              <div className="p-4 space-y-4">
+      {/* Content */}
+      <div className="px-6 py-8 space-y-4 flex-1">
+        <AnimatePresence>
                 <p className="text-sm text-neutral-500 dark:text-white/45">
                   Choose a unique ID to receive tokens easily without sharing long addresses.
                 </p>
@@ -230,11 +203,8 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
                     )}
                   </>
                 )}
-              </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        </AnimatePresence>
+      </div>
+    </WalletScreen>
   );
 }

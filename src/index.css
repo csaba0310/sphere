@@ -70,6 +70,10 @@ body {
   touch-action: manipulation;
 }
 
+input, textarea, select {
+  font-family: var(--font-sans);
+}
+
 /* Mobile: prevent page scroll, only content should scroll */
 @media screen and (max-width: 1023px) {
   html, body, #root {
@@ -158,6 +162,7 @@ input[type="number"] {
 
   /* Typography */
   --font-display: 'Anton', sans-serif;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
 
   /* Semantic theme colors for components */
@@ -242,6 +247,28 @@ input[type="number"] {
 @keyframes modalIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* Dark mode: text readability over video background.
+   Text shadow creates a dark halo around letters so they're legible
+   even when the bright sphere in the background video sits behind them. */
+.dark h1,
+.dark h2,
+.dark h3 {
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Gradient text uses text-transparent — inherited text-shadow bleeds through
+   the transparent fill and renders as black. Reset it. */
+.dark .bg-clip-text {
+  text-shadow: none;
+}
+
+/* Cards with backdrop-blur already provide a dark surface — no text-shadow needed. */
+.no-text-shadow h1,
+.no-text-shadow h2,
+.no-text-shadow h3 {
+  text-shadow: none;
 }
 
 /* Theme transition utility */

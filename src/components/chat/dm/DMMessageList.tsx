@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, ChevronUp } from 'lucide-react';
+import { MessageCircle, ChevronUp, Loader2 } from 'lucide-react';
 import { type DisplayMessage, formatMessageDate } from '../data/chatTypes';
 import { DMMessageBubble } from './DMMessageBubble';
 
@@ -72,8 +72,28 @@ export function DMMessageList({ messages, isLoading, isRecipientTyping, hasMore,
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-0">
-        <div className="animate-spin w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full" />
+      <div className="flex-1 flex items-center justify-center min-h-0">
+        <div className="relative w-16 h-16">
+          <motion.div
+            className="absolute inset-0 border-2 border-neutral-200 dark:border-white/6 rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+          />
+          <motion.div
+            className="absolute inset-1 border-2 border-orange-500/30 rounded-full border-t-orange-500 border-r-orange-500"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          />
+          <div className="absolute inset-2 bg-orange-500/15 rounded-full blur-lg" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div
+              animate={{ scale: [1, 1.15, 1], opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <Loader2 className="w-5 h-5 text-orange-500 dark:text-brand-orange animate-spin" />
+            </motion.div>
+          </div>
+        </div>
       </div>
     );
   }

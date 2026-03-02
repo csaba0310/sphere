@@ -61,7 +61,7 @@ export function Button({
         ${variantClasses[variant]}
         ${sizeClasses[size]}
         ${fullWidth ? 'w-full' : ''}
-        font-semibold flex items-center justify-center gap-2 transition-colors
+        font-semibold font-mono flex items-center justify-center gap-2 transition-colors
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
       `}

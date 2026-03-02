@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Settings, Layers, Download, LogOut, Key, AtSign, Link } from 'lucide-react';
-import { BaseModal, ModalHeader, MenuButton } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader, MenuButton } from '../../ui';
 import { LookupModal } from './LookupModal';
 import { AddressManagerModal } from './AddressManagerModal';
 import { ConnectedSitesModal } from './ConnectedSitesModal';
@@ -29,10 +30,10 @@ export function SettingsModal({
 
   return (
     <>
-      <BaseModal isOpen={isOpen} onClose={onClose} size="sm">
-        <ModalHeader title="Settings" icon={Settings} iconVariant="neutral" onClose={onClose} />
+      <WalletScreen isOpen={isOpen} onClose={onClose}>
+        <ModalHeader variant="screen" title="Settings" icon={Settings} iconVariant="neutral" onClose={onClose} />
 
-        <div className="p-4 space-y-2 overflow-y-auto">
+        <div className="px-4 py-6 space-y-2 flex-1 overflow-y-auto">
           <MenuButton
             icon={Layers}
             color="blue"
@@ -68,10 +69,7 @@ export function SettingsModal({
             icon={Link}
             color="neutral"
             label="Connected Sites"
-            onClick={() => {
-              onClose();
-              setIsConnectedSitesOpen(true);
-            }}
+            onClick={() => setIsConnectedSitesOpen(true)}
           />
 
           <MenuButton
@@ -97,7 +95,7 @@ export function SettingsModal({
             }}
           />
         </div>
-      </BaseModal>
+      </WalletScreen>
 
       <LookupModal
         isOpen={isLookupOpen}

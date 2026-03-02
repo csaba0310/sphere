@@ -20,7 +20,7 @@ export function DashboardLayout() {
   const showMiniChat = !isDmTabActive;
 
   return (
-    <div className="h-full flex flex-col bg-neutral-100 dark:bg-[#060606] theme-transition overflow-y-auto overflow-x-hidden relative">
+    <div className="h-full flex flex-col bg-neutral-100 dark:bg-[#060606] theme-transition overflow-hidden relative">
       {/* Video background — dark mode only */}
       <div className="hidden dark:block fixed inset-0 z-0 pointer-events-none">
         <video
@@ -31,7 +31,7 @@ export function DashboardLayout() {
           playsInline
           src={bgVideoUrl}
         />
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
       {/* Grid overlay — dark mode only */}
@@ -47,7 +47,7 @@ export function DashboardLayout() {
       {/* Content — above background layers */}
       <div className="relative z-10 flex flex-col h-full">
         {!isFullscreen && <Header />}
-        <div className="flex-1 min-h-0 flex">
+        <div className={`flex-1 min-h-0 flex ${!isAgentPage ? 'overflow-y-auto overflow-x-hidden' : ''}`}>
           <div className={`flex-1 w-full ${isFullscreen ? 'p-0' : isAgentPage ? 'px-0 sm:px-12 lg:px-28 pb-0' : 'px-0 sm:px-12 lg:px-28 pt-4 pb-0 md:pt-8 lg:pb-8'} ${
             isMinePage ? 'bg-neutral-100 dark:bg-transparent' : ''
           }`}>

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { X, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getErrorMessage } from "../../../../../sdk/errors";
+import { WalletScreen } from "../../../ui/WalletScreen";
+import { ModalHeader } from "../../../ui";
 
 type VestingMode = 'all' | 'vested' | 'unvested';
 
@@ -156,47 +158,15 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
     }
   };
 
-  if (!show) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => onClose()}
-        className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm"
+    <WalletScreen isOpen={show} onClose={() => onClose()}>
+      <ModalHeader
+        variant="screen"
+        title={step === 'confirm' ? 'Confirm Transaction' : 'Send ALPHA'}
+        onClose={step === 'confirm' ? () => { setStep('input'); setError(null); } : () => onClose()}
       />
 
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="relative w-full max-w-md bg-white dark:bg-modal-bg/80 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden"
-      >
-        {/* Header */}
-        <div className="p-6 border-b border-neutral-200 dark:border-white/5 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            {step === 'confirm' && (
-              <button
-                onClick={() => { setStep('input'); setError(null); }}
-                className="p-1.5 hover:bg-neutral-100 dark:hover:bg-white/5 rounded-full transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4 text-neutral-500 dark:text-white/45" />
-              </button>
-            )}
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-              {step === 'confirm' ? 'Confirm Transaction' : 'Send ALPHA'}
-            </h3>
-          </div>
-          <button
-            onClick={() => onClose()}
-            className="p-2 hover:bg-neutral-100 dark:hover:bg-white/5 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5 text-neutral-500 dark:text-white/45" />
-          </button>
-        </div>
-
-        <div className="p-6">
+      <div className="px-6 py-8 flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             {step === 'input' ? (
               <motion.div
@@ -403,7 +373,6 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
             )}
           </AnimatePresence>
         </div>
-      </motion.div>
-    </div>
+    </WalletScreen>
   );
 }

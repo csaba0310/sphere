@@ -5,7 +5,8 @@ import { getErrorMessage } from '../../../../sdk/errors';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { AmountFormatUtils } from '../utils/currency';
-import { BaseModal, ModalHeader, EmptyState } from '../../ui';
+import { WalletScreen } from '../../ui/WalletScreen';
+import { ModalHeader, EmptyState } from '../../ui';
 
 interface PaymentRequestsModalProps {
   isOpen: boolean;
@@ -64,8 +65,9 @@ export function PaymentRequestsModal({ isOpen, onClose, requests, pendingCount, 
   ) : undefined;
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleSafeClose}>
+    <WalletScreen isOpen={isOpen} onClose={handleSafeClose}>
       <ModalHeader
+        variant="screen"
         title="Payment Requests"
         icon={Receipt}
         subtitle={subtitle}
@@ -112,7 +114,7 @@ export function PaymentRequestsModal({ isOpen, onClose, requests, pendingCount, 
           </motion.button>
         </div>
       )}
-    </BaseModal>
+    </WalletScreen>
   );
 }
 

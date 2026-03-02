@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, XCircle, AlertTriangle, Info, X, Copy, Check, ExternalLink } from "lucide-react";
+import { CheckCircle, XCircle, AlertTriangle, Info, Copy, Check, ExternalLink } from "lucide-react";
+import { WalletScreen } from "../../../ui/WalletScreen";
+import { ModalHeader } from "../../../ui";
 
 export type MessageType = "success" | "error" | "warning" | "info";
 
@@ -101,34 +103,13 @@ export function MessageModal({
   txids,
   onClose,
 }: MessageModalProps) {
-  if (!show) return null;
-
   const Icon = iconMap[type];
   const colors = colorMap[type];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        transition={{ type: "spring", duration: 0.4 }}
-        className="relative w-full max-w-md bg-white dark:bg-modal-bg/90 border border-neutral-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
+    <WalletScreen isOpen={show} onClose={onClose}>
+      <ModalHeader variant="screen" title={title} onClose={onClose} />
+      <div className="px-6 flex-1 flex flex-col justify-center py-8">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -149,7 +130,6 @@ export function MessageModal({
               <Icon className={`w-6 h-6 ${colors.text}`} />
             </motion.div>
           </motion.div>
-          <h3 className="text-neutral-900 dark:text-white text-xl font-bold mb-2">{title}</h3>
           <p className="text-neutral-500 dark:text-white/45 text-sm whitespace-pre-wrap">
             {message}
           </p>
@@ -183,7 +163,7 @@ export function MessageModal({
             OK
           </motion.button>
         </motion.div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </WalletScreen>
   );
 }
