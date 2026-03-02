@@ -1,11 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Loader2, Globe, ExternalLink } from 'lucide-react';
-import { ConnectHost } from '@unicitylabs/sphere-sdk/connect';
+import { ConnectHost, HOST_READY_TYPE } from '@unicitylabs/sphere-sdk/connect';
 import type { DAppMetadata, PermissionScope } from '@unicitylabs/sphere-sdk/connect';
 import { PostMessageTransport } from '@unicitylabs/sphere-sdk/connect/browser';
 import type { AgentConfig } from '../../config/activities';
 import { useSphereContext } from '../../sdk/hooks/core/useSphere';
 import { useConnectContext } from '../connect/ConnectContext';
+import {
+  getApprovedOrigin,
+  saveApprovedOrigin,
+  updateLastSeen,
+  revokeApprovedOrigin,
+} from '../../utils/connected-sites';
 
 interface IframeAgentProps {
   agent: AgentConfig;
@@ -67,12 +73,38 @@ export function IframeAgent({ agent }: IframeAgentProps) {
     const host = new ConnectHost({
       sphere: sphereRef.current,
       transport,
-      onConnectionRequest: (dapp: DAppMetadata, perms: PermissionScope[]) =>
-        requestApprovalRef.current(dapp, perms),
+      onConnectionRequest: async (dapp: DAppMetadata, perms: PermissionScope[], silent?: boolean) => {
+        // Check if this iframe origin was already approved
+        const saved = getApprovedOrigin(origin);
+        if (saved) {
+          updateLastSeen(origin);
+          return { approved: true, grantedPermissions: saved.permissions };
+        }
+
+        // Silent mode: reject immediately
+        if (silent) {
+          return { approved: false, grantedPermissions: [] };
+        }
+
+        // First time — show approval modal via ConnectProvider
+        const result = await requestApprovalRef.current(dapp, perms);
+        if (result.approved) {
+          saveApprovedOrigin(origin, dapp, result.grantedPermissions);
+        }
+        return result;
+      },
+      onDisconnect: () => {
+        revokeApprovedOrigin(origin);
+      },
       onIntent: (action, params) => requestIntentRef.current(action, params),
     });
     hostRef.current = host;
     setConnectHost(host);
+
+    // Signal to iframe that host is ready (iframe may already be loaded or still loading)
+    try {
+      iframe.contentWindow?.postMessage({ type: HOST_READY_TYPE }, origin);
+    } catch { /* cross-origin or iframe not ready yet — handled by onLoad below */ }
 
     return () => {
       cleanup();
@@ -148,7 +180,21 @@ export function IframeAgent({ agent }: IframeAgentProps) {
           src={activeUrl}
           title={agent.name}
           className="w-full h-full border-0"
-          onLoad={() => setIsLoading(false)}
+          onLoad={() => {
+            setIsLoading(false);
+            if (hostRef.current && iframeRef.current?.contentWindow) {
+              const sendReady = () => {
+                try {
+                  const o = new URL(activeUrl).origin;
+                  iframeRef.current?.contentWindow?.postMessage({ type: HOST_READY_TYPE }, o);
+                } catch { /* ignore */ }
+              };
+              // Send immediately for cases where iframe React effects are already running
+              sendReady();
+              // Send again after 300ms to guarantee delivery after iframe React effects mount
+              setTimeout(sendReady, 300);
+            }
+          }}
           allow="clipboard-write"
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
         />
