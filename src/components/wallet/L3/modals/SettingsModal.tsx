@@ -69,10 +69,7 @@ export function SettingsModal({
             icon={Link}
             color="neutral"
             label="Connected Sites"
-            onClick={() => {
-              onClose();
-              setIsConnectedSitesOpen(true);
-            }}
+            onClick={() => setIsConnectedSitesOpen(true)}
           />
 
           <MenuButton
