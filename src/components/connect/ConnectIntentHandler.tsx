@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, PenLine } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
 import { SendModal } from '../wallet/L3/modals/SendModal';
@@ -8,13 +8,15 @@ import { SendModal as L1SendModal } from '../wallet/L1/components/modals/SendMod
 import { useConnectContext } from './ConnectContext';
 import { useSendDM } from '../../sdk/hooks/comms/useSendDM';
 import { getErrorMessage } from '../../sdk/errors';
-import { useIdentity, useL1Balance, useL1Send } from '../../sdk';
+import { useIdentity, useL1Balance, useL1Send, useSphereContext } from '../../sdk';
 
 export function ConnectIntentHandler() {
   const { pendingIntent, resolveIntent, rejectIntent, connectHost } = useConnectContext();
+  const { sphere } = useSphereContext();
   const { sendDM, isLoading: isSendingDM } = useSendDM();
   const [dmError, setDmError] = useState<string | null>(null);
   const [autoApproveDM, setAutoApproveDM] = useState(false);
+  const [signError, setSignError] = useState<string | null>(null);
 
   // L1 hooks (always called — hooks cannot be conditional)
   const { l1Address } = useIdentity();
@@ -197,6 +199,64 @@ export function ConnectIntentHandler() {
               onClick={handleSendDM}
             >
               {isSendingDM ? 'Sending…' : 'Send DM'}
+            </Button>
+          </div>
+        </div>
+      </BaseModal>
+    );
+  }
+
+  // --- Sign Message Intent ---
+  if (action === 'sign_message') {
+    const message = params.message as string;
+
+    // Parse domain from challenge for display (e.g. "Domain: quests.unicity.network")
+    const domainMatch = message.match(/^Domain:\s*(.+)$/m);
+    const displayDomain = domainMatch ? domainMatch[1].trim() : null;
+
+    const handleSign = () => {
+      setSignError(null);
+      if (!sphere) {
+        setSignError('Wallet not available');
+        return;
+      }
+      try {
+        const signature = sphere.signMessage(message);
+        const identity = sphere.identity;
+        resolveIntent({ signature, publicKey: identity?.chainPubkey });
+      } catch (err) {
+        setSignError(getErrorMessage(err));
+      }
+    };
+
+    return (
+      <BaseModal isOpen={true} onClose={handleClose}>
+        <ModalHeader title="Sign Message" icon={PenLine} onClose={handleClose} />
+
+        <div className="px-6 py-5 flex-1 flex flex-col justify-center">
+          {displayDomain && (
+            <div className="text-sm text-neutral-500 mb-3 text-center">
+              Requested by <span className="font-medium text-neutral-800 dark:text-neutral-200">{displayDomain}</span>
+            </div>
+          )}
+
+          <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-4 mb-5 border border-neutral-200 dark:border-white/10">
+            <div className="text-xs text-neutral-400 mb-2 uppercase tracking-wide">Message</div>
+            <pre className="text-xs text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap break-all font-mono leading-relaxed">
+              {message}
+            </pre>
+          </div>
+
+          {signError && (
+            <div className="text-red-500 text-sm mb-3 text-center">{signError}</div>
+          )}
+
+          <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="primary" fullWidth onClick={handleSign}>
+              Sign
             </Button>
           </div>
         </div>
