@@ -266,7 +266,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
             canDeleteMessages={canModerateSelectedGroup}
             onDeleteMessage={deleteMessage}
             isDeletingMessage={isDeleting}
-            onReplyToMessage={handleReplyToMessage}
+            onReplyToMessage={canWriteToSelectedGroup ? handleReplyToMessage : undefined}
             hasMore={hasMore}
             loadMore={loadMore}
           />
