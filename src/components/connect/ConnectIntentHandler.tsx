@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { MessageSquare, PenLine } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../sdk/errors';
 import { useIdentity, useL1Balance, useL1Send, useSphereContext } from '../../sdk';
 
 export function ConnectIntentHandler() {
-  const { pendingIntent, resolveIntent, rejectIntent, connectHost } = useConnectContext();
+  const { pendingIntent, resolveIntent, rejectIntent, registerAutoIntent } = useConnectContext();
   const { sphere } = useSphereContext();
   const { sendDM, isLoading: isSendingDM } = useSendDM();
   const [dmError, setDmError] = useState<string | null>(null);
@@ -34,10 +34,6 @@ export function ConnectIntentHandler() {
     const amountSatoshis = Math.round(amountAlpha * 1e8).toString();
     await l1Send({ toAddress: destination, amount: amountSatoshis });
   }, [l1Send]);
-
-  // Ref so the auto-approve closure always uses the latest sendDM
-  const sendDMRef = useRef(sendDM);
-  sendDMRef.current = sendDM;
 
   if (!pendingIntent) return null;
 
@@ -131,14 +127,17 @@ export function ConnectIntentHandler() {
       try {
         const dm = await sendDM({ recipient: to, content: message });
 
-        // Register auto-approve if user checked the checkbox
-        if (autoApproveDM && connectHost) {
-          connectHost.setIntentAutoApprove('dm', async (_action, intentParams) => {
+        // Register auto-approve if user checked the checkbox.
+        // Uses ConnectProvider-level auto-handler (bypasses ConnectHost entirely)
+        // so it's immune to ConnectHost lifecycle issues.
+        if (autoApproveDM && sphere) {
+          const sphereRef = sphere;
+          registerAutoIntent('dm', async (_action, intentParams) => {
             try {
-              const result = await sendDMRef.current({
-                recipient: intentParams.to as string,
-                content: intentParams.message as string,
-              });
+              const result = await sphereRef.communications.sendDM(
+                intentParams.to as string,
+                intentParams.message as string,
+              );
               return { result: { sent: true, messageId: result.id, timestamp: result.timestamp } };
             } catch (err) {
               return {

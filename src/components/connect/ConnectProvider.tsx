@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, type ReactNode } from 'react';
 import type { DAppMetadata, PermissionScope } from '@unicitylabs/sphere-sdk/connect';
 import type { ConnectHost } from '@unicitylabs/sphere-sdk/connect';
+import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import {
   ConnectContext,
   type PendingApproval,
@@ -20,7 +21,15 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
   const connectHostRef = useRef<ConnectHost | null>(null);
   const [, forceUpdate] = useState(0);
 
+  type AutoHandler = (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } }>;
+  // Auto-approve handlers scoped to a specific ConnectHost instance
+  const autoIntentHandlersRef = useRef<Map<string, { host: ConnectHost; handler: AutoHandler }>>(new Map());
+
   const setConnectHost = useCallback((host: ConnectHost | null) => {
+    // Clear auto-approve handlers when host changes (URL switch, disconnect, etc.)
+    if (host !== connectHostRef.current) {
+      autoIntentHandlersRef.current.clear();
+    }
     connectHostRef.current = host;
     forceUpdate((n) => n + 1);
   }, []);
@@ -34,8 +43,31 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
     [],
   );
 
+  const registerAutoIntent = useCallback(
+    (
+      action: string,
+      handler: AutoHandler,
+    ) => {
+      const host = connectHostRef.current;
+      if (!host) return;
+      autoIntentHandlersRef.current.set(action, { host, handler });
+    },
+    [],
+  );
+
   const requestIntent = useCallback(
-    (action: string, params: Record<string, unknown>) => {
+    async (action: string, params: Record<string, unknown>): Promise<{ result?: unknown; error?: { code: number; message: string } }> => {
+      // Check auto-approve handlers — only if registered by the current host
+      const entry = autoIntentHandlersRef.current.get(action);
+      if (entry && entry.host === connectHostRef.current) {
+        try {
+          return await entry.handler(action, params);
+        } catch (err) {
+          return { error: { code: ERROR_CODES.INTERNAL_ERROR, message: err instanceof Error ? err.message : 'Auto-approve handler failed' } };
+        }
+      }
+
+      // Otherwise show modal
       return new Promise<{ result?: unknown; error?: { code: number; message: string } }>((resolve) => {
         setPendingIntent({ action, params, resolve });
       });
@@ -83,6 +115,7 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
     rejectIntent,
     connectHost: connectHostRef.current,
     setConnectHost,
+    registerAutoIntent,
   };
 
   return (

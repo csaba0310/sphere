@@ -50,6 +50,12 @@ export interface ConnectContextValue {
 
   /** Set the ConnectHost reference */
   setConnectHost: (host: ConnectHost | null) => void;
+
+  /** Register an auto-approve handler for an intent action (bypasses modal) */
+  registerAutoIntent: (
+    action: string,
+    handler: (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } }>,
+  ) => void;
 }
 
 export const ConnectContext = createContext<ConnectContextValue | null>(null);
