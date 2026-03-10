@@ -25,6 +25,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
     selectGroup,
     leaveGroup,
     joinGroup,
+    groups,
     filteredGroups,
     isLoadingGroups,
     availableGroups,
@@ -346,6 +347,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
           setInviteLinkFromUrl(null);
         }}
         availableGroups={availableGroups}
+        joinedGroupIds={groups.map((g) => g.id)}
         isLoading={isLoadingAvailable}
         onRefresh={refreshAvailableGroups}
         onJoin={joinGroup}

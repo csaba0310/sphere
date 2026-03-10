@@ -10,6 +10,7 @@ interface JoinGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
   availableGroups: GroupData[];
+  joinedGroupIds?: string[];
   isLoading: boolean;
   onRefresh: () => void;
   onJoin: (groupId: string, inviteCode?: string) => Promise<boolean>;
@@ -20,6 +21,7 @@ export function JoinGroupModal({
   isOpen,
   onClose,
   availableGroups,
+  joinedGroupIds = [],
   isLoading,
   onRefresh,
   onJoin,
@@ -33,10 +35,12 @@ export function JoinGroupModal({
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const joinedSet = new Set(joinedGroupIds);
   const filteredGroups = availableGroups.filter(
     (g) =>
-      g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      g.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      !joinedSet.has(g.id) &&
+      (g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        g.description?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Parse invite link format: groupId/inviteCode
