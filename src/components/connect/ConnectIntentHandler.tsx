@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { MessageSquare, PenLine } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
