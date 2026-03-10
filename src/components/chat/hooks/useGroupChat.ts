@@ -214,7 +214,7 @@ export const useGroupChat = (): UseGroupChatReturn => {
     enabled: !!groupChat && isGroupChatConnected,
   });
 
-  // Restore selected group from localStorage when groups are loaded, fallback to "General".
+  // Restore selected group from localStorage when groups are loaded, fallback to first pinned group.
   // Also fetches messages from relay when the local cache is empty — fixes mobile layout
   // showing stale/old messages (auto-select previously skipped the fetch path).
   useEffect(() => {
