@@ -5,6 +5,7 @@ import { useUIState } from '../../hooks/useUIState';
 import { useDesktopState } from '../../hooks/useDesktopState';
 import { TutorialOverlay } from '../tutorial/TutorialOverlay';
 import { useTutorial } from '../../hooks/useTutorial';
+import { useDeepLinkNavigation } from '../../hooks/useDeepLinkNavigation';
 import bgVideoUrl from '/kling_20260226_VIDEO_Take_Image_1650_0.mp4';
 
 export function DashboardLayout() {
@@ -13,6 +14,7 @@ export function DashboardLayout() {
   const { isFullscreen } = useUIState();
   const { activeTabId } = useDesktopState();
   const tutorial = useTutorial();
+  useDeepLinkNavigation();
 
   // Hide mini chat when the DM tab is actively open (to avoid duplicate UI)
   const isAgentPage = location.pathname === '/home' || location.pathname.startsWith('/agents/');
