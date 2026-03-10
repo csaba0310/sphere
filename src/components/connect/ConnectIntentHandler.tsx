@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../sdk/errors';
 import { useIdentity, useL1Balance, useL1Send, useSphereContext } from '../../sdk';
 
 export function ConnectIntentHandler() {
-  const { pendingIntent, resolveIntent, rejectIntent, connectHost } = useConnectContext();
+  const { pendingIntent, resolveIntent, rejectIntent, registerAutoIntent } = useConnectContext();
   const { sphere } = useSphereContext();
   const { sendDM, isLoading: isSendingDM } = useSendDM();
   const [dmError, setDmError] = useState<string | null>(null);
@@ -128,11 +128,11 @@ export function ConnectIntentHandler() {
         const dm = await sendDM({ recipient: to, content: message });
 
         // Register auto-approve if user checked the checkbox.
-        // Use sphere.communications.sendDM directly (not the React hook) so
-        // the handler survives ConnectIntentHandler unmounting.
-        if (autoApproveDM && connectHost && sphere) {
+        // Uses ConnectProvider-level auto-handler (bypasses ConnectHost entirely)
+        // so it's immune to ConnectHost lifecycle issues.
+        if (autoApproveDM && sphere) {
           const sphereRef = sphere;
-          connectHost.setIntentAutoApprove('dm', async (_action, intentParams) => {
+          registerAutoIntent('dm', async (_action, intentParams) => {
             try {
               const result = await sphereRef.communications.sendDM(
                 intentParams.to as string,

@@ -20,6 +20,9 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
   const connectHostRef = useRef<ConnectHost | null>(null);
   const [, forceUpdate] = useState(0);
 
+  // Auto-approve handlers: action → handler function
+  const autoIntentHandlersRef = useRef<Map<string, (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } }>>>(new Map());
+
   const setConnectHost = useCallback((host: ConnectHost | null) => {
     connectHostRef.current = host;
     forceUpdate((n) => n + 1);
@@ -34,8 +37,29 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
     [],
   );
 
+  const registerAutoIntent = useCallback(
+    (
+      action: string,
+      handler: (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } }>,
+    ) => {
+      autoIntentHandlersRef.current.set(action, handler);
+    },
+    [],
+  );
+
   const requestIntent = useCallback(
-    (action: string, params: Record<string, unknown>) => {
+    async (action: string, params: Record<string, unknown>): Promise<{ result?: unknown; error?: { code: number; message: string } }> => {
+      // Check auto-approve handlers first
+      const autoHandler = autoIntentHandlersRef.current.get(action);
+      if (autoHandler) {
+        try {
+          return await autoHandler(action, params);
+        } catch (err) {
+          return { error: { code: -1, message: err instanceof Error ? err.message : 'Auto-approve handler failed' } };
+        }
+      }
+
+      // Otherwise show modal
       return new Promise<{ result?: unknown; error?: { code: number; message: string } }>((resolve) => {
         setPendingIntent({ action, params, resolve });
       });
@@ -83,6 +107,7 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
     rejectIntent,
     connectHost: connectHostRef.current,
     setConnectHost,
+    registerAutoIntent,
   };
 
   return (
