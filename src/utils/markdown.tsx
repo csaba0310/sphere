@@ -116,7 +116,7 @@ function MathBlock({
 }
 
 // Deep link button for unicity-connect:// URLs
-function DeepLinkButton({ deepLink, httpsUrl, label }: { deepLink: string; httpsUrl: string; label: string }) {
+function DeepLinkButton({ httpsUrl, label }: { httpsUrl: string; label: string }) {
   const [showMenu, setShowMenu] = useState(false);
 
   // Use http for localhost, https otherwise
@@ -370,7 +370,6 @@ function parseInline(text: string, keyPrefix: string, mentionClassName: string =
       parts.push(
         <DeepLinkButton
           key={`${keyPrefix}-deeplink-${key++}`}
-          deepLink={deepLink}
           httpsUrl={httpsUrl}
           label={displayLabel}
         />
