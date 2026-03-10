@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import { MessageSquare, PenLine } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
@@ -34,10 +34,6 @@ export function ConnectIntentHandler() {
     const amountSatoshis = Math.round(amountAlpha * 1e8).toString();
     await l1Send({ toAddress: destination, amount: amountSatoshis });
   }, [l1Send]);
-
-  // Ref so the auto-approve closure always uses the latest sendDM
-  const sendDMRef = useRef(sendDM);
-  sendDMRef.current = sendDM;
 
   if (!pendingIntent) return null;
 
@@ -131,14 +127,17 @@ export function ConnectIntentHandler() {
       try {
         const dm = await sendDM({ recipient: to, content: message });
 
-        // Register auto-approve if user checked the checkbox
-        if (autoApproveDM && connectHost) {
+        // Register auto-approve if user checked the checkbox.
+        // Use sphere.communications.sendDM directly (not the React hook) so
+        // the handler survives ConnectIntentHandler unmounting.
+        if (autoApproveDM && connectHost && sphere) {
+          const sphereRef = sphere;
           connectHost.setIntentAutoApprove('dm', async (_action, intentParams) => {
             try {
-              const result = await sendDMRef.current({
-                recipient: intentParams.to as string,
-                content: intentParams.message as string,
-              });
+              const result = await sphereRef.communications.sendDM(
+                intentParams.to as string,
+                intentParams.message as string,
+              );
               return { result: { sent: true, messageId: result.id, timestamp: result.timestamp } };
             } catch (err) {
               return {
