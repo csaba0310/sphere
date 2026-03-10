@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Hash, Lock, MoreVertical, LogOut, Trash2, Link, Loader2 } from 'lucide-react';
+import { Hash, Lock, Pin, MoreVertical, LogOut, Trash2, Link, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { GroupData } from '@unicitylabs/sphere-sdk';
 import { GroupVisibility } from '@unicitylabs/sphere-sdk';
@@ -64,7 +64,9 @@ export function GroupItem({
               : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'
           }`}
         >
-          {group.visibility === GroupVisibility.PRIVATE ? (
+          {isPinnedGroup(group.id) ? (
+            <Pin className="w-4 h-4" />
+          ) : group.visibility === GroupVisibility.PRIVATE ? (
             <Lock className="w-4 h-4" />
           ) : (
             <Hash className="w-4 h-4" />
