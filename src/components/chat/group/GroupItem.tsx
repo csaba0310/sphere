@@ -34,6 +34,11 @@ export function GroupItem({
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const canInvite = isAdmin && !!onCreateInvite && group.visibility === GroupVisibility.PRIVATE;
+  const canDelete = (isAdmin || (isRelayAdmin && group.visibility === GroupVisibility.PUBLIC)) && !!onDeleteGroup;
+  const canLeave = !isPinnedGroup(group.id);
+  const hasMenuItems = canInvite || canDelete || canLeave;
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -102,17 +107,19 @@ export function GroupItem({
             {getGroupFormattedLastMessageTime(group)}
           </span>
           <div ref={menuRef} className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowMenu(!showMenu);
-              }}
-              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-all"
-            >
-              <MoreVertical className="w-4 h-4 text-neutral-400" />
-            </button>
+            {hasMenuItems && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(!showMenu);
+                }}
+                className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-all"
+              >
+                <MoreVertical className="w-4 h-4 text-neutral-400" />
+              </button>
+            )}
 
-            {showMenu && (
+            {showMenu && hasMenuItems && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
