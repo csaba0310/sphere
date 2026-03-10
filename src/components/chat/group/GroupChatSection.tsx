@@ -58,6 +58,8 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
     isCreatingGroup,
     isDeletingGroup,
     isCreatingInvite,
+    // Write permission
+    canWriteToSelectedGroup,
     // Identity
     myPubkey,
     isAdminOfGroup,
@@ -292,8 +294,8 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
           </div>
         )}
 
-        {/* Message Input */}
-        {selectedGroup && (
+        {/* Message Input (hidden for read-only groups) */}
+        {selectedGroup && canWriteToSelectedGroup && (
           <div className="shrink-0">
             {/* Reply preview */}
             <AnimatePresence>

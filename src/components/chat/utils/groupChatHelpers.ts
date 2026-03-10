@@ -5,6 +5,17 @@
 import type { GroupData, GroupMessageData, GroupMemberData } from '@unicitylabs/sphere-sdk';
 
 // =============================================================================
+// Pinned Groups (auto-joined, always on top)
+// =============================================================================
+
+/** Groups that are auto-joined and pinned to top of the list. */
+export const PINNED_GROUP_IDS: readonly string[] = ['announcements', 'general'];
+
+export function isPinnedGroup(groupId: string): boolean {
+  return PINNED_GROUP_IDS.includes(groupId);
+}
+
+// =============================================================================
 // Group Helpers
 // =============================================================================
 

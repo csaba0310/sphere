@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { GroupData } from '@unicitylabs/sphere-sdk';
 import { GroupVisibility } from '@unicitylabs/sphere-sdk';
 import { showToast } from '../../ui/toast-utils';
-import { getGroupDisplayName, getGroupFormattedLastMessageTime } from '../utils/groupChatHelpers';
+import { getGroupDisplayName, getGroupFormattedLastMessageTime, isPinnedGroup } from '../utils/groupChatHelpers';
 
 interface GroupItemProps {
   group: GroupData;
@@ -162,18 +162,20 @@ export function GroupItem({
                     Delete Group
                   </button>
                 )}
-                {/* Leave Group */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLeave();
-                    setShowMenu(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Leave Group
-                </button>
+                {/* Leave Group (not available for pinned groups) */}
+                {!isPinnedGroup(group.id) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onLeave();
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Leave Group
+                  </button>
+                )}
               </motion.div>
             )}
           </div>

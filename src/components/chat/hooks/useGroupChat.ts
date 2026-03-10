@@ -7,7 +7,7 @@ import { useSphereContext } from '../../../sdk/hooks/core/useSphere';
 import { useIdentity } from '../../../sdk/hooks/core/useIdentity';
 import { useActiveTabId } from '../../../hooks/useDesktopState';
 import { STORAGE_KEYS } from '../../../config/storageKeys';
-import { getGroupDisplayName } from '../utils/groupChatHelpers';
+import { getGroupDisplayName, isPinnedGroup } from '../utils/groupChatHelpers';
 import { buildAddressId } from '../data/chatTypes';
 
 export const groupChatKeys = (addressId: string) => ({
@@ -83,6 +83,9 @@ export interface UseGroupChatReturn {
   isCreatingGroup: boolean;
   isDeletingGroup: boolean;
   isCreatingInvite: boolean;
+
+  // Write permission
+  canWriteToSelectedGroup: boolean;
 
   // Identity
   myPubkey: string | null;
@@ -195,11 +198,15 @@ export const useGroupChat = (): UseGroupChatReturn => {
     queryFn: () => {
       if (!groupChat) return [];
       const groups = groupChat.getGroups();
-      // Pin "General" first, then sort by last message time (descending)
+      // Pinned groups first (alphabetically), then rest by last message time
       return [...groups].sort((a, b) => {
-        const aGeneral = a.name?.toLowerCase() === 'general' ? 1 : 0;
-        const bGeneral = b.name?.toLowerCase() === 'general' ? 1 : 0;
-        if (aGeneral !== bGeneral) return bGeneral - aGeneral;
+        const aPinned = isPinnedGroup(a.id);
+        const bPinned = isPinnedGroup(b.id);
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        if (aPinned && bPinned) {
+          return getGroupDisplayName(a).localeCompare(getGroupDisplayName(b));
+        }
         return (b.lastMessageTime ?? 0) - (a.lastMessageTime ?? 0);
       });
     },
@@ -221,7 +228,7 @@ export const useGroupChat = (): UseGroupChatReturn => {
       target = groupsQuery.data.find((g) => g.id === savedGroupId);
     }
     if (!target) {
-      target = groupsQuery.data.find((g) => g.name?.toLowerCase() === 'general');
+      target = groupsQuery.data.find((g) => isPinnedGroup(g.id));
     }
 
     if (target) {
@@ -586,6 +593,13 @@ export const useGroupChat = (): UseGroupChatReturn => {
     [createInviteMutation]
   );
 
+  // Write permission for selected group (write-restricted groups only allow admins/moderators)
+  const canWriteToSelectedGroup = useMemo(() => {
+    if (!selectedGroup || !groupChat) return false;
+    return groupChat.canWriteToGroup(selectedGroup.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGroup, groupChat, membersQuery.data]);
+
   // Identity helpers — addressId forces recomputation on address switch
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const myPubkey = useMemo(() => groupChat?.getMyPublicKey() ?? null, [groupChat, addressId]);
@@ -658,6 +672,9 @@ export const useGroupChat = (): UseGroupChatReturn => {
     isCreatingGroup: createGroupMutation.isPending,
     isDeletingGroup: deleteGroupMutation.isPending,
     isCreatingInvite: createInviteMutation.isPending,
+
+    // Write permission
+    canWriteToSelectedGroup,
 
     // Identity
     myPubkey,
