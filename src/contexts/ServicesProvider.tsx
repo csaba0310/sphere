@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { ServicesContext } from './ServicesContext';
 import { useSphereContext } from '../sdk/hooks/core/useSphere';
+import { PINNED_GROUP_IDS } from '../components/chat/utils/groupChatHelpers';
 
 export const ServicesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isGroupChatConnected, setIsGroupChatConnected] = useState(false);
@@ -32,13 +33,16 @@ export const ServicesProvider: React.FC<{ children: ReactNode }> = ({ children }
       }
     };
 
-    // Auto-join "General" group when connected (if not already a member)
+    // Auto-join pinned groups when connected (if not already a member)
     const handleConnection = (data: { connected: boolean }) => {
       setIsGroupChatConnected(data.connected);
       if (data.connected) {
         const groups = groupChat.getGroups();
-        if (!groups.some(g => g.id === 'general')) {
-          groupChat.joinGroup('general').catch(() => {});
+        const joinedIds = new Set(groups.map(g => g.id));
+        for (const id of PINNED_GROUP_IDS) {
+          if (!joinedIds.has(id)) {
+            groupChat.joinGroup(id).catch(() => {});
+          }
         }
       }
     };

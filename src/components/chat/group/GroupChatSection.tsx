@@ -25,6 +25,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
     selectGroup,
     leaveGroup,
     joinGroup,
+    groups,
     filteredGroups,
     isLoadingGroups,
     availableGroups,
@@ -58,6 +59,8 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
     isCreatingGroup,
     isDeletingGroup,
     isCreatingInvite,
+    // Write permission
+    canWriteToSelectedGroup,
     // Identity
     myPubkey,
     isAdminOfGroup,
@@ -264,7 +267,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
             canDeleteMessages={canModerateSelectedGroup}
             onDeleteMessage={deleteMessage}
             isDeletingMessage={isDeleting}
-            onReplyToMessage={handleReplyToMessage}
+            onReplyToMessage={canWriteToSelectedGroup ? handleReplyToMessage : undefined}
             hasMore={hasMore}
             loadMore={loadMore}
           />
@@ -292,8 +295,8 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
           </div>
         )}
 
-        {/* Message Input */}
-        {selectedGroup && (
+        {/* Message Input (hidden for read-only groups) */}
+        {selectedGroup && canWriteToSelectedGroup && (
           <div className="shrink-0">
             {/* Reply preview */}
             <AnimatePresence>
@@ -344,6 +347,7 @@ export function GroupChatSection({ onModeChange }: GroupChatSectionProps) {
           setInviteLinkFromUrl(null);
         }}
         availableGroups={availableGroups}
+        joinedGroupIds={groups.map((g) => g.id)}
         isLoading={isLoadingAvailable}
         onRefresh={refreshAvailableGroups}
         onJoin={joinGroup}

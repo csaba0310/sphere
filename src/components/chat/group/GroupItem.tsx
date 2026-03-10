@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { Hash, Lock, MoreVertical, LogOut, Trash2, Link, Loader2 } from 'lucide-react';
+import { Hash, Lock, Pin, MoreVertical, LogOut, Trash2, Link, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { GroupData } from '@unicitylabs/sphere-sdk';
 import { GroupVisibility } from '@unicitylabs/sphere-sdk';
 import { showToast } from '../../ui/toast-utils';
-import { getGroupDisplayName, getGroupFormattedLastMessageTime } from '../utils/groupChatHelpers';
+import { getGroupDisplayName, getGroupFormattedLastMessageTime, isPinnedGroup } from '../utils/groupChatHelpers';
 
 interface GroupItemProps {
   group: GroupData;
@@ -33,6 +33,11 @@ export function GroupItem({
 }: GroupItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const canInvite = isAdmin && !!onCreateInvite && group.visibility === GroupVisibility.PRIVATE;
+  const canDelete = (isAdmin || (isRelayAdmin && group.visibility === GroupVisibility.PUBLIC)) && !!onDeleteGroup;
+  const canLeave = !isPinnedGroup(group.id);
+  const hasMenuItems = canInvite || canDelete || canLeave;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -64,7 +69,9 @@ export function GroupItem({
               : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'
           }`}
         >
-          {group.visibility === GroupVisibility.PRIVATE ? (
+          {isPinnedGroup(group.id) ? (
+            <Pin className="w-4 h-4" />
+          ) : group.visibility === GroupVisibility.PRIVATE ? (
             <Lock className="w-4 h-4" />
           ) : (
             <Hash className="w-4 h-4" />
@@ -100,17 +107,19 @@ export function GroupItem({
             {getGroupFormattedLastMessageTime(group)}
           </span>
           <div ref={menuRef} className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowMenu(!showMenu);
-              }}
-              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-all"
-            >
-              <MoreVertical className="w-4 h-4 text-neutral-400" />
-            </button>
+            {hasMenuItems && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(!showMenu);
+                }}
+                className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-all"
+              >
+                <MoreVertical className="w-4 h-4 text-neutral-400" />
+              </button>
+            )}
 
-            {showMenu && (
+            {showMenu && hasMenuItems && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -162,18 +171,20 @@ export function GroupItem({
                     Delete Group
                   </button>
                 )}
-                {/* Leave Group */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLeave();
-                    setShowMenu(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Leave Group
-                </button>
+                {/* Leave Group (not available for pinned groups) */}
+                {!isPinnedGroup(group.id) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onLeave();
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Leave Group
+                  </button>
+                )}
               </motion.div>
             )}
           </div>
