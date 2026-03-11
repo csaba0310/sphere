@@ -31,6 +31,29 @@ Sphere implements `ConnectHost` — the wallet side of the Sphere Connect protoc
 
 Key components: `ConnectPage` (`/connect` route), `ConnectProvider`, `ConnectionApprovalModal`.
 
+### Deep Links (`unicity-connect://`)
+
+Sphere supports a custom URL protocol for inter-app linking within DMs. When a dApp sends a `unicity-connect://` URL in a DM, Sphere renders it as an interactive button with two options: **Open in Sphere** (loads the URL as an iframe agent) or **Open in browser** (opens in a new tab).
+
+**Protocol format:**
+```
+unicity-connect://host/path?query=params
+```
+
+When opened, the protocol is resolved to `https://` (or `http://` for `localhost`/`127.0.0.1`).
+
+**How it works:**
+
+1. **Sending** — a dApp builds a URL and replaces `https://` with `unicity-connect://` before sending it as a DM message
+2. **Rendering** — Sphere's markdown parser detects `unicity-connect://` in plain text, `[text](unicity-connect://...)`, and `<a href="unicity-connect://...">` formats, rendering a `DeepLinkButton` dropdown
+3. **Opening in Sphere** — a global handler (registered by `useDeepLinkNavigation` in `DashboardLayout`) navigates to `/agents/custom?url=<httpsUrl>`, loading the target as an iframe agent
+4. **Opening in browser** — the resolved `http(s)://` URL is opened in a new tab via `window.open`
+
+**Key files:**
+- `src/utils/deepLinkHandler.ts` — protocol conversion (`deepLinkToHttps`), global click handler registry
+- `src/utils/markdown.tsx` — `DeepLinkButton` component, deep link detection in all link formats
+- `src/hooks/useDeepLinkNavigation.ts` — registers the Sphere-side navigation handler
+
 ### Agent System
 
 Agents are specialized interfaces loaded as tabs. Currently active:
