@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { getMentionClickHandler } from './mentionHandler';
+import { getDeepLinkClickHandler, deepLinkToHttps } from './deepLinkHandler';
 
 // Code block component with copy button
 function CodeBlock({ code, language, keyPrefix }: { code: string; language?: string; keyPrefix: string }) {
@@ -114,6 +115,89 @@ function MathBlock({
   );
 }
 
+// Deep link button for unicity-connect:// URLs
+function DeepLinkButton({ httpsUrl, label }: { httpsUrl: string; label: string }) {
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Use http for localhost, https otherwise
+  const resolvedUrl = (() => {
+    try {
+      const u = new URL(httpsUrl);
+      if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
+        return httpsUrl.replace(/^https:\/\//, 'http://');
+      }
+    } catch { /* ignore */ }
+    return httpsUrl;
+  })();
+
+  const handleOpenInSphere = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    const handler = getDeepLinkClickHandler();
+    if (handler) {
+      handler(resolvedUrl);
+    } else {
+      window.open(resolvedUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleOpenInBrowser = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    window.open(resolvedUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  return (
+    <span className="relative inline-block">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setShowMenu(v => !v); }}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg
+                   bg-orange-500/15 border border-orange-500/30
+                   text-orange-500 dark:text-orange-400 text-sm font-medium
+                   hover:bg-orange-500/25 transition-colors cursor-pointer"
+      >
+        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        {label}
+      </button>
+      {showMenu && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
+          <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden min-w-48">
+            <button
+              type="button"
+              onClick={handleOpenInSphere}
+              className="w-full px-4 py-2.5 text-left text-sm text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <svg className="w-4 h-4 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                <path d="M2 12h20" />
+              </svg>
+              Open in Sphere
+            </button>
+            <button
+              type="button"
+              onClick={handleOpenInBrowser}
+              className="w-full px-4 py-2.5 text-left text-sm text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <svg className="w-4 h-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              Open in browser
+            </button>
+          </div>
+        </>
+      )}
+    </span>
+  );
+}
+
 // Helper to replace math placeholders with MathBlock components
 function replaceMathPlaceholders(
   text: string,
@@ -183,7 +267,7 @@ function parseInline(text: string, keyPrefix: string, mentionClassName: string =
   // THIRD PASS: Process markdown - math placeholders won't be captured by markdown patterns
   // Added @mention pattern at the end: @username (alphanumeric, underscore, hyphen)
   // Note: (?<!\S) ensures @ is at start of word (not in email like user@example.com)
-  const regex = /(\*\*(.+?)\*\*|\*([^\s*](?:[^*]*[^\s*])?)\*|_([^_]+?)_|`([^`]+?)`|<br\s*\/?>|<b>(.+?)<\/b>|<strong>(.+?)<\/strong>|<i>(.+?)<\/i>|<em>(.+?)<\/em>|<code>(.+?)<\/code>|<a\s+href=["']([^"']+)["']>(.+?)<\/a>|\[([^\]]+)\]\(((?:[^\s()]|\([^\s)]*\))+)(?:\s+"([^"]+)")?\)|!\[([^\]]*)\]\(((?:[^()]|\([^)]*\))+)\)|(https?:\/\/[^\s<>[\]()]+[^\s<>[\]().,;:!?'"])|((?<!\S)@[\w-]+))/gi;
+  const regex = /(\*\*(.+?)\*\*|\*([^\s*](?:[^*]*[^\s*])?)\*|_([^_]+?)_|`([^`]+?)`|<br\s*\/?>|<b>(.+?)<\/b>|<strong>(.+?)<\/strong>|<i>(.+?)<\/i>|<em>(.+?)<\/em>|<code>(.+?)<\/code>|<a\s+href=["']([^"']+)["']>(.+?)<\/a>|\[([^\]]+)\]\(((?:[^\s()]|\([^\s)]*\))+)(?:\s+"([^"]+)")?\)|!\[([^\]]*)\]\(((?:[^()]|\([^)]*\))+)\)|(unicity-connect:\/\/[^\s<>[\]()]+[^\s<>[\]().,;:!?'"])|(https?:\/\/[^\s<>[\]()]+[^\s<>[\]().,;:!?'"])|((?<!\S)@[\w-]+))/gi;
   let lastIndex = 0;
   let match;
 
@@ -242,28 +326,52 @@ function parseInline(text: string, keyPrefix: string, mentionClassName: string =
       );
     } else if (match[11] && match[12]) {
       // <a href="url">text</a> - recursively parse content
-      const content = parseInline(match[12], `${keyPrefix}-a-${key}`, mentionClassName);
-      parts.push(
-        <a key={`${keyPrefix}-a-${key++}`} href={match[11]} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline">
-          {content}
-        </a>
-      );
+      const href = match[11];
+      if (href.startsWith('unicity-connect://')) {
+        const httpsUrl = deepLinkToHttps(href);
+        parts.push(
+          <DeepLinkButton
+            key={`${keyPrefix}-deeplink-a-${key++}`}
+            httpsUrl={httpsUrl}
+            label={match[12]}
+          />
+        );
+      } else {
+        const content = parseInline(match[12], `${keyPrefix}-a-${key}`, mentionClassName);
+        parts.push(
+          <a key={`${keyPrefix}-a-${key++}`} href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline">
+            {content}
+          </a>
+        );
+      }
     } else if (match[13] && match[14]) {
       // [text](url) or [text](url "tooltip") markdown link - recursively parse content
-      const content = parseInline(match[13], `${keyPrefix}-link-${key}`, mentionClassName);
-      const tooltip = match[15]; // Optional tooltip
-      parts.push(
-        <a
-          key={`${keyPrefix}-link-${key++}`}
-          href={match[14]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline"
-          title={tooltip || undefined}
-        >
-          {content}
-        </a>
-      );
+      const href = match[14];
+      if (href.startsWith('unicity-connect://')) {
+        const httpsUrl = deepLinkToHttps(href);
+        parts.push(
+          <DeepLinkButton
+            key={`${keyPrefix}-deeplink-link-${key++}`}
+            httpsUrl={httpsUrl}
+            label={match[13]}
+          />
+        );
+      } else {
+        const content = parseInline(match[13], `${keyPrefix}-link-${key}`, mentionClassName);
+        const tooltip = match[15]; // Optional tooltip
+        parts.push(
+          <a
+            key={`${keyPrefix}-link-${key++}`}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline"
+            title={tooltip || undefined}
+          >
+            {content}
+          </a>
+        );
+      }
     } else if (match[17]) {
       // ![alt](url) markdown image (supports base64 data URLs)
       const alt = match[16] || 'image';
@@ -278,8 +386,26 @@ function parseInline(text: string, keyPrefix: string, mentionClassName: string =
         />
       );
     } else if (match[18]) {
+      // unicity-connect:// deep link
+      const deepLink = match[18];
+      const httpsUrl = deepLinkToHttps(deepLink);
+      let displayLabel: string;
+      try {
+        const u = new URL(httpsUrl);
+        displayLabel = u.host + u.pathname.replace(/\/$/, '');
+      } catch {
+        displayLabel = deepLink;
+      }
+      parts.push(
+        <DeepLinkButton
+          key={`${keyPrefix}-deeplink-${key++}`}
+          httpsUrl={httpsUrl}
+          label={displayLabel}
+        />
+      );
+    } else if (match[19]) {
       // Plain URL (https://... or http://...)
-      const url = match[18];
+      const url = match[19];
       parts.push(
         <a
           key={`${keyPrefix}-url-${key++}`}
@@ -291,9 +417,9 @@ function parseInline(text: string, keyPrefix: string, mentionClassName: string =
           {url}
         </a>
       );
-    } else if (match[19]) {
+    } else if (match[20]) {
       // @mention (e.g., @username)
-      const mention = match[19];
+      const mention = match[20];
       const username = mention.slice(1); // Remove @ prefix
       parts.push(
         <span
