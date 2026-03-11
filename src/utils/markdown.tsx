@@ -148,7 +148,8 @@ function DeepLinkButton({ httpsUrl, label }: { httpsUrl: string; label: string }
   return (
     <span className="relative inline-block">
       <button
-        onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setShowMenu(v => !v); }}
         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg
                    bg-orange-500/15 border border-orange-500/30
                    text-orange-500 dark:text-orange-400 text-sm font-medium
@@ -165,6 +166,7 @@ function DeepLinkButton({ httpsUrl, label }: { httpsUrl: string; label: string }
           <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
           <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden min-w-48">
             <button
+              type="button"
               onClick={handleOpenInSphere}
               className="w-full px-4 py-2.5 text-left text-sm text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors cursor-pointer flex items-center gap-2"
             >
@@ -176,6 +178,7 @@ function DeepLinkButton({ httpsUrl, label }: { httpsUrl: string; label: string }
               Open in Sphere
             </button>
             <button
+              type="button"
               onClick={handleOpenInBrowser}
               className="w-full px-4 py-2.5 text-left text-sm text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors cursor-pointer flex items-center gap-2"
             >

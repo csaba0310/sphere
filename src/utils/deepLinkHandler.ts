@@ -1,8 +1,6 @@
 // Global handler for unicity-connect:// deep links
 // Separated from markdown.tsx to satisfy react-refresh/only-export-components rule
 
-export const DEEP_LINK_PROTOCOL = 'unicity-connect://';
-
 export type DeepLinkClickHandler = (httpsUrl: string) => void;
 
 let globalDeepLinkClickHandler: DeepLinkClickHandler | null = null;
