@@ -136,6 +136,8 @@ function DeepLinkButton({ httpsUrl, label }: { httpsUrl: string; label: string }
     const handler = getDeepLinkClickHandler();
     if (handler) {
       handler(resolvedUrl);
+    } else {
+      window.open(resolvedUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -324,28 +326,52 @@ function parseInline(text: string, keyPrefix: string, mentionClassName: string =
       );
     } else if (match[11] && match[12]) {
       // <a href="url">text</a> - recursively parse content
-      const content = parseInline(match[12], `${keyPrefix}-a-${key}`, mentionClassName);
-      parts.push(
-        <a key={`${keyPrefix}-a-${key++}`} href={match[11]} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline">
-          {content}
-        </a>
-      );
+      const href = match[11];
+      if (href.startsWith('unicity-connect://')) {
+        const httpsUrl = deepLinkToHttps(href);
+        parts.push(
+          <DeepLinkButton
+            key={`${keyPrefix}-deeplink-a-${key++}`}
+            httpsUrl={httpsUrl}
+            label={match[12]}
+          />
+        );
+      } else {
+        const content = parseInline(match[12], `${keyPrefix}-a-${key}`, mentionClassName);
+        parts.push(
+          <a key={`${keyPrefix}-a-${key++}`} href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline">
+            {content}
+          </a>
+        );
+      }
     } else if (match[13] && match[14]) {
       // [text](url) or [text](url "tooltip") markdown link - recursively parse content
-      const content = parseInline(match[13], `${keyPrefix}-link-${key}`, mentionClassName);
-      const tooltip = match[15]; // Optional tooltip
-      parts.push(
-        <a
-          key={`${keyPrefix}-link-${key++}`}
-          href={match[14]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline"
-          title={tooltip || undefined}
-        >
-          {content}
-        </a>
-      );
+      const href = match[14];
+      if (href.startsWith('unicity-connect://')) {
+        const httpsUrl = deepLinkToHttps(href);
+        parts.push(
+          <DeepLinkButton
+            key={`${keyPrefix}-deeplink-link-${key++}`}
+            httpsUrl={httpsUrl}
+            label={match[13]}
+          />
+        );
+      } else {
+        const content = parseInline(match[13], `${keyPrefix}-link-${key}`, mentionClassName);
+        const tooltip = match[15]; // Optional tooltip
+        parts.push(
+          <a
+            key={`${keyPrefix}-link-${key++}`}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 underline"
+            title={tooltip || undefined}
+          >
+            {content}
+          </a>
+        );
+      }
     } else if (match[17]) {
       // ![alt](url) markdown image (supports base64 data URLs)
       const alt = match[16] || 'image';
@@ -366,7 +392,7 @@ function parseInline(text: string, keyPrefix: string, mentionClassName: string =
       let displayLabel: string;
       try {
         const u = new URL(httpsUrl);
-        displayLabel = u.hostname + u.pathname.replace(/\/$/, '');
+        displayLabel = u.host + u.pathname.replace(/\/$/, '');
       } catch {
         displayLabel = deepLink;
       }
