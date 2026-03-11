@@ -12,10 +12,18 @@ import {
   updateLastSeen,
   revokeApprovedOrigin,
 } from '../utils/connected-sites';
+import {
+  createBridgeChannel,
+  BRIDGE_MSG,
+  type BridgeChannelMessage,
+  type IntentRequestMessage,
+  type ApprovalRequestMessage,
+} from '../utils/connect-bridge-channel';
 
 export function ConnectPage() {
   const [searchParams] = useSearchParams();
   const origin = searchParams.get('origin');
+  const isBridgeMode = searchParams.has('bridge');
   const { sphere, isLoading } = useSphereContext();
   const { requestApproval, requestIntent, setConnectHost } = useConnectContext();
   const hostRef = useRef<ConnectHost | null>(null);
@@ -24,7 +32,6 @@ export function ConnectPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [connectedDapp, setConnectedDapp] = useState<string | null>(null);
 
-  // Stable refs so the effect doesn't re-run when these change
   const sphereRef = useRef(sphere);
   sphereRef.current = sphere;
   const requestApprovalRef = useRef(requestApproval);
@@ -32,18 +39,80 @@ export function ConnectPage() {
   const requestIntentRef = useRef(requestIntent);
   requestIntentRef.current = requestIntent;
 
-  // Track whether sphere has been available at least once
   const sphereReady = !isLoading && !!sphere;
-
-  // Prevent StrictMode double-mount from destroying the host.
-  // In dev, React runs: mount → cleanup → mount. The cleanup would destroy host1,
-  // then mount creates host2 — but the dApp already connected to host1.
-  // Since this is a popup page, browser GC handles cleanup when the window closes.
   const initializedRef = useRef(false);
 
+  // ---------------------------------------------------------------------------
+  // Bridge mode: popup acts as intent/approval UI for the bridge iframe.
+  // No ConnectHost here — the bridge iframe owns the session.
+  // ---------------------------------------------------------------------------
   useEffect(() => {
+    if (!isBridgeMode) return;
+    if (!origin) return;
     if (!sphereReady) return;
-    // Already initialized (incl. StrictMode second mount) — skip
+    if (initializedRef.current) return;
+
+    initializedRef.current = true;
+    setStatus('ready');
+
+    const channel = createBridgeChannel(origin);
+
+    // Notify bridge that popup is ready
+    channel.postMessage({ type: BRIDGE_MSG.POPUP_READY });
+
+    // Notify bridge when popup is closing
+    const handleBeforeUnload = () => {
+      channel.postMessage({ type: BRIDGE_MSG.POPUP_CLOSED });
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Listen for intents and approvals from bridge
+    channel.onmessage = (event: MessageEvent<BridgeChannelMessage>) => {
+      const msg = event.data;
+
+      if (msg.type === BRIDGE_MSG.INTENT_REQUEST) {
+        const intentMsg = msg as IntentRequestMessage;
+        requestIntentRef.current(intentMsg.action, intentMsg.params).then((result) => {
+          channel.postMessage({
+            type: BRIDGE_MSG.INTENT_RESULT,
+            intentId: intentMsg.intentId,
+            result: result.result,
+            error: result.error,
+          });
+        });
+        return;
+      }
+
+      if (msg.type === BRIDGE_MSG.APPROVAL_REQUEST) {
+        const approvalMsg = msg as ApprovalRequestMessage;
+        requestApprovalRef.current(
+          approvalMsg.dapp as DAppMetadata,
+          approvalMsg.permissions as PermissionScope[],
+        ).then((result) => {
+          channel.postMessage({
+            type: BRIDGE_MSG.APPROVAL_RESULT,
+            approvalId: approvalMsg.approvalId,
+            approved: result.approved,
+            grantedPermissions: result.grantedPermissions,
+          });
+        });
+        return;
+      }
+    };
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      channel.close();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBridgeMode, sphereReady, origin]);
+
+  // ---------------------------------------------------------------------------
+  // Standalone mode (original): popup owns the ConnectHost + session.
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (isBridgeMode) return;
+    if (!sphereReady) return;
     if (initializedRef.current) return;
 
     if (!origin) {
@@ -69,7 +138,6 @@ export function ConnectPage() {
       sphere: currentSphere,
       transport,
       onConnectionRequest: async (dapp: DAppMetadata, perms: PermissionScope[], silent?: boolean) => {
-        // Check if this origin was already approved
         const saved = getApprovedOrigin(origin);
         if (saved) {
           updateLastSeen(origin);
@@ -77,12 +145,10 @@ export function ConnectPage() {
           return { approved: true, grantedPermissions: saved.permissions };
         }
 
-        // Silent mode: reject immediately without showing UI
         if (silent) {
           return { approved: false, grantedPermissions: [] };
         }
 
-        // First time — show approval modal
         const result = await requestApprovalRef.current(dapp, perms);
         if (result.approved) {
           setConnectedDapp(dapp.name);
@@ -102,7 +168,6 @@ export function ConnectPage() {
 
     setStatus('ready');
 
-    // Signal to dApp that host is ready
     try {
       (window.opener as Window).postMessage(
         { type: HOST_READY_TYPE },
@@ -117,8 +182,6 @@ export function ConnectPage() {
       } catch { /* ignore */ }
     }
 
-    // No cleanup — popup page is GC'd when window closes.
-    // Returning a cleanup would break StrictMode (destroy host on first unmount).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sphereReady, origin]);
 
@@ -131,7 +194,9 @@ export function ConnectPage() {
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-sm font-medium text-gray-700 dark:text-neutral-300">
-                {connectedDapp ? `Connected to ${connectedDapp}` : 'Ready for connections'}
+                {isBridgeMode
+                  ? 'Wallet approval window'
+                  : connectedDapp ? `Connected to ${connectedDapp}` : 'Ready for connections'}
               </span>
             </div>
             {origin && (
@@ -156,7 +221,9 @@ export function ConnectPage() {
         {/* Hint */}
         {status === 'ready' && (
           <p className="text-xs text-center text-gray-400 dark:text-neutral-500 px-4">
-            You can close this window. It will re-open automatically when the dApp needs your wallet.
+            {isBridgeMode
+              ? 'This window handles wallet approvals. You can close it after approving.'
+              : 'You can close this window. The dApp will re-open it when needed.'}
           </p>
         )}
       </div>

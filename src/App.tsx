@@ -5,6 +5,7 @@ import { IntroPage } from './pages/IntroPage';
 import { HomePage } from './pages/HomePage';
 import { AgentPage } from './pages/AgentPage';
 import { ConnectPage } from './pages/ConnectPage';
+import { ConnectBridgePage } from './pages/ConnectBridgePage';
 import { useSphereEvents } from './sdk';
 
 // Retry wrapper: auto-reload page once on chunk load failure (stale deployment)
@@ -46,6 +47,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<IntroPage />} />
       <Route path="/connect" element={<ConnectPage />} />
+      <Route path="/connect-bridge" element={<ConnectBridgePage />} />
       <Route element={<DashboardLayout />}>
         <Route path="/home" element={<HomePage />} />
         <Route path="/agents/:agentId" element={<AgentPage />} />
