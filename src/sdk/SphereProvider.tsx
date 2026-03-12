@@ -96,10 +96,8 @@ function welcomeKey(chainPubkey: string, nametag: string): string {
   return `sphere_welcomed_${nametag}_${chainPubkey}`;
 }
 
-/** Send welcome trigger DM to agents with no existing conversation (fire-and-forget).
- *  @param delayOverride — ms to wait before checking; use longer delay for existing
- *  wallets so relay messages have time to load into memory. */
-function sendWelcomeDM(instance: Sphere, delayOverride?: number): void {
+/** Send welcome trigger DM to agents with no existing conversation (fire-and-forget). */
+function sendWelcomeDM(instance: Sphere): void {
   if (!instance.identity) return;
 
   const { chainPubkey } = instance.identity;
@@ -110,8 +108,7 @@ function sendWelcomeDM(instance: Sphere, delayOverride?: number): void {
   );
   if (pending.length === 0) return;
 
-  const delayMs = delayOverride
-    ?? parseInt((import.meta.env.VITE_WELCOME_DELAY_MS as string | undefined) || '4000', 10);
+  const delayMs = parseInt((import.meta.env.VITE_WELCOME_DELAY_MS as string | undefined) || '4000', 10);
 
   setTimeout(async () => {
     for (const nametag of pending) {
@@ -213,8 +210,18 @@ export function SphereProvider({
         setInitProgress(null);
         sphereRef.current = instance;
         setSphere(instance);
-        // Delay welcome check for existing wallets — relay messages need time to load
-        sendWelcomeDM(instance, 15000);
+        // Send welcome DMs after relay delivers historical messages (EOSE)
+        {
+          let welcomed = false;
+          const trigger = () => {
+            if (welcomed) return;
+            welcomed = true;
+            sendWelcomeDM(instance);
+          };
+          const unsubReady = instance.on("communications:ready", () => { unsubReady(); trigger(); });
+          // Fallback if EOSE never fires (relay issues)
+          setTimeout(() => { unsubReady(); trigger(); }, 20000);
+        }
 
         // Run address discovery in background after wallet is visible
         setIsDiscoveringAddresses(true);
