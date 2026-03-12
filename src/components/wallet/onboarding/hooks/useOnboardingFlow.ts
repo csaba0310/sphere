@@ -575,7 +575,7 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
     // Mark wallet as existing so WalletPanel switches from onboarding to wallet UI.
     // For create flows walletExists is already true — this is a no-op for sphere.
     // For import flows this sets the sphere in context + walletExists = true.
-    finalizeWallet(importedSphereRef.current ?? undefined, isCreateFlowRef.current);
+    finalizeWallet(importedSphereRef.current ?? undefined);
     importedSphereRef.current = null;
     isCreateFlowRef.current = false;
 
