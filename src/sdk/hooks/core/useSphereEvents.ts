@@ -5,6 +5,7 @@ import { SPHERE_KEYS } from '../../queryKeys';
 import { formatAmount } from '../../index';
 import { showTransferToast } from '../../../components/ui/toast-utils';
 import { CHAT_KEYS, GROUP_CHAT_KEYS, type DmReceivedDetail } from '../../../components/chat/data/chatTypes';
+import { sendWelcomeDM } from '../../SphereProvider';
 import type { IncomingTransfer } from '@unicitylabs/sphere-sdk';
 
 // SDK DM shape (local mirror — SDK DTS not always available)
@@ -101,9 +102,14 @@ export function useSphereEvents(): void {
       queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
       queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.payments.all });
       queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.l1.all });
-      // Invalidate all chat queries so UI re-fetches for the new address
-      queryClient.invalidateQueries({ queryKey: CHAT_KEYS.all });
-      queryClient.invalidateQueries({ queryKey: GROUP_CHAT_KEYS.all });
+      // Remove (not invalidate) chat caches — address-scoped queries will
+      // refetch with fresh data.  Invalidation alone can race with the
+      // address switch and display stale data from the previous address.
+      queryClient.removeQueries({ queryKey: CHAT_KEYS.all });
+      queryClient.removeQueries({ queryKey: GROUP_CHAT_KEYS.all });
+
+      // Send welcome DMs for the new address (fire-and-forget, idempotent)
+      sendWelcomeDM(sphere);
     };
 
     const handleSyncCompleted = invalidatePayments;
@@ -113,6 +119,12 @@ export function useSphereEvents(): void {
     // Bridge incoming SDK DMs to lightweight custom event + query invalidation
     const handleDmReceived = (dm: SDKDirectMessage) => {
       const myPubkey = sphere.identity?.chainPubkey;
+
+      // Only process DMs belonging to the current address — the mux delivers
+      // events for ALL addresses, and processing other addresses' DMs would
+      // pollute the current address's query cache with stale data.
+      if (dm.senderPubkey !== myPubkey && dm.recipientPubkey !== myPubkey) return;
+
       const isFromMe = dm.senderPubkey === myPubkey;
       const peerPubkey = isFromMe ? dm.recipientPubkey : dm.senderPubkey;
 

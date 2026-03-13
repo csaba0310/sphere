@@ -59,6 +59,11 @@ export default defineConfig(({ mode }) => {
     ],
     base: env.BASE_PATH || '/',
     server: {
+      // Allow Vite to serve files from the parent directory (needed for
+      // local file: references like "@unicitylabs/sphere-sdk": "file:../sphere-sdk")
+      fs: {
+        allow: ['.', '..'],
+      },
       // Enable HTTPS if certificates are available
       https: sslEnabled ? {
         key: fs.readFileSync(path.join(sslCertPath, 'privkey.pem')),

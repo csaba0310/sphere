@@ -97,7 +97,7 @@ function welcomeKey(chainPubkey: string, nametag: string): string {
 }
 
 /** Send welcome trigger DM to agents with no existing conversation (fire-and-forget). */
-function sendWelcomeDM(instance: Sphere): void {
+export function sendWelcomeDM(instance: Sphere): void {
   if (!instance.identity) return;
 
   const { chainPubkey } = instance.identity;
@@ -110,23 +110,28 @@ function sendWelcomeDM(instance: Sphere): void {
 
   const delayMs = parseInt((import.meta.env.VITE_WELCOME_DELAY_MS as string | undefined) || '4000', 10);
 
+  console.log('[welcome] sendWelcomeDM called, chainPubkey:', chainPubkey.slice(0, 8), 'pending:', pending);
+
   setTimeout(async () => {
     for (const nametag of pending) {
       try {
+        console.log(`[welcome] resolving @${nametag}...`);
         const peerInfo = await instance.resolve(`@${nametag}`);
-        if (!peerInfo) continue;
+        if (!peerInfo) { console.log(`[welcome] @${nametag} not found`); continue; }
 
         const conversation = instance.communications.getConversation(peerInfo.transportPubkey);
         if (conversation.length > 0) {
+          console.log(`[welcome] @${nametag} already has conversation (${conversation.length} msgs)`);
           localStorage.setItem(welcomeKey(chainPubkey, nametag), '1');
           continue;
         }
 
+        console.log(`[welcome] sending welcome DM to @${nametag}...`);
         await instance.communications.sendDM(`@${nametag}`, WELCOME_TRIGGER);
-        logger.debug('SphereProvider', `Welcome trigger sent to @${nametag}`);
+        console.log(`[welcome] welcome DM sent to @${nametag}`);
         localStorage.setItem(welcomeKey(chainPubkey, nametag), '1');
       } catch (err) {
-        logger.warn('SphereProvider', `Failed to send welcome trigger to @${nametag}`, err);
+        console.error(`[welcome] FAILED for @${nametag}:`, err);
       }
     }
   }, delayMs);
