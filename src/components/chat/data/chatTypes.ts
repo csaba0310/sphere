@@ -111,6 +111,27 @@ export function toDisplayMessage(dm: SDKDirectMessage, myPubkey: string): Displa
 }
 
 // ==========================================
+// Markdown stripping for conversation previews
+// ==========================================
+
+/** Strip markdown formatting for plain-text preview (headers, bold, italic, code, links, images) */
+export function stripMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, '')        // headers
+    .replace(/!\[.*?\]\(.*?\)/g, '')     // images
+    .replace(/\[([^\]]*)\]\(.*?\)/g, '$1') // links → label
+    .replace(/`{1,3}[^`]*`{1,3}/g, (m) => m.replace(/`/g, '')) // inline/block code → content
+    .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1') // bold/italic
+    .replace(/_{1,3}([^_]+)_{1,3}/g, '$1')   // bold/italic underscore
+    .replace(/~~([^~]+)~~/g, '$1')       // strikethrough
+    .replace(/>\s?/gm, '')              // blockquotes
+    .replace(/[-*+]\s/gm, '')           // list markers
+    .replace(/\n{2,}/g, ' ')            // collapse multiple newlines
+    .replace(/\n/g, ' ')               // single newlines → space
+    .trim();
+}
+
+// ==========================================
 // Conversation Builders
 // ==========================================
 
@@ -134,7 +155,7 @@ export function buildConversation(
   return {
     peerPubkey,
     peerNametag: peerNametag ?? undefined,
-    lastMessageText: lastMsg?.content.slice(0, 100) ?? '',
+    lastMessageText: lastMsg ? stripMarkdown(lastMsg.content).slice(0, 100) : '',
     lastMessageTime: lastMsg?.timestamp ?? 0,
     unreadCount,
   };

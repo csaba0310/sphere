@@ -88,18 +88,47 @@ function setupIpfsSync(instance: Sphere, providers: BrowserProviders): void {
 /** Internal trigger content — hidden from chat UI, detected by bot */
 export const WELCOME_TRIGGER = '__sphere_welcome__';
 
-/** Send welcome trigger DM to configured agent (fire-and-forget) */
+/** Welcome DM recipients — send trigger if no existing conversation */
+const WELCOME_AGENTS = ['kbbot', 'viktor'];
+
+/** Per-agent, per-address localStorage key to skip redundant welcome checks */
+function welcomeKey(chainPubkey: string, nametag: string): string {
+  return `sphere_welcomed_${nametag}_${chainPubkey}`;
+}
+
+/** Send welcome trigger DM to agents with no existing conversation (fire-and-forget). */
 function sendWelcomeDM(instance: Sphere): void {
   if (!instance.identity) return;
 
-  const agentNametag = (import.meta.env.VITE_WELCOME_AGENT_NAMETAG as string | undefined) || 'kbbot';
+  const { chainPubkey } = instance.identity;
+
+  // Skip agents that already have their flag set
+  const pending = WELCOME_AGENTS.filter(
+    agent => !localStorage.getItem(welcomeKey(chainPubkey, agent)),
+  );
+  if (pending.length === 0) return;
+
   const delayMs = parseInt((import.meta.env.VITE_WELCOME_DELAY_MS as string | undefined) || '4000', 10);
 
-  setTimeout(() => {
-    instance.communications
-      .sendDM(`@${agentNametag}`, WELCOME_TRIGGER)
-      .then(() => logger.debug('SphereProvider', `Welcome trigger sent to @${agentNametag}`))
-      .catch((err) => logger.warn('SphereProvider', `Failed to send welcome trigger`, err));
+  setTimeout(async () => {
+    for (const nametag of pending) {
+      try {
+        const peerInfo = await instance.resolve(`@${nametag}`);
+        if (!peerInfo) continue;
+
+        const conversation = instance.communications.getConversation(peerInfo.transportPubkey);
+        if (conversation.length > 0) {
+          localStorage.setItem(welcomeKey(chainPubkey, nametag), '1');
+          continue;
+        }
+
+        await instance.communications.sendDM(`@${nametag}`, WELCOME_TRIGGER);
+        logger.debug('SphereProvider', `Welcome trigger sent to @${nametag}`);
+        localStorage.setItem(welcomeKey(chainPubkey, nametag), '1');
+      } catch (err) {
+        logger.warn('SphereProvider', `Failed to send welcome trigger to @${nametag}`, err);
+      }
+    }
   }, delayMs);
 }
 
@@ -181,6 +210,18 @@ export function SphereProvider({
         setInitProgress(null);
         sphereRef.current = instance;
         setSphere(instance);
+        // Send welcome DMs after relay delivers historical messages (EOSE)
+        {
+          let welcomed = false;
+          const trigger = () => {
+            if (welcomed) return;
+            welcomed = true;
+            sendWelcomeDM(instance);
+          };
+          const unsubReady = instance.on("communications:ready", () => { unsubReady(); trigger(); });
+          // Fallback if EOSE never fires (relay issues)
+          setTimeout(() => { unsubReady(); trigger(); }, 20000);
+        }
 
         // Run address discovery in background after wallet is visible
         setIsDiscoveringAddresses(true);
@@ -402,12 +443,12 @@ export function SphereProvider({
     await initialize(0, true);
   }, [providers, initialize, queryClient]);
 
-  const finalizeWallet = useCallback((importedSphere?: Sphere, isNewWallet?: boolean) => {
+  const finalizeWallet = useCallback((importedSphere?: Sphere) => {
     if (importedSphere) {
       if (providers) setupIpfsSync(importedSphere, providers);
       sphereRef.current = importedSphere;
       setSphere(importedSphere);
-      if (isNewWallet) sendWelcomeDM(importedSphere);
+      sendWelcomeDM(importedSphere);
     }
     setWalletExists(true);
   }, [providers]);
