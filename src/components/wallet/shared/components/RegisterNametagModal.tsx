@@ -1,6 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
 import { WalletScreen } from '../../ui/WalletScreen';
 import { ModalHeader } from '../../ui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -23,6 +22,7 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
 
   const { sphere, resolveNametag } = useSphereContext();
   const queryClient = useQueryClient();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Debounced nametag availability check
   useEffect(() => {
@@ -45,13 +45,17 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
     return () => clearTimeout(timer);
   }, [nametagInput, resolveNametag]);
 
-  // Reset state when modal closes
+  // Reset state when modal closes; focus input after slide-in when opening
   useEffect(() => {
     if (!isOpen) {
       setNametagInput('');
       setError(null);
       setAvailability('idle');
       setSuccess(false);
+    } else {
+      // Delay focus until after WalletScreen slide-in animation (~400ms)
+      const timer = setTimeout(() => inputRef.current?.focus(), 400);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -127,17 +131,16 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
 
       {/* Content */}
       <div className="px-6 py-8 space-y-4 flex-1">
-        <AnimatePresence>
                 <p className="text-sm text-neutral-500 dark:text-white/45">
                   Choose a unique ID to receive tokens easily without sharing long addresses.
                 </p>
 
-                {success ? (
+        {success ? (
                   <div className="text-center py-4">
                     <p className="text-emerald-500 font-medium">Registered successfully!</p>
                   </div>
                 ) : (
-                  <>
+                  <div className="space-y-4">
                     <div className="relative group">
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
                         {availability === 'checking' && <Loader2 className="w-3.5 h-3.5 text-neutral-400 animate-spin" />}
@@ -153,7 +156,7 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         placeholder="id"
-                        autoFocus
+                        ref={inputRef}
                         className={`w-full bg-neutral-100 dark:bg-white/4 border-2 rounded-xl py-3 pl-4 pr-28 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:bg-white dark:focus:bg-white/6 transition-all ${
                           availability === 'taken'
                             ? 'border-red-400 dark:border-red-500/50 focus:border-red-500'
@@ -201,9 +204,8 @@ export function RegisterNametagModal({ isOpen, onClose }: RegisterNametagModalPr
                         {error}
                       </p>
                     )}
-                  </>
+                  </div>
                 )}
-        </AnimatePresence>
       </div>
     </WalletScreen>
   );
