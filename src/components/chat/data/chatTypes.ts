@@ -1,4 +1,4 @@
-import { WELCOME_TRIGGER } from '../../../sdk/SphereProvider';
+import { WELCOME_TRIGGER } from '../../../sdk/welcomeDM';
 
 // SDK DirectMessage shape (local mirror — SDK DTS not always resolvable)
 interface SDKDirectMessage {
@@ -167,7 +167,10 @@ export function buildConversations(
 ): Conversation[] {
   const result: Conversation[] = [];
   for (const [peerPubkey, messages] of sdkConversations) {
-    result.push(buildConversation(peerPubkey, messages, myPubkey));
+    const conv = buildConversation(peerPubkey, messages, myPubkey);
+    // Hide conversations where all messages are welcome triggers (no real content yet)
+    if (conv.lastMessageTime === 0 && conv.lastMessageText === '') continue;
+    result.push(conv);
   }
   return result.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
 }

@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
 import { SPHERE_KEYS } from '../../../../sdk/queryKeys';
+import { sendWelcomeDM } from '../../../../sdk/welcomeDM';
 
 export type CreateAddressStep =
   | 'idle'
@@ -133,6 +134,8 @@ export function useCreateAddress(): UseCreateAddressReturn {
         await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
         await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.payments.tokens.all });
         await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.l1.all });
+        // Send welcome DMs to agents for the new address
+        sendWelcomeDM(sphere);
         return;
       }
 
@@ -204,6 +207,9 @@ export function useCreateAddress(): UseCreateAddressReturn {
 
       // Complete
       setStep('complete', 'Address created successfully!');
+
+      // Send welcome DMs to agents for the new address
+      sendWelcomeDM(sphere);
 
       // Dispatch event to trigger UI updates
       window.dispatchEvent(new Event("wallet-updated"));

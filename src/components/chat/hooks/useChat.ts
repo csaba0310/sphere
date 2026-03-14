@@ -13,7 +13,7 @@ import {
   getDisplayName,
   CHAT_KEYS,
 } from '../data/chatTypes';
-import { WELCOME_TRIGGER } from '../../../sdk/SphereProvider';
+import { WELCOME_TRIGGER } from '../../../sdk/welcomeDM';
 import { STORAGE_KEYS } from '../../../config/storageKeys';
 
 // Local type mirroring SDK's DirectMessage (SDK DTS not always available)
