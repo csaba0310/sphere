@@ -146,8 +146,9 @@ export function useDesktopState() {
   const activateTab = useCallback(
     (tabId: string) => {
       update((prev) => {
+        const isMobile = !window.matchMedia('(min-width: 1024px)').matches;
         if (prev.activeTabId === tabId) return prev;
-        return { ...prev, activeTabId: tabId };
+        return { ...prev, activeTabId: tabId, walletOpen: isMobile ? false : prev.walletOpen };
       });
     },
     [update],
