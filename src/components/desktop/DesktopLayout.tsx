@@ -167,13 +167,13 @@ export function DesktopLayout() {
         />
       </div>
 
-      {/* Content + wallet row */}
+      {/* Content + wallet row — single render to preserve state across breakpoints */}
       <div className="flex-1 min-h-0 flex mx-1">
-          {/* Mobile: stack content and wallet in same space */}
-          <div className="flex-1 min-w-0 lg:hidden relative overflow-hidden rounded-2xl">
-            {/* Content area */}
-            <div className={`absolute inset-0 bg-white dark:bg-[#0a0a0a]/60 dark:backdrop-blur-sm transition-transform duration-300 ease-in-out ${
-              walletOpen ? '-translate-x-full' : 'translate-x-0'
+          {/* Content + mobile wallet container */}
+          <div className="flex-1 min-w-0 relative overflow-hidden rounded-2xl lg:overflow-visible">
+            {/* Content area — mobile: absolute + slide, desktop: normal flow */}
+            <div className={`absolute inset-0 lg:relative lg:h-full lg:rounded-2xl lg:overflow-hidden bg-white dark:bg-[#0a0a0a]/60 dark:backdrop-blur-sm transition-transform duration-300 ease-in-out lg:transition-none ${
+              walletOpen ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
             }`}>
               {activeTabId === null && <DesktopShortcuts />}
               {openTabs.map((tab) => (
@@ -185,29 +185,14 @@ export function DesktopLayout() {
                 </div>
               ))}
             </div>
-            {/* Wallet panel — slides in from right */}
+            {/* Wallet panel — mobile only: slides in from right */}
             <div
               data-tutorial="wallet-panel-mobile"
-              className={`absolute inset-0 transition-transform duration-300 ease-in-out ${
+              className={`absolute inset-0 lg:hidden transition-transform duration-300 ease-in-out ${
                 walletOpen ? 'translate-x-0' : 'translate-x-full'
               }`}
             >
               <WalletPanel />
-            </div>
-          </div>
-
-          {/* Desktop: content + wallet side by side */}
-          <div className="hidden lg:block flex-1 min-w-0">
-            <div className="h-full rounded-2xl overflow-hidden bg-white dark:bg-[#0a0a0a]/60 dark:backdrop-blur-sm">
-              {activeTabId === null && <DesktopShortcuts />}
-              {openTabs.map((tab) => (
-                <div
-                  key={tab.id}
-                  className={tab.id === activeTabId ? 'h-full' : 'hidden'}
-                >
-                  {renderTabContent(tab.id, tab.appId, tab.url)}
-                </div>
-              ))}
             </div>
           </div>
 
