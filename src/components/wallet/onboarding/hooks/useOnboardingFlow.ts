@@ -105,6 +105,17 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Block page reload / tab close during wallet creation
+  const isProcessingActive = step === "processing" || step === "mnemonicBackup";
+  useEffect(() => {
+    if (!isProcessingActive) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isProcessingActive]);
+
   // Mnemonic restore state
   const [seedWords, setSeedWords] = useState<string[]>(Array(12).fill(""));
 

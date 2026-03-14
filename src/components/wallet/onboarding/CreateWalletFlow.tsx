@@ -2,6 +2,7 @@
  * CreateWalletFlow - Main onboarding flow component
  * Uses extracted hooks for state management and screen components for UI
  */
+import { useEffect, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useSphereContext } from "../../../sdk/hooks/core/useSphere";
 import { useOnboardingFlow } from "./hooks/useOnboardingFlow";
@@ -91,8 +92,24 @@ export function CreateWalletFlow() {
     nametag,
   } = useOnboardingFlow();
 
+  // Block all clicks outside the wallet panel during critical steps
+  const isLocked = step === "processing" || step === "mnemonicBackup";
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isLocked) return;
+    // Disable pointer events on everything, re-enable on our panel
+    document.body.style.pointerEvents = "none";
+    const panel = panelRef.current?.closest("[data-wallet-panel]") as HTMLElement | null;
+    if (panel) panel.style.pointerEvents = "auto";
+    return () => {
+      document.body.style.pointerEvents = "";
+      if (panel) panel.style.pointerEvents = "";
+    };
+  }, [isLocked]);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-full p-6 text-center relative">
+    <div ref={panelRef} className="flex flex-col items-center justify-center min-h-full p-6 text-center relative">
       <AnimatePresence mode="wait">
         {step === "start" && (
           <StartScreen
