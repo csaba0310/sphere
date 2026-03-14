@@ -10,7 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
 import { SPHERE_KEYS } from '../../../../sdk/queryKeys';
-import { sendWelcomeDM } from '../../../../sdk/SphereProvider';
+import { sendWelcomeDM } from '../../../../sdk/welcomeDM';
 
 export type CreateAddressStep =
   | 'idle'

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSphereContext } from '../../../sdk/hooks/core/useSphere';
 import { useIdentity } from '../../../sdk/hooks/core/useIdentity';
 import { type Conversation, type DisplayMessage, type DmReceivedDetail, buildAddressId, toDisplayMessage, formatMessageTime, getDisplayName, getAvatar, CHAT_KEYS } from '../data/chatTypes';
-import { WELCOME_TRIGGER } from '../../../sdk/SphereProvider';
+import { WELCOME_TRIGGER } from '../../../sdk/welcomeDM';
 import { useMiniChatStore } from './miniChatStore';
 import { MiniChatInput } from './MiniChatInput';
 import { MarkdownContent } from '../../../utils/markdown';

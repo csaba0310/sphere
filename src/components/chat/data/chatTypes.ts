@@ -1,4 +1,4 @@
-import { WELCOME_TRIGGER } from '../../../sdk/SphereProvider';
+import { WELCOME_TRIGGER } from '../../../sdk/welcomeDM';
 
 // SDK DirectMessage shape (local mirror — SDK DTS not always resolvable)
 interface SDKDirectMessage {

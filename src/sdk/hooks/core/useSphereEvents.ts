@@ -5,7 +5,7 @@ import { SPHERE_KEYS } from '../../queryKeys';
 import { formatAmount } from '../../index';
 import { showTransferToast } from '../../../components/ui/toast-utils';
 import { CHAT_KEYS, GROUP_CHAT_KEYS, type DmReceivedDetail } from '../../../components/chat/data/chatTypes';
-import { sendWelcomeDM } from '../../SphereProvider';
+import { sendWelcomeDM } from '../../welcomeDM';
 import type { IncomingTransfer } from '@unicitylabs/sphere-sdk';
 
 // SDK DM shape (local mirror — SDK DTS not always available)
