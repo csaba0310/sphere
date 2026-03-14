@@ -16,6 +16,7 @@ import {
   AddressSelectionScreen,
   NametagScreen,
   ProcessingScreen,
+  MnemonicBackupScreen,
 } from "./components";
 
 export type { OnboardingStep } from "./hooks/useOnboardingFlow";
@@ -53,7 +54,11 @@ export function CreateWalletFlow() {
     processingTitle,
     processingCompleteTitle,
     isProcessingComplete,
-    handleCompleteOnboarding,
+    handleMnemonicBackupComplete,
+    handleDownloadBackup,
+
+    // Generated mnemonic (for backup screen)
+    generatedMnemonic,
 
     // Address selection state (multi-select)
     derivedAddresses,
@@ -188,7 +193,14 @@ export function CreateWalletFlow() {
             title={processingTitle}
             completeTitle={processingCompleteTitle}
             isComplete={isProcessingComplete}
-            onComplete={handleCompleteOnboarding}
+          />
+        )}
+
+        {step === "mnemonicBackup" && generatedMnemonic && (
+          <MnemonicBackupScreen
+            mnemonic={generatedMnemonic}
+            onDownloadBackup={handleDownloadBackup}
+            onConfirm={handleMnemonicBackupComplete}
           />
         )}
       </AnimatePresence>

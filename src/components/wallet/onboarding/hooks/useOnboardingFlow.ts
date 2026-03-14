@@ -20,7 +20,8 @@ export type OnboardingStep =
   | "passwordPrompt"
   | "addressSelection"
   | "nametag"
-  | "processing";
+  | "processing"
+  | "mnemonicBackup";
 
 export interface UseOnboardingFlowReturn {
   // Step management
@@ -53,6 +54,8 @@ export interface UseOnboardingFlowReturn {
   processingCompleteTitle: string;
   isProcessingComplete: boolean;
   handleCompleteOnboarding: () => Promise<void>;
+  handleMnemonicBackupComplete: () => void;
+  handleDownloadBackup: () => Promise<void>;
 
   // Address selection state (multi-select)
   derivedAddresses: DerivedAddressInfo[];
@@ -570,25 +573,58 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
     }
   }, [createWallet, sphere]);
 
-  // Action: Complete onboarding (called when user clicks "Let's Go")
-  const handleCompleteOnboarding = useCallback(async () => {
-    // Mark wallet as existing so WalletPanel switches from onboarding to wallet UI.
-    // For create flows walletExists is already true — this is a no-op for sphere.
-    // For import flows this sets the sphere in context + walletExists = true.
+  // Finalize wallet and switch to wallet UI
+  const doFinalizeWallet = useCallback(() => {
     finalizeWallet(importedSphereRef.current ?? undefined);
     importedSphereRef.current = null;
     isCreateFlowRef.current = false;
-
-    // Remove all cached query data so old wallet balances don't flash briefly.
-    // removeQueries deletes the cache entirely; the hooks will re-fetch from scratch.
     queryClient.removeQueries({ queryKey: SPHERE_KEYS.all });
-
-    // Signal wallet creation for legacy listeners
     window.dispatchEvent(new Event("wallet-loaded"));
     window.dispatchEvent(new Event("wallet-updated"));
-
     setStep("start");
   }, [queryClient, finalizeWallet]);
+
+  // Auto-transition when processing completes
+  useEffect(() => {
+    if (isProcessingComplete && step === "processing") {
+      const timer = setTimeout(() => {
+        if (isCreateFlowRef.current && generatedMnemonic) {
+          setStep("mnemonicBackup");
+        } else {
+          doFinalizeWallet();
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [isProcessingComplete, generatedMnemonic, step, doFinalizeWallet]);
+
+  // Legacy handler kept for interface compatibility (no longer shows "Let's Go")
+  const handleCompleteOnboarding = useCallback(async () => {
+    doFinalizeWallet();
+  }, [doFinalizeWallet]);
+
+  // Action: Confirm mnemonic backup (called after user saves recovery phrase)
+  const handleMnemonicBackupComplete = useCallback(() => {
+    doFinalizeWallet();
+  }, [doFinalizeWallet]);
+
+  // Action: Download wallet backup file
+  const handleDownloadBackup = useCallback(async () => {
+    const activeSphere = importedSphereRef.current ?? sphere;
+    if (!activeSphere) return;
+    const jsonData = activeSphere.exportToJSON({ includeMnemonic: true });
+    const nametag = activeSphere.identity?.nametag?.replace(/^@/, "");
+    const fileName = nametag
+      ? `${nametag}.json`
+      : "sphere_wallet_backup.json";
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [sphere]);
 
   // Action: Derive new address (for address selection screen)
   const handleDeriveNewAddress = useCallback(async () => {
@@ -754,6 +790,8 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
     processingCompleteTitle,
     isProcessingComplete,
     handleCompleteOnboarding,
+    handleMnemonicBackupComplete,
+    handleDownloadBackup,
 
     // Address selection state (multi-select)
     derivedAddresses,
