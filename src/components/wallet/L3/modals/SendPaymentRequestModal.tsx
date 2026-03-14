@@ -28,9 +28,11 @@ interface SendPaymentRequestModalProps {
   isOpen: boolean;
   onClose: (result?: { success: boolean; requestId?: string }) => void;
   prefill?: PaymentRequestPrefill;
+  /** Render as centered modal dialog instead of slide-in panel */
+  asModal?: boolean;
 }
 
-export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymentRequestModalProps) {
+export function SendPaymentRequestModal({ isOpen, onClose, prefill, asModal }: SendPaymentRequestModalProps) {
   const { sphere } = useSphereContext();
 
   const [step, setStep] = useState<Step>('coin');
@@ -213,7 +215,7 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill }: SendPaymen
   };
 
   return (
-    <WalletScreen isOpen={isOpen} onClose={handleClose}>
+    <WalletScreen isOpen={isOpen} onClose={handleClose} asModal={asModal}>
       <ModalHeader variant="screen" title={getTitle()} onClose={getBackHandler()} />
 
       <div className="px-6 py-8 flex-1 overflow-y-auto">

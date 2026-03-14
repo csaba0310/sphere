@@ -92,19 +92,31 @@ export function CreateWalletFlow() {
     nametag,
   } = useOnboardingFlow();
 
-  // Block all clicks outside the wallet panel during critical steps
+  // Block navigation clicks outside wallet panel during critical steps.
+  // Sets pointer-events:none on body, re-enables on wallet panel and on
+  // fixed/absolute modals (z-100) so Connect intents still work.
   const isLocked = step === "processing" || step === "mnemonicBackup";
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isLocked) return;
-    // Disable pointer events on everything, re-enable on our panel
+
     document.body.style.pointerEvents = "none";
+
+    // Re-enable on wallet panel
     const panel = panelRef.current?.closest("[data-wallet-panel]") as HTMLElement | null;
     if (panel) panel.style.pointerEvents = "auto";
+
+    // Re-enable on all fixed-position overlays (BaseModal backdrops & containers)
+    const style = document.createElement("style");
+    style.setAttribute("data-wallet-lock", "");
+    style.textContent = "[style*='position: fixed'], [class*='fixed'] { pointer-events: auto !important; }";
+    document.head.appendChild(style);
+
     return () => {
       document.body.style.pointerEvents = "";
       if (panel) panel.style.pointerEvents = "";
+      style.remove();
     };
   }, [isLocked]);
 

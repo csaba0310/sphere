@@ -61,6 +61,7 @@ export function ConnectIntentHandler() {
           coinId: (params.coinId as string) ?? 'UCT',
           memo: params.memo as string | undefined,
         }}
+        asModal
       />
     );
   }
@@ -83,6 +84,7 @@ export function ConnectIntentHandler() {
           coinId: (params.coinId as string) ?? 'UCT',
           message: params.message as string | undefined,
         }}
+        asModal
       />
     );
   }
@@ -113,6 +115,7 @@ export function ConnectIntentHandler() {
         onEstimateFee={estimateFee}
         onResolveAddress={resolveAddress}
         prefill={toParam ? { to: toParam, amount: amountAlpha ?? '' } : undefined}
+        asModal
       />
     );
   }
