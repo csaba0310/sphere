@@ -119,7 +119,7 @@ export function WalletPanel() {
   // No wallet — show onboarding flow inside the panel
   if (!walletExists) {
     return (
-      <div className={PANEL_SHELL}>
+      <div className={PANEL_SHELL} data-wallet-panel>
         <div className="flex-1 relative overflow-y-auto">
           <CreateWalletFlow />
         </div>

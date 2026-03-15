@@ -2,6 +2,7 @@
  * CreateWalletFlow - Main onboarding flow component
  * Uses extracted hooks for state management and screen components for UI
  */
+import { useEffect, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useSphereContext } from "../../../sdk/hooks/core/useSphere";
 import { useOnboardingFlow } from "./hooks/useOnboardingFlow";
@@ -16,6 +17,7 @@ import {
   AddressSelectionScreen,
   NametagScreen,
   ProcessingScreen,
+  MnemonicBackupScreen,
 } from "./components";
 
 export type { OnboardingStep } from "./hooks/useOnboardingFlow";
@@ -53,7 +55,11 @@ export function CreateWalletFlow() {
     processingTitle,
     processingCompleteTitle,
     isProcessingComplete,
-    handleCompleteOnboarding,
+    handleMnemonicBackupComplete,
+    handleDownloadBackup,
+
+    // Generated mnemonic (for backup screen)
+    generatedMnemonic,
 
     // Address selection state (multi-select)
     derivedAddresses,
@@ -86,8 +92,36 @@ export function CreateWalletFlow() {
     nametag,
   } = useOnboardingFlow();
 
+  // Block navigation clicks outside wallet panel during critical steps.
+  // Sets pointer-events:none on body, re-enables on wallet panel and on
+  // fixed/absolute modals (z-100) so Connect intents still work.
+  const isLocked = step === "processing" || step === "mnemonicBackup";
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isLocked) return;
+
+    document.body.style.pointerEvents = "none";
+
+    // Re-enable on wallet panel
+    const panel = panelRef.current?.closest("[data-wallet-panel]") as HTMLElement | null;
+    if (panel) panel.style.pointerEvents = "auto";
+
+    // Re-enable on all fixed-position overlays (BaseModal backdrops & containers)
+    const style = document.createElement("style");
+    style.setAttribute("data-wallet-lock", "");
+    style.textContent = "[style*='position: fixed'], [class*='fixed'] { pointer-events: auto !important; }";
+    document.head.appendChild(style);
+
+    return () => {
+      document.body.style.pointerEvents = "";
+      if (panel) panel.style.pointerEvents = "";
+      style.remove();
+    };
+  }, [isLocked]);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-full p-6 text-center relative">
+    <div ref={panelRef} className="flex flex-col items-center justify-center min-h-full p-6 text-center relative">
       <AnimatePresence mode="wait">
         {step === "start" && (
           <StartScreen
@@ -188,7 +222,14 @@ export function CreateWalletFlow() {
             title={processingTitle}
             completeTitle={processingCompleteTitle}
             isComplete={isProcessingComplete}
-            onComplete={handleCompleteOnboarding}
+          />
+        )}
+
+        {step === "mnemonicBackup" && generatedMnemonic && (
+          <MnemonicBackupScreen
+            mnemonic={generatedMnemonic}
+            onDownloadBackup={handleDownloadBackup}
+            onConfirm={handleMnemonicBackupComplete}
           />
         )}
       </AnimatePresence>

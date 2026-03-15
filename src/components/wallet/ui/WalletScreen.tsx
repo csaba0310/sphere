@@ -1,14 +1,25 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { BaseModal } from './BaseModal';
 
 interface WalletScreenProps {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
   className?: string;
+  /** Render as a centered modal dialog instead of a slide-in panel */
+  asModal?: boolean;
 }
 
-export function WalletScreen({ isOpen, children, className = '' }: WalletScreenProps) {
+export function WalletScreen({ isOpen, onClose, children, className = '', asModal = false }: WalletScreenProps) {
+  if (asModal) {
+    return (
+      <BaseModal isOpen={isOpen} onClose={onClose} size="lg" className={className}>
+        {children}
+      </BaseModal>
+    );
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (

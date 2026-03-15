@@ -22,9 +22,11 @@ interface SendModalProps {
   isOpen: boolean;
   onClose: (result?: { success: boolean }) => void;
   prefill?: SendPrefill;
+  /** Render as centered modal dialog instead of slide-in panel */
+  asModal?: boolean;
 }
 
-export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
+export function SendModal({ isOpen, onClose, prefill, asModal }: SendModalProps) {
   const { assets: sdkAssets } = useAssets();
   const { transfer, isLoading: isTransferring } = useTransfer();
   const { sphere } = useSphereContext();
@@ -199,7 +201,7 @@ export function SendModal({ isOpen, onClose, prefill }: SendModalProps) {
   };
 
   return (
-    <WalletScreen isOpen={isOpen} onClose={handleClose}>
+    <WalletScreen isOpen={isOpen} onClose={handleClose} asModal={asModal}>
       <ModalHeader variant="screen" title={getTitle()} onClose={getBackHandler()} />
 
       <div className="px-6 py-8 flex-1 overflow-y-auto">

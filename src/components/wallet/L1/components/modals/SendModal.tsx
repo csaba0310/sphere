@@ -37,9 +37,11 @@ interface SendModalProps {
   onEstimateFee?: (to: string, amountSats: string) => Promise<{ fee: string; feeRate: number }>;
   onResolveAddress?: (destination: string) => Promise<{ address: string; nametag?: string }>;
   prefill?: L1SendPrefill;
+  /** Render as centered modal dialog instead of slide-in panel */
+  asModal?: boolean;
 }
 
-export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalances: propBalances, onEstimateFee, onResolveAddress, prefill }: SendModalProps) {
+export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalances: propBalances, onEstimateFee, onResolveAddress, prefill, asModal }: SendModalProps) {
   const [destination, setDestination] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -159,7 +161,7 @@ export function SendModal({ show, selectedAddress, onClose, onSend, vestingBalan
   };
 
   return (
-    <WalletScreen isOpen={show} onClose={() => onClose()}>
+    <WalletScreen isOpen={show} onClose={() => onClose()} asModal={asModal}>
       <ModalHeader
         variant="screen"
         title={step === 'confirm' ? 'Confirm Transaction' : 'Send ALPHA'}
