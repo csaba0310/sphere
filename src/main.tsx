@@ -12,8 +12,8 @@ import { ConnectProvider } from './components/connect'
 import { ToastContainer } from './components/ui/Toast'
 import mixpanel from 'mixpanel-browser'
 mixpanel.init(import.meta.env.VITE_MIXPANEL_TOKEN || '19d06212425213a4eeb34337016d0186', {
-  autocapture: false,
-  record_sessions_percent: 0,
+  autocapture: true,
+  record_sessions_percent: 100,
   api_host: 'https://api-eu.mixpanel.com',
 })
 
