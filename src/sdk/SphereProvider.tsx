@@ -354,6 +354,9 @@ export function SphereProvider({
   );
 
   const deleteWallet = useCallback(async () => {
+    // Notify connected dApps before destroying — ConnectPage/IframeAgent listen for this
+    window.dispatchEvent(new CustomEvent('sphere:wallet-logout'));
+
     // Destroy sphere to close SDK connections (Nostr, IndexedDB handles, etc.)
     if (sphereRef.current) {
       await sphereRef.current.destroy();
