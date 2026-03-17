@@ -40,6 +40,24 @@ export function IframeAgent({ agent }: IframeAgentProps) {
   // Track sphere availability so the effect re-runs when sphere loads
   const sphereReady = !!sphere;
 
+  // When user switches address — notify the connected dApp
+  useEffect(() => {
+    if (sphere && hostRef.current) {
+      hostRef.current.updateSphere(sphere);
+    }
+  }, [sphere]);
+
+  // Notify dApp on logout
+  useEffect(() => {
+    const notifyLocked = () => {
+      if (hostRef.current) {
+        hostRef.current.notifyWalletLocked();
+      }
+    };
+    window.addEventListener('sphere:wallet-logout', notifyLocked);
+    return () => window.removeEventListener('sphere:wallet-logout', notifyLocked);
+  }, []);
+
   const cleanup = useCallback(() => {
     hostRef.current?.destroy();
     hostRef.current = null;

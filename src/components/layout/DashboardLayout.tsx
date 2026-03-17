@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { Header } from './Header';
 import { MiniChatBubbles } from '../chat/mini';
 import { useUIState } from '../../hooks/useUIState';
@@ -7,6 +8,7 @@ import { TutorialOverlay } from '../tutorial/TutorialOverlay';
 import { useTutorial } from '../../hooks/useTutorial';
 import { useDeepLinkNavigation } from '../../hooks/useDeepLinkNavigation';
 import bgVideoUrl from '/kling_20260226_VIDEO_Take_Image_1650_0.mp4';
+import bgPosterUrl from '/bg-poster.webp';
 
 export function DashboardLayout() {
   const location = useLocation();
@@ -15,6 +17,7 @@ export function DashboardLayout() {
   const { activeTabId } = useDesktopState();
   const tutorial = useTutorial();
   useDeepLinkNavigation();
+  const [videoReady, setVideoReady] = useState(false);
 
   // Hide mini chat when the DM tab is actively open (to avoid duplicate UI)
   const isAgentPage = location.pathname === '/home' || location.pathname.startsWith('/agents/');
@@ -25,13 +28,19 @@ export function DashboardLayout() {
     <div className="h-full flex flex-col bg-neutral-100 dark:bg-[#060606] theme-transition overflow-hidden relative">
       {/* Video background — dark mode only */}
       <div className="hidden dark:block fixed inset-0 z-0 pointer-events-none">
+        {/* Static poster shown instantly while video loads */}
+        {!videoReady && (
+          <img src={bgPosterUrl} alt="" className="w-full h-full object-cover" />
+        )}
         <video
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover ${!videoReady ? 'hidden' : ''}`}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
           src={bgVideoUrl}
+          onCanPlayThrough={() => setVideoReady(true)}
         />
         <div className="absolute inset-0 bg-black/60" />
       </div>

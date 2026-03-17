@@ -41,6 +41,30 @@ export function ConnectPage() {
   // Since this is a popup page, browser GC handles cleanup when the window closes.
   const initializedRef = useRef(false);
 
+  // When user switches address — notify the connected dApp
+  useEffect(() => {
+    if (sphere && hostRef.current) {
+      hostRef.current.updateSphere(sphere);
+    }
+  }, [sphere]);
+
+  // Notify dApp on logout (SPA navigation) or page unload (refresh/close)
+  useEffect(() => {
+    const notifyLocked = () => {
+      if (hostRef.current) {
+        hostRef.current.notifyWalletLocked();
+      }
+    };
+    // SPA logout — dispatched by SphereProvider.deleteWallet before destroy
+    window.addEventListener('sphere:wallet-logout', notifyLocked);
+    // Page refresh or close
+    window.addEventListener('beforeunload', notifyLocked);
+    return () => {
+      window.removeEventListener('sphere:wallet-logout', notifyLocked);
+      window.removeEventListener('beforeunload', notifyLocked);
+    };
+  }, []);
+
   useEffect(() => {
     if (!sphereReady) return;
     // Already initialized (incl. StrictMode second mount) — skip
@@ -123,42 +147,33 @@ export function ConnectPage() {
   }, [sphereReady, origin]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col items-center p-4 pt-8">
-      <div className="w-full max-w-sm space-y-3">
-        {/* Connection status bar */}
-        {status === 'ready' && (
-          <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-gray-200 dark:border-neutral-700 p-3 shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-sm font-medium text-gray-700 dark:text-neutral-300">
-                {connectedDapp ? `Connected to ${connectedDapp}` : 'Ready for connections'}
-              </span>
+    <div className="h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col">
+      {/* Connection status bar */}
+      {status === 'ready' && (
+        <div className="shrink-0 mx-3 mt-3 bg-white dark:bg-neutral-800 rounded-2xl border border-gray-200 dark:border-neutral-700 p-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-sm font-medium text-gray-700 dark:text-neutral-300">
+              {connectedDapp ? `Connected to ${connectedDapp}` : 'Ready for connections'}
+            </span>
+          </div>
+          {origin && (
+            <div className="text-xs text-gray-400 dark:text-neutral-500 mt-1">
+              Origin: <span className="font-mono">{origin}</span>
             </div>
-            {origin && (
-              <div className="text-xs text-gray-400 dark:text-neutral-500 mt-1">
-                Origin: <span className="font-mono">{origin}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 p-4 text-center text-red-600 dark:text-red-400 text-sm">
-            {errorMsg}
-          </div>
-        )}
-
-        {/* Wallet panel — same component as the main app */}
-        <div className="h-130">
-          <WalletPanel />
+          )}
         </div>
+      )}
 
-        {/* Hint */}
-        {status === 'ready' && (
-          <p className="text-xs text-center text-gray-400 dark:text-neutral-500 px-4">
-            You can close this window. It will re-open automatically when the dApp needs your wallet.
-          </p>
-        )}
+      {status === 'error' && (
+        <div className="shrink-0 mx-3 mt-3 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 p-4 text-center text-red-600 dark:text-red-400 text-sm">
+          {errorMsg}
+        </div>
+      )}
+
+      {/* Wallet panel — fills remaining space */}
+      <div className="flex-1 min-h-0 p-3">
+        <WalletPanel />
       </div>
     </div>
   );
