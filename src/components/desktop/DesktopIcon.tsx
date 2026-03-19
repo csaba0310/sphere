@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { AgentConfig } from '../../config/activities';
 
@@ -5,11 +6,15 @@ interface DesktopIconProps {
   agent: AgentConfig;
   isOpen?: boolean;
   badge?: number;
+  iconUrl?: string;
+  tooltip?: string;
   onClick: () => void;
 }
 
-export function DesktopIcon({ agent, isOpen, badge, onClick }: DesktopIconProps) {
+export function DesktopIcon({ agent, isOpen, badge, iconUrl, tooltip, onClick }: DesktopIconProps) {
   const { Icon, name, color } = agent;
+  const [imgError, setImgError] = useState(false);
+  const showImage = iconUrl && !imgError;
 
   return (
     <motion.button
@@ -17,6 +22,7 @@ export function DesktopIcon({ agent, isOpen, badge, onClick }: DesktopIconProps)
       whileHover={{ scale: 1.08, y: -4 }}
       whileTap={{ scale: 0.92 }}
       transition={{ duration: 0.05 }}
+      title={tooltip}
       className="flex flex-col items-center gap-2 p-3 rounded-2xl group cursor-pointer relative"
     >
       {/* Icon container with gradient */}
@@ -36,7 +42,16 @@ export function DesktopIcon({ agent, isOpen, badge, onClick }: DesktopIconProps)
           {/* Corner accent */}
           <div className="absolute top-0 right-0 w-8 h-8 bg-white/10 rounded-bl-full group-hover:w-10 group-hover:h-10 transition-all duration-300" />
 
-          <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-lg relative z-10" />
+          {showImage ? (
+            <img
+              src={iconUrl}
+              alt={name}
+              onError={() => setImgError(true)}
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-lg relative z-10 drop-shadow-lg"
+            />
+          ) : (
+            <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-lg relative z-10" />
+          )}
         </div>
 
         {/* Badge */}
