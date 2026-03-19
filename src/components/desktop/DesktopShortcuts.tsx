@@ -119,6 +119,19 @@ export function DesktopShortcuts() {
             </section>
           );
         })}
+
+        {/* Community CTA */}
+        <p className="text-center text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.3)] pt-2 pb-4">
+          Built something for Sphere?{' '}
+          <a
+            href="https://github.com/unicity-sphere/sphere-apps"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)] transition-colors"
+          >
+            Add it to the directory
+          </a>
+        </p>
       </div>
     </div>
   );
