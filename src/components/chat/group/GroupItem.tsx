@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Hash, Lock, Pin, MoreVertical, LogOut, Trash2, Link, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -9,20 +10,20 @@ import { getGroupDisplayName, getGroupFormattedLastMessageTime, isPinnedGroup } 
 interface GroupItemProps {
   group: GroupData;
   isSelected: boolean;
-  onClick: () => void;
-  onLeave: () => void;
+  onSelect: (group: GroupData) => void;
+  onLeave: (groupId: string) => void;
   isAdmin?: boolean;
   isRelayAdmin?: boolean;
-  onDeleteGroup?: () => Promise<boolean>;
-  onCreateInvite?: () => Promise<string | null>;
+  onDeleteGroup?: (groupId: string) => Promise<boolean>;
+  onCreateInvite?: (groupId: string) => Promise<string | null>;
   isDeletingGroup?: boolean;
   isCreatingInvite?: boolean;
 }
 
-export function GroupItem({
+export const GroupItem = memo(function GroupItem({
   group,
   isSelected,
-  onClick,
+  onSelect,
   onLeave,
   isAdmin = false,
   isRelayAdmin = false,
@@ -40,6 +41,7 @@ export function GroupItem({
   const hasMenuItems = canInvite || canDelete || canLeave;
 
   useEffect(() => {
+    if (!showMenu) return;
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
@@ -47,18 +49,16 @@ export function GroupItem({
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [showMenu]);
 
   return (
-    <motion.div
-      onClick={onClick}
+    <div
+      onClick={() => onSelect(group)}
       className={`p-3 rounded-xl cursor-pointer transition-all relative group ${
         isSelected
           ? 'bg-linear-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/30'
           : 'hover:bg-neutral-100 dark:hover:bg-neutral-800/50 border border-transparent'
       } ${showMenu ? 'z-50' : ''}`}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
     >
       <div className="flex items-center gap-3">
         {/* Group Avatar */}
@@ -130,7 +130,7 @@ export function GroupItem({
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
-                      const code = await onCreateInvite();
+                      const code = await onCreateInvite(group.id);
                       if (code) {
                         // Copy to clipboard - format: #/agents/group-chat?join=groupId/inviteCode
                         const inviteUrl = `${window.location.origin}${window.location.pathname}#/agents/group-chat?join=${group.id}/${code}`;
@@ -156,7 +156,7 @@ export function GroupItem({
                     onClick={async (e) => {
                       e.stopPropagation();
                       if (confirm(`Are you sure you want to delete "${getGroupDisplayName(group)}"? This cannot be undone.`)) {
-                        await onDeleteGroup();
+                        await onDeleteGroup(group.id);
                       }
                       setShowMenu(false);
                     }}
@@ -176,7 +176,7 @@ export function GroupItem({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onLeave();
+                      onLeave(group.id);
                       setShowMenu(false);
                     }}
                     className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
@@ -190,6 +190,6 @@ export function GroupItem({
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
-}
+});
