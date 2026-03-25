@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Loader2, Globe, ExternalLink } from 'lucide-react';
+import { Loader2, Globe, ExternalLink, RotateCw } from 'lucide-react';
 import { ConnectHost, HOST_READY_TYPE } from '@unicitylabs/sphere-sdk/connect';
 import type { DAppMetadata, PermissionScope } from '@unicitylabs/sphere-sdk/connect';
 import { PostMessageTransport } from '@unicitylabs/sphere-sdk/connect/browser';
@@ -170,6 +170,21 @@ export function IframeAgent({ agent }: IframeAgentProps) {
         <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate flex-1">
           {displayHost}
         </span>
+        <button
+          onClick={() => {
+            const iframe = iframeRef.current;
+            if (iframe) {
+              cleanup();
+              setIsLoading(true);
+              iframe.src = activeUrl;
+            }
+          }}
+          className="flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 rounded-md hover:bg-neutral-200/60 dark:hover:bg-neutral-700/40 transition-colors shrink-0"
+          title="Reload page"
+        >
+          <RotateCw className="w-3 h-3" />
+          <span className="hidden sm:inline">Reload</span>
+        </button>
         <a
           href={activeUrl}
           target="_blank"
