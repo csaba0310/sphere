@@ -47,7 +47,12 @@ type Section =
   | 'guide-wallet-backup'
   | 'examples'
   | 'example-payment'
-  | 'example-marketplace';
+  | 'example-marketplace'
+  | 'connect'
+  | 'connect-overview'
+  | 'connect-how-it-works'
+  | 'connect-autoconnect'
+  | 'connect-resources';
 
 interface NavItem {
   id: Section;
@@ -135,6 +140,16 @@ const navigation: NavItem[] = [
   {
     id: 'api-market',
     label: 'Market',
+  },
+  {
+    id: 'connect',
+    label: 'Sphere Connect',
+    children: [
+      { id: 'connect-overview', label: 'Overview' },
+      { id: 'connect-how-it-works', label: 'How It Works' },
+      { id: 'connect-autoconnect', label: 'autoConnect()' },
+      { id: 'connect-resources', label: 'Resources & Links' },
+    ],
   },
   {
     id: 'guides',
@@ -239,8 +254,31 @@ export function DocsPage() {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveSection(id);
       setMobileNavOpen(false);
+      window.history.replaceState(null, '', `#${id}`);
     }
   };
+
+  // Read hash on mount and scroll to section
+  useEffect(() => {
+    const hash = window.location.hash.slice(1) as Section;
+    if (hash) {
+      // Expand parent nav group if needed
+      for (const item of navigation) {
+        if (item.id === hash || item.children?.some(c => c.id === hash)) {
+          setExpandedSections(prev => new Set(prev).add(item.id));
+          break;
+        }
+      }
+      // Delay to let DOM render
+      requestAnimationFrame(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActiveSection(hash);
+        }
+      });
+    }
+  }, []);
 
   const toggleSection = (id: Section) => {
     setExpandedSections(prev => {
@@ -298,9 +336,8 @@ export function DocsPage() {
                   onClick={() => {
                     if (item.children) {
                       toggleSection(item.id);
-                    } else {
-                      scrollToSection(item.id);
                     }
+                    scrollToSection(item.id);
                   }}
                   className={`
                     w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition
@@ -1300,6 +1337,199 @@ const unsub = sphere.market.subscribeFeed((listing) => {
 // Get recent listings
 const recent = await sphere.market.getRecentListings();`}
             />
+          </section>
+
+          {/* ============================================================ */}
+          {/* SPHERE CONNECT                                                */}
+          {/* ============================================================ */}
+          <section id="connect" data-section="connect" className="mb-16">
+            <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-neutral-200 dark:border-neutral-700">
+              Sphere Connect
+            </h2>
+
+            {/* Overview */}
+            <div id="connect-overview" data-section="connect-overview" className="scroll-mt-24 mb-12">
+              <h3 className="text-xl font-semibold mb-4">Overview</h3>
+              <p className="text-neutral-600 dark:text-neutral-300 mb-4">
+                Sphere Connect is a protocol that lets external dApps interact with the Sphere wallet.
+                Instead of managing private keys directly, your app connects to the user's wallet
+                and requests actions through a secure, permission-based interface.
+              </p>
+              <p className="text-neutral-600 dark:text-neutral-300 mb-4">
+                The protocol follows a <strong>Host / Client</strong> architecture:
+              </p>
+              <ul className="list-disc ml-6 text-neutral-600 dark:text-neutral-300 space-y-2 mb-4">
+                <li><strong>Host</strong> — the Sphere wallet (web app or browser extension). Manages keys, signs transactions, controls permissions.</li>
+                <li><strong>Client</strong> — your dApp. Sends queries and intents to the wallet via a transport layer.</li>
+              </ul>
+              <p className="text-neutral-600 dark:text-neutral-300 mb-4">
+                Three transport types are available depending on the environment:
+              </p>
+              <ul className="list-disc ml-6 text-neutral-600 dark:text-neutral-300 space-y-2">
+                <li><strong>PostMessageTransport</strong> — for browser apps loaded in iframes or opened as popups</li>
+                <li><strong>ExtensionTransport</strong> — for apps connecting via the Sphere browser extension <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-medium">In Development</span></li>
+                <li><strong>WebSocketTransport</strong> — for Node.js / CLI applications</li>
+              </ul>
+            </div>
+
+            {/* How It Works */}
+            <div id="connect-how-it-works" data-section="connect-how-it-works" className="scroll-mt-24 mb-12">
+              <h3 className="text-xl font-semibold mb-4">How It Works</h3>
+
+              {/* Flow diagram */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 my-8">
+                <div className="flex flex-col items-center px-6 py-4 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 min-w-[140px]">
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Your App</span>
+                  <span className="font-semibold text-sm">ConnectClient</span>
+                </div>
+                <div className="text-neutral-400 dark:text-neutral-500 text-2xl sm:rotate-0 rotate-90">
+                  &#x2194;
+                </div>
+                <div className="flex flex-col items-center px-6 py-4 border border-orange-300 dark:border-orange-600/50 rounded-xl bg-orange-50 dark:bg-orange-500/10 min-w-[140px]">
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Channel</span>
+                  <span className="font-semibold text-sm">Transport</span>
+                </div>
+                <div className="text-neutral-400 dark:text-neutral-500 text-2xl sm:rotate-0 rotate-90">
+                  &#x2194;
+                </div>
+                <div className="flex flex-col items-center px-6 py-4 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 min-w-[140px]">
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Wallet</span>
+                  <span className="font-semibold text-sm">ConnectHost</span>
+                </div>
+              </div>
+
+              <p className="text-neutral-600 dark:text-neutral-300 mb-3">
+                Your app communicates with the wallet through three types of messages:
+              </p>
+              <ul className="list-disc ml-6 text-neutral-600 dark:text-neutral-300 space-y-2">
+                <li><strong>Queries</strong> — read-only requests (get balance, identity, assets, transaction history)</li>
+                <li><strong>Intents</strong> — actions that require user confirmation (send tokens, sign messages, send DMs)</li>
+                <li><strong>Events</strong> — real-time push notifications from the wallet (incoming transfers, identity changes)</li>
+              </ul>
+            </div>
+
+            {/* autoConnect */}
+            <div id="connect-autoconnect" data-section="connect-autoconnect" className="scroll-mt-24 mb-12">
+              <h3 className="text-xl font-semibold mb-4">autoConnect()</h3>
+              <p className="text-neutral-600 dark:text-neutral-300 mb-4">
+                The recommended way to connect from a browser app. It automatically detects the best
+                available transport and establishes the connection:
+              </p>
+
+              <div className="overflow-x-auto my-4">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-neutral-500 border-b border-neutral-200 dark:border-neutral-700">
+                      <th className="pb-2 pr-4">Priority</th>
+                      <th className="pb-2 pr-4">Mode</th>
+                      <th className="pb-2">When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-neutral-100 dark:border-neutral-800">
+                      <td className="py-2 pr-4 font-mono text-amber-600 dark:text-amber-400">P1</td>
+                      <td className="py-2 pr-4">Iframe</td>
+                      <td className="py-2 text-neutral-600 dark:text-neutral-400">App is loaded inside Sphere as an agent</td>
+                    </tr>
+                    <tr className="border-b border-neutral-100 dark:border-neutral-800">
+                      <td className="py-2 pr-4 font-mono text-amber-600 dark:text-amber-400">P2</td>
+                      <td className="py-2 pr-4">Extension <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-medium">In Development</span></td>
+                      <td className="py-2 text-neutral-600 dark:text-neutral-400">Sphere browser extension is installed</td>
+                    </tr>
+                    <tr className="border-b border-neutral-100 dark:border-neutral-800">
+                      <td className="py-2 pr-4 font-mono text-amber-600 dark:text-amber-400">P3</td>
+                      <td className="py-2 pr-4">Popup</td>
+                      <td className="py-2 text-neutral-600 dark:text-neutral-400">Fallback — opens Sphere in a popup window</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <CodeBlock
+                filename="connect-example.ts"
+                code={`import { autoConnect } from '@unicitylabs/sphere-sdk/connect/browser';
+
+const { client, connection, disconnect } = await autoConnect({
+  dapp: { name: 'My App', description: 'My dApp description' },
+  permissions: ['payments:read', 'payments:write'],
+});
+
+// Query wallet
+const identity = await client.getIdentity();
+const balance = await client.getBalance();
+
+// Send tokens (requires user confirmation in wallet)
+await client.intent('send', {
+  to: '@alice',
+  amount: '100',
+});
+
+// Listen for real-time events
+client.on('transfer:incoming', (transfer) => {
+  console.log('Received:', transfer);
+});
+
+// Disconnect when done
+disconnect();`}
+              />
+            </div>
+
+            {/* Resources & Links */}
+            <div id="connect-resources" data-section="connect-resources" className="scroll-mt-24 mb-12">
+              <h3 className="text-xl font-semibold mb-4">Resources & Links</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <a
+                  href="https://github.com/unicity-sphere/sphere-sdk-connect-example"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col gap-2 p-5 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-orange-400 dark:hover:border-orange-500 transition bg-white/50 dark:bg-neutral-800/30"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm group-hover:text-orange-500 transition">Connect Example Repository</span>
+                    <svg className="w-4 h-4 text-neutral-400 group-hover:text-orange-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </div>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Working examples for browser and Node.js integration
+                  </p>
+                </a>
+
+                <a
+                  href="https://github.com/unicity-sphere/sphere-sdk/blob/main/docs/CONNECT.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col gap-2 p-5 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-orange-400 dark:hover:border-orange-500 transition bg-white/50 dark:bg-neutral-800/30"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm group-hover:text-orange-500 transition">Full Connect Documentation</span>
+                    <svg className="w-4 h-4 text-neutral-400 group-hover:text-orange-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </div>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Complete protocol spec — RPC methods, intents, events, permissions
+                  </p>
+                </a>
+
+                <a
+                  href="https://github.com/unicity-sphere/unicity-claude-marketplace"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col gap-2 p-5 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-orange-400 dark:hover:border-orange-500 transition bg-white/50 dark:bg-neutral-800/30"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm group-hover:text-orange-500 transition">Claude Code Plugin Marketplace</span>
+                    <svg className="w-4 h-4 text-neutral-400 group-hover:text-orange-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </div>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Sphere Connect plugin for Claude Code — auto-generates integration code
+                  </p>
+                </a>
+              </div>
+            </div>
           </section>
 
           {/* ============================================================ */}
