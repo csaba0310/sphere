@@ -1,0 +1,115 @@
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { Users, Target, Plus, Check } from 'lucide-react';
+import type { ProjectSummary } from '../../services/marketplaceApi';
+import { useInstalledProjects } from '../../hooks/useInstalledProjects';
+
+interface ProjectCardProps {
+  project: ProjectSummary;
+  index?: number;
+}
+
+const categoryLabels: Record<string, string> = {
+  game: 'Game', defi: 'DeFi', social: 'Social', tool: 'Tool', nft: 'NFT', other: 'Other',
+};
+
+export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
+  const { isInstalled, toggle } = useInstalledProjects();
+  const installed = isInstalled(project.slug);
+
+  const handleInstall = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggle(project.slug);
+  };
+
+  const hasBanner = !!project.bannerUrl;
+
+  return (
+    <Link to={`/apps/${project.slug}`}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.05, duration: 0.3 }}
+        whileHover={{ y: -4 }}
+        className="no-text-shadow group rounded-2xl border border-neutral-200 dark:border-white/8 hover:border-orange-500/60 dark:hover:border-brand-orange/60 hover:shadow-lg hover:shadow-orange-500/10 dark:hover:shadow-brand-orange/15 transition-all duration-200 cursor-pointer relative overflow-hidden"
+      >
+        {/* Banner background */}
+        {hasBanner ? (
+          <div className="relative h-24 overflow-hidden">
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+              style={{ backgroundImage: `url(${project.bannerUrl})` }}
+            />
+            <div className="absolute inset-0" style={{
+              background: `linear-gradient(to bottom, ${project.accentColor}33 0%, ${project.accentColor}99 100%)`,
+            }} />
+
+            {/* Install button on banner */}
+            <button
+              onClick={handleInstall}
+              title={installed ? 'Remove from Desktop' : 'Add to Desktop'}
+              className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all ${
+                installed
+                  ? 'bg-green-500/30 text-white border border-green-400/40'
+                  : 'bg-black/30 text-white/70 border border-white/15 hover:bg-orange-500/40 hover:text-white hover:border-orange-400/40'
+              }`}
+            >
+              {installed ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            </button>
+          </div>
+        ) : (
+          /* Accent gradient fallback when no banner */
+          <div className="relative h-16 overflow-hidden">
+            <div className="absolute inset-0" style={{
+              background: `linear-gradient(135deg, ${project.accentColor}cc 0%, ${project.accentColor}44 100%)`,
+            }} />
+            <button
+              onClick={handleInstall}
+              title={installed ? 'Remove from Desktop' : 'Add to Desktop'}
+              className={`absolute top-2 right-2 z-10 w-7 h-7 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all ${
+                installed
+                  ? 'bg-green-500/30 text-white border border-green-400/40'
+                  : 'bg-black/30 text-white/70 border border-white/15 hover:bg-orange-500/40 hover:text-white hover:border-orange-400/40'
+              }`}
+            >
+              {installed ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="p-4 bg-white dark:bg-white/4 dark:backdrop-blur-2xl">
+          {/* Header */}
+          <div className="flex items-start gap-3">
+            <img
+              src={project.logoUrl}
+              alt={project.name}
+              className={`w-11 h-11 rounded-xl object-cover border border-neutral-200 dark:border-white/10 shrink-0 ${hasBanner ? '-mt-8 ring-2 ring-white dark:ring-[#0a0a0a] shadow-lg relative z-10' : ''}`}
+              onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/44x44/${project.accentColor.slice(1)}/white?text=${project.name[0]}`; }}
+            />
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-neutral-900 dark:text-white text-sm truncate">{project.name}</h3>
+              <p className="text-neutral-500 dark:text-white/45 text-xs mt-0.5 h-8 line-clamp-2">{project.tagline}</p>
+            </div>
+          </div>
+
+          {/* Category + Stats — fixed layout */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100 dark:border-white/5">
+            <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border" style={{
+              backgroundColor: `${project.accentColor}15`,
+              color: project.accentColor,
+              borderColor: `${project.accentColor}30`,
+            }}>
+              {categoryLabels[project.category] ?? project.category}
+            </span>
+            <div className="flex items-center gap-3 text-[11px] text-neutral-400 dark:text-white/35">
+              <span className="flex items-center gap-1"><Users className="w-3 h-3" />{project.stats.totalUsers.toLocaleString()}</span>
+              <span className="flex items-center gap-1"><Target className="w-3 h-3" />{project.stats.activeQuests}</span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </Link>
+  );
+}
