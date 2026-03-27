@@ -124,7 +124,7 @@ function MediaLightbox({ items, index, onClose, onChange }: {
   const vimeoId = vimeoMatch?.[1];
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
+    <div className="fixed inset-0 z-9999 bg-black/95 flex flex-col" onClick={onClose}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3 shrink-0" onClick={e => e.stopPropagation()}>
         <span className="text-white/50 text-sm font-mono">{index + 1} / {items.length}</span>
@@ -255,7 +255,7 @@ export function ProjectPage() {
             backgroundColor: project.accentColor,
             backgroundImage: project.bannerUrl ? `url(${project.bannerUrl})` : undefined,
           }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
 
           {/* Back button */}
           <Link to="/explore" className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm text-white/80 hover:text-white text-sm transition-colors">
