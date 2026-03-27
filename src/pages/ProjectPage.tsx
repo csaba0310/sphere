@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Plus, Check, Download, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Plus, Check, Download, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useProject, useProjectQuests, useProjectAchievements } from '../hooks/useMarketplace';
 import { QuestPreviewCard } from '../components/marketplace/QuestPreviewCard';
 import { DiscordIcon, XIcon } from '../components/icons/SocialIcons';
@@ -298,21 +298,37 @@ export function ProjectPage() {
           </div>
 
           <div className="flex gap-2 shrink-0 flex-wrap">
-            {/* Add / Remove from Desktop — always visible */}
-            <button
-              onClick={() => slug && toggle(slug)}
-              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
-                installed
-                  ? 'bg-green-500/15 text-green-500 border border-green-500/25 hover:bg-red-500/15 hover:text-red-400 hover:border-red-500/25'
-                  : 'bg-orange-500 dark:bg-brand-orange hover:bg-orange-600 dark:hover:bg-brand-orange-dark text-white shadow-lg shadow-orange-500/20'
-              }`}
-            >
-              {installed ? <><Check className="w-4 h-4" /> On Desktop</> : <><Download className="w-4 h-4" /> Add to Desktop</>}
-            </button>
-            {project.appUrl && (
-              <button onClick={handleAddToDesktop} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border border-neutral-200 dark:border-white/8 text-neutral-600 dark:text-white/55 hover:text-neutral-900 dark:hover:text-white hover:border-neutral-300 dark:hover:border-white/15 transition-colors cursor-pointer">
-                Open App <ExternalLink className="w-3.5 h-3.5" />
+            {(project as Record<string, unknown>).type === 'skill' ? (
+              /* Skill: Install to Astrid */
+              <button
+                onClick={() => slug && toggle(slug)}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                  installed
+                    ? 'bg-green-500/15 text-green-500 border border-green-500/25 hover:bg-red-500/15 hover:text-red-400 hover:border-red-500/25'
+                    : 'bg-violet-500 hover:bg-violet-600 text-white shadow-lg shadow-violet-500/20'
+                }`}
+              >
+                {installed ? <><Check className="w-4 h-4" /> Installed</> : <><Download className="w-4 h-4" /> Install to Astrid</>}
               </button>
+            ) : (
+              /* App: Add to Desktop */
+              <>
+                <button
+                  onClick={() => slug && toggle(slug)}
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                    installed
+                      ? 'bg-green-500/15 text-green-500 border border-green-500/25 hover:bg-red-500/15 hover:text-red-400 hover:border-red-500/25'
+                      : 'bg-orange-500 dark:bg-brand-orange hover:bg-orange-600 dark:hover:bg-brand-orange-dark text-white shadow-lg shadow-orange-500/20'
+                  }`}
+                >
+                  {installed ? <><Check className="w-4 h-4" /> On Desktop</> : <><Download className="w-4 h-4" /> Add to Desktop</>}
+                </button>
+                {project.appUrl && (
+                  <button onClick={handleAddToDesktop} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border border-neutral-200 dark:border-white/8 text-neutral-600 dark:text-white/55 hover:text-neutral-900 dark:hover:text-white hover:border-neutral-300 dark:hover:border-white/15 transition-colors cursor-pointer">
+                    Open App <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </>
             )}
             {project.websiteUrl && (
               <a href={project.websiteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border border-neutral-200 dark:border-white/8 text-neutral-600 dark:text-white/55 hover:text-neutral-900 dark:hover:text-white hover:border-neutral-300 dark:hover:border-white/15 transition-colors">
@@ -325,9 +341,14 @@ export function ProjectPage() {
         {/* Stats */}
         <div className="flex gap-6 sm:gap-10 border-t border-neutral-200 dark:border-white/8 mt-6 pt-5">
           {[
-            { label: 'Users', value: project.stats.totalUsers, icon: Users },
-            { label: 'Quests', value: project.stats.activeQuests, icon: Target },
-            { label: 'Completions', value: project.stats.totalCompletions, icon: Trophy },
+            { label: (project as Record<string, unknown>).type === 'skill' ? 'Installs' : 'Users', value: project.stats.totalUsers, icon: Users },
+            ...((project as Record<string, unknown>).type === 'skill'
+              ? []
+              : [
+                  { label: 'Quests', value: project.stats.activeQuests, icon: Target },
+                  { label: 'Completions', value: project.stats.totalCompletions, icon: Trophy },
+                ]),
+            { label: 'Rating', value: (project.stats as Record<string, unknown>).rating as number ?? 0, icon: Star },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="text-center sm:text-left">
               <div className="flex items-center gap-1.5 justify-center sm:justify-start">

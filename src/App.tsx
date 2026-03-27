@@ -32,6 +32,7 @@ const AgentsPage = lazyWithRetry(() => import('./pages/AgentsPage').then(m => ({
 const AboutPage = lazyWithRetry(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
 const ExplorePage = lazyWithRetry(() => import('./pages/ExplorePage').then(m => ({ default: m.ExplorePage })));
 const ProjectPage = lazyWithRetry(() => import('./pages/ProjectPage').then(m => ({ default: m.ProjectPage })));
+const SkillDetailPage = lazyWithRetry(() => import('./pages/SkillDetailPage').then(m => ({ default: m.SkillDetailPage })));
 
 function LazyFallback() {
   return (
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="/about" element={<Suspense fallback={<LazyFallback />}><AboutPage /></Suspense>} />
         <Route path="/explore" element={<Suspense fallback={<LazyFallback />}><ExplorePage /></Suspense>} />
         <Route path="/apps/:slug" element={<Suspense fallback={<LazyFallback />}><ProjectPage /></Suspense>} />
+        <Route path="/skills/:skillId" element={<Suspense fallback={<LazyFallback />}><SkillDetailPage /></Suspense>} />
       </Route>
     </Routes>
   );

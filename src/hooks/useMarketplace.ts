@@ -8,7 +8,7 @@ import {
   fetchCategories,
 } from '../services/marketplaceApi';
 
-export function useProjects(params?: { category?: string; search?: string; sort?: string }) {
+export function useProjects(params?: { type?: 'app' | 'skill'; category?: string; search?: string; sort?: string; page?: number; limit?: number }) {
   return useQuery({
     queryKey: ['marketplace', 'projects', params],
     queryFn: () => fetchProjects(params),
@@ -16,10 +16,10 @@ export function useProjects(params?: { category?: string; search?: string; sort?
   });
 }
 
-export function useFeaturedProjects() {
+export function useFeaturedProjects(type?: 'app' | 'skill') {
   return useQuery({
-    queryKey: ['marketplace', 'featured'],
-    queryFn: fetchFeaturedProjects,
+    queryKey: ['marketplace', 'featured', type],
+    queryFn: () => fetchFeaturedProjects(type),
     staleTime: 5 * 60_000,
     retry: 1,
   });

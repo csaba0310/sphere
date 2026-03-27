@@ -9,7 +9,7 @@ interface FeaturedProjectCardProps {
 
 export function FeaturedProjectCard({ project }: FeaturedProjectCardProps) {
   return (
-    <Link to={`/apps/${project.slug}`}>
+    <Link to={`/apps/${project.slug}`} draggable={false}>
       <motion.div
         whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}

@@ -1,4 +1,5 @@
 import { useNavigate, Link } from 'react-router-dom';
+import { useRef, useCallback, useEffect } from 'react';
 import { Globe, ArrowRight } from 'lucide-react';
 import {
   DndContext,
@@ -52,6 +53,42 @@ function SortableProjectIcon({ project }: { project: ProjectSummary }) {
   );
 }
 
+// Drag-scrollable container (same pattern as MediaGallery)
+function DragScroll({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const sl = useRef(0);
+  const moved = useRef(false);
+
+  const stop = useCallback(() => {
+    dragging.current = false;
+    if (ref.current) ref.current.style.cursor = 'grab';
+    setTimeout(() => { moved.current = false; }, 0);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', stop);
+    return () => window.removeEventListener('mouseup', stop);
+  }, [stop]);
+
+  return (
+    <div
+      ref={ref}
+      onDragStart={e => e.preventDefault()}
+      onMouseDown={e => { e.preventDefault(); dragging.current = true; moved.current = false; startX.current = e.pageX; sl.current = ref.current?.scrollLeft ?? 0; if (ref.current) ref.current.style.cursor = 'grabbing'; }}
+      onMouseMove={e => { if (!dragging.current || !ref.current) return; e.preventDefault(); const w = (e.pageX - startX.current) * 1.2; ref.current.scrollLeft = sl.current - w; if (Math.abs(w) > 5) moved.current = true; }}
+      onMouseUp={stop}
+      onMouseLeave={stop}
+      onClickCapture={e => { if (moved.current) { e.preventDefault(); e.stopPropagation(); } }}
+      className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 select-none"
+      style={{ cursor: 'grab', userSelect: 'none' }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function DesktopShortcuts() {
   const navigate = useNavigate();
   const { openTabs, openTab } = useDesktopState();
@@ -59,7 +96,8 @@ export function DesktopShortcuts() {
   const groupUnreadCount = useGroupUnreadCount();
   const { data: remoteApps } = useRemoteApps();
   const { data: featuredProjects } = useFeaturedProjects();
-  const { data: allProjects } = useProjects();
+  const { data: projectsData } = useProjects();
+  const allProjects = projectsData?.projects;
   const { installedSlugs, reorder } = useInstalledProjects();
 
   // Require 8px drag distance before activating — prevents accidental drags on click
@@ -72,9 +110,9 @@ export function DesktopShortcuts() {
     .map((slug) => allProjects?.find((p) => p.slug === slug))
     .filter(Boolean) as ProjectSummary[];
 
-  // Ecosystem: remote apps + non-featured, non-installed marketplace projects
+  // Ecosystem: remote apps + non-featured, non-installed, non-skill marketplace projects
   const ecosystemProjects = allProjects?.filter(
-    (p) => !p.featured && !installedSlugs.includes(p.slug),
+    (p) => !p.featured && !installedSlugs.includes(p.slug) && (p as Record<string, unknown>).type !== 'skill',
   ) ?? [];
 
   const openAppIds = new Set(openTabs.map((t) => t.appId));
@@ -123,13 +161,13 @@ export function DesktopShortcuts() {
                 View all <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
+            <DragScroll>
               {featuredProjects.map((project) => (
-                <div key={project.slug} className="snap-start">
+                <div key={project.slug} className="shrink-0">
                   <FeaturedProjectCard project={project} />
                 </div>
               ))}
-            </div>
+            </DragScroll>
           </section>
         )}
 

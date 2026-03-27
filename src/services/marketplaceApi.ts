@@ -3,6 +3,7 @@ const API_BASE = import.meta.env.VITE_MARKETPLACE_API_URL ?? 'http://localhost:3
 // ── Types ─────────────────────────────────────────────────────────────
 export interface ProjectSummary {
   _id: string;
+  type?: 'app' | 'skill';
   slug: string;
   name: string;
   tagline: string;
@@ -15,6 +16,15 @@ export interface ProjectSummary {
   stats: { totalUsers: number; totalCompletions: number; activeQuests: number };
   appUrl?: string | null;
   websiteUrl?: string | null;
+  pricing?: { model: string; priceUCT: number | null };
+}
+
+export interface PaginatedProjects {
+  projects: ProjectSummary[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface ProjectDetail extends ProjectSummary {
@@ -62,22 +72,28 @@ async function get<T>(path: string): Promise<T> {
 
 // ── API functions ─────────────────────────────────────────────────────
 export function fetchProjects(params?: {
+  type?: 'app' | 'skill';
   category?: string;
   search?: string;
   sort?: string;
   featured?: boolean;
-}): Promise<ProjectSummary[]> {
+  page?: number;
+  limit?: number;
+}): Promise<PaginatedProjects> {
   const sp = new URLSearchParams();
+  if (params?.type) sp.set('type', params.type);
   if (params?.category) sp.set('category', params.category);
   if (params?.search) sp.set('search', params.search);
   if (params?.sort) sp.set('sort', params.sort);
   if (params?.featured) sp.set('featured', 'true');
+  if (params?.page) sp.set('page', String(params.page));
+  if (params?.limit) sp.set('limit', String(params.limit));
   const qs = sp.toString();
   return get(`${qs ? `?${qs}` : ''}`);
 }
 
-export function fetchFeaturedProjects(): Promise<ProjectSummary[]> {
-  return get('/featured');
+export function fetchFeaturedProjects(type?: 'app' | 'skill'): Promise<ProjectSummary[]> {
+  return get(type ? `/featured?type=${type}` : '/featured');
 }
 
 export function fetchProject(slug: string): Promise<ProjectDetail> {
