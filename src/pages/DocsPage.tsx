@@ -1450,38 +1450,26 @@ const recent = await sphere.market.getRecentListings();`}
                 code={`import { autoConnect } from '@unicitylabs/sphere-sdk/connect/browser';
 import { WALLET_EVENTS } from '@unicitylabs/sphere-sdk/connect';
 
-const SESSION_KEY = 'sphere_connect_session';
-
+// Connect to wallet — auto-detects best transport (iframe → extension → popup)
 const { client, connection, disconnect } = await autoConnect({
   dapp: {
     name: 'My App',
     url: location.origin,
-    description: 'My dApp description',
-    icon: location.origin + '/icon.svg',
+    icon: location.origin + '/icon.svg',  // shown in wallet approval dialog
   },
   permissions: ['identity:read', 'sign:request', 'balance:read'],
-  // Resume previous popup session after page refresh
-  resumeSessionId: sessionStorage.getItem(SESSION_KEY) ?? undefined,
-  silent: true,
 });
-
-// Persist session for popup mode — survives page refresh
-sessionStorage.setItem(SESSION_KEY, connection.sessionId);
 
 // Query wallet
 const identity = await client.query('sphere_getIdentity');
 const balance = await client.query('sphere_getBalance');
 
 // Send tokens (requires user confirmation in wallet)
-await client.intent('send', {
-  to: '@alice',
-  amount: '100',
-});
+await client.intent('send', { to: '@alice', amount: '100' });
 
-// Handle wallet logout — clear session, show connect UI
+// Handle wallet logout — user signed out or switched wallets
 client.on(WALLET_EVENTS.LOCKED, () => {
-  sessionStorage.removeItem(SESSION_KEY);
-  // Update your UI to show disconnected state
+  // Show connect UI, clear any saved session
 });
 
 // Handle wallet address switch
@@ -1495,8 +1483,11 @@ client.on('transfer:incoming', (transfer) => {
 });
 
 // Disconnect when done
-sessionStorage.removeItem(SESSION_KEY);
-disconnect();`}
+disconnect();
+
+// TIP: For popup mode, save connection.sessionId to sessionStorage
+// and pass resumeSessionId to autoConnect() to survive page refreshes.
+// See full guide: github.com/unicity-sphere/sphere-sdk/blob/main/docs/CONNECT.md`}
               />
             </div>
 
