@@ -1448,20 +1448,45 @@ const recent = await sphere.market.getRecentListings();`}
               <CodeBlock
                 filename="connect-example.ts"
                 code={`import { autoConnect } from '@unicitylabs/sphere-sdk/connect/browser';
+import { WALLET_EVENTS } from '@unicitylabs/sphere-sdk/connect';
+
+const SESSION_KEY = 'sphere_connect_session';
 
 const { client, connection, disconnect } = await autoConnect({
-  dapp: { name: 'My App', description: 'My dApp description' },
-  permissions: ['payments:read', 'payments:write'],
+  dapp: {
+    name: 'My App',
+    url: location.origin,
+    description: 'My dApp description',
+    icon: location.origin + '/icon.svg',
+  },
+  permissions: ['identity:read', 'sign:request', 'balance:read'],
+  // Resume previous popup session after page refresh
+  resumeSessionId: sessionStorage.getItem(SESSION_KEY) ?? undefined,
+  silent: true,
 });
 
+// Persist session for popup mode — survives page refresh
+sessionStorage.setItem(SESSION_KEY, connection.sessionId);
+
 // Query wallet
-const identity = await client.getIdentity();
-const balance = await client.getBalance();
+const identity = await client.query('sphere_getIdentity');
+const balance = await client.query('sphere_getBalance');
 
 // Send tokens (requires user confirmation in wallet)
 await client.intent('send', {
   to: '@alice',
   amount: '100',
+});
+
+// Handle wallet logout — clear session, show connect UI
+client.on(WALLET_EVENTS.LOCKED, () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  // Update your UI to show disconnected state
+});
+
+// Handle wallet address switch
+client.on(WALLET_EVENTS.IDENTITY_CHANGED, (newIdentity) => {
+  // Update displayed identity
 });
 
 // Listen for real-time events
@@ -1470,6 +1495,7 @@ client.on('transfer:incoming', (transfer) => {
 });
 
 // Disconnect when done
+sessionStorage.removeItem(SESSION_KEY);
 disconnect();`}
               />
             </div>
