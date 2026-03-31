@@ -41,12 +41,15 @@ export function ConnectPage() {
   // Since this is a popup page, browser GC handles cleanup when the window closes.
   const initializedRef = useRef(false);
 
-  // When user switches address — notify the connected dApp
+  // When user switches address — notify the connected dApp.
+  // When sphere becomes null (wallet deleted/logged out) — notify locked.
   useEffect(() => {
     if (sphere && hostRef.current) {
       hostRef.current.updateSphere(sphere);
+    } else if (!sphere && !isLoading && hostRef.current) {
+      hostRef.current.notifyWalletLocked();
     }
-  }, [sphere]);
+  }, [sphere, isLoading]);
 
   // Notify dApp on logout (SPA navigation) or page unload (refresh/close)
   useEffect(() => {
