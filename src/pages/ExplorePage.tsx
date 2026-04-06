@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useProjects, useFeaturedProjects } from '../hooks/useMarketplace';
 import { FeaturedProjectCard } from '../components/marketplace/FeaturedProjectCard';
@@ -10,9 +10,6 @@ import { CategoryFilter } from '../components/marketplace/CategoryFilter';
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const APP_CATEGORIES = ['game', 'defi', 'social', 'tool'];
-const SKILL_CATEGORIES = ['utility', 'defi', 'trading', 'social', 'developer', 'nft'];
-
-type ExploreTab = 'apps' | 'skills';
 
 // ─── Drag-scrollable Featured Carousel ────────────────────────────────────────
 
@@ -76,24 +73,15 @@ function FeaturedCarousel({ items }: { items: { slug: string }[] }) {
 // ─── ExplorePage ──────────────────────────────────────────────────────────────
 
 export function ExplorePage() {
-  const [activeTab, setActiveTab] = useState<ExploreTab>('apps');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
 
-  // Data — filtered by active tab type
-  const currentType = activeTab === 'apps' ? 'app' as const : 'skill' as const;
-  const { data: projectsData, isLoading } = useProjects({ type: currentType });
+  // Data — always filtered for apps only
+  const { data: projectsData, isLoading } = useProjects({ type: 'app' });
   const allItems = projectsData?.projects ?? [];
-  const { data: featured } = useFeaturedProjects(currentType);
+  const { data: featured } = useFeaturedProjects('app');
 
-  // Reset filters when switching tabs
-  const handleTabChange = (tab: ExploreTab) => {
-    setActiveTab(tab);
-    setCategory(null);
-    setSearch('');
-  };
-
-  // Filtered items (same logic for both apps and skills)
+  // Filtered items
   const filtered = useMemo(() => {
     let result = allItems;
     if (category) result = result.filter((p) => p.category === category);
@@ -106,13 +94,12 @@ export function ExplorePage() {
     return result;
   }, [allItems, category, search]);
 
-  // Featured items for current tab
+  // Featured items
   const featuredItems = featured ?? [];
 
-  // Tab-specific config
-  const categories = activeTab === 'apps' ? APP_CATEGORIES : SKILL_CATEGORIES;
-  const itemLabel = activeTab === 'apps' ? 'projects' : 'skills';
-  const searchPlaceholder = activeTab === 'apps' ? 'Search projects...' : 'Search skills...';
+  const categories = APP_CATEGORIES;
+  const itemLabel = 'projects';
+  const searchPlaceholder = 'Search projects...';
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-neutral-900 dark:text-white">
@@ -124,46 +111,11 @@ export function ExplorePage() {
             AgentSphere / Explore
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight">
-            {activeTab === 'apps' ? (
-              <>Discover{' '}<span className="bg-linear-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">Projects</span></>
-            ) : (
-              <>Discover{' '}<span className="bg-linear-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">Skills</span></>
-            )}
+            Explore{' '}<span className="bg-linear-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">Projects</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-base sm:text-lg text-neutral-500 dark:text-white/65 max-w-xl mx-auto leading-relaxed">
-            {activeTab === 'apps'
-              ? 'Games, DeFi apps, and tools built on Unicity \u2014 all accessible from your wallet.'
-              : 'AI-powered plugins for Astrid \u2014 extend your assistant with new capabilities.'}
+            Games, DeFi apps, and tools built on Unicity
           </motion.p>
-        </div>
-      </section>
-
-      {/* Tab Switcher */}
-      <section className="px-4 sm:px-6 pb-6">
-        <div className="flex justify-center">
-          <div className="flex items-center gap-1 w-fit p-1 rounded-lg bg-neutral-100 dark:bg-white/4 border border-neutral-200 dark:border-white/8">
-            <button
-              onClick={() => handleTabChange('apps')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'apps'
-                  ? 'bg-orange-500 dark:bg-brand-orange text-white shadow-md shadow-orange-500/20'
-                  : 'text-neutral-500 dark:text-white/45 hover:text-neutral-700 dark:hover:text-white'
-              }`}
-            >
-              Apps
-            </button>
-            <button
-              onClick={() => handleTabChange('skills')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 ${
-                activeTab === 'skills'
-                  ? 'bg-orange-500 dark:bg-brand-orange text-white shadow-md shadow-orange-500/20'
-                  : 'text-neutral-500 dark:text-white/45 hover:text-neutral-700 dark:hover:text-white'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Astrid Skills
-            </button>
-          </div>
         </div>
       </section>
 
@@ -228,12 +180,10 @@ export function ExplorePage() {
       <section className="px-4 sm:px-6 py-12">
         <div className="no-text-shadow max-w-3xl mx-auto bg-neutral-50 dark:bg-white/4 dark:backdrop-blur-2xl rounded-2xl border border-neutral-200 dark:border-white/8 p-8 sm:p-10 text-center">
           <h2 className="text-xl sm:text-2xl font-bold mb-3">
-            {activeTab === 'apps' ? 'Build on Sphere' : 'Build a Skill'}
+            Build on Sphere
           </h2>
           <p className="text-neutral-500 dark:text-white/45 mb-6 max-w-md mx-auto text-sm leading-relaxed">
-            {activeTab === 'apps'
-              ? 'Register your project, add quests, and reach thousands of Sphere users.'
-              : 'Create AI-powered plugins for Astrid and distribute them to thousands of Sphere users.'}
+            Register your project, add quests, and reach thousands of Sphere users.
           </p>
           <Link
             to="/developer"
