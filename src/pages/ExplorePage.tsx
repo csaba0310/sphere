@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useProjects, useFeaturedProjects } from '../hooks/useMarketplace';
+import { useProjects, useFeaturedProjects, useProjectMetricsBatch } from '../hooks/useMarketplace';
 import { FeaturedProjectCard } from '../components/marketplace/FeaturedProjectCard';
 import { ProjectCard } from '../components/marketplace/ProjectCard';
 import { CategoryFilter } from '../components/marketplace/CategoryFilter';
@@ -13,7 +13,10 @@ const APP_CATEGORIES = ['game', 'defi', 'social', 'tool'];
 
 // ─── Drag-scrollable Featured Carousel ────────────────────────────────────────
 
-function FeaturedCarousel({ items }: { items: { slug: string }[] }) {
+function FeaturedCarousel({ items, metricsByProject }: {
+  items: { slug: string }[];
+  metricsByProject: Record<string, import('../services/marketplaceApi').ProjectMetrics>;
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
@@ -63,7 +66,7 @@ function FeaturedCarousel({ items }: { items: { slug: string }[] }) {
     >
       {(items as import('../services/marketplaceApi').ProjectSummary[]).map((project) => (
         <div key={project.slug} className="shrink-0">
-          <FeaturedProjectCard project={project} />
+          <FeaturedProjectCard project={project} metrics={metricsByProject[project._id]} />
         </div>
       ))}
     </div>
@@ -80,6 +83,13 @@ export function ExplorePage() {
   const { data: projectsData, isLoading } = useProjects({ type: 'app' });
   const allItems = projectsData?.projects ?? [];
   const { data: featured } = useFeaturedProjects('app');
+
+  // Single batch request for live metrics across every project on this page
+  const allProjectIds = useMemo(
+    () => [...new Set([...allItems, ...(featured ?? [])].map((p) => p._id))],
+    [allItems, featured],
+  );
+  const { data: metricsByProject = {} } = useProjectMetricsBatch(allProjectIds);
 
   // Filtered items
   const filtered = useMemo(() => {
@@ -143,7 +153,7 @@ export function ExplorePage() {
             <h2 className="text-lg font-semibold mb-4">
               Featured <span className="text-neutral-400 dark:text-white/35 font-normal">{itemLabel}</span>
             </h2>
-            <FeaturedCarousel items={featuredItems} />
+            <FeaturedCarousel items={featuredItems} metricsByProject={metricsByProject} />
           </div>
         </section>
       )}
@@ -165,7 +175,12 @@ export function ExplorePage() {
           ) : filtered.length > 0 ? (
             <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
               {filtered.map((project, i) => (
-                <ProjectCard key={project.slug} project={project} index={i} />
+                <ProjectCard
+                  key={project.slug}
+                  project={project}
+                  index={i}
+                  metrics={metricsByProject[project._id]}
+                />
               ))}
             </div>
           ) : (

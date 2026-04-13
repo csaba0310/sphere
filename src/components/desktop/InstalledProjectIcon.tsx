@@ -13,7 +13,7 @@ interface InstalledProjectIconProps {
 export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
   const navigate = useNavigate();
   const { openTab } = useDesktopState();
-  const { uninstall } = useInstalledProjects();
+  const { uninstall, ping } = useInstalledProjects();
   const [menuOpen, setMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -35,6 +35,7 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
   const launchUrl = project.appUrl ?? project.websiteUrl;
 
   const handleClick = () => {
+    void ping(project.slug);
     if (launchUrl) {
       openTab('custom', { url: launchUrl, label: project.name });
       navigate(`/agents/custom?url=${encodeURIComponent(launchUrl)}`);
