@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, Users, Target } from 'lucide-react';
+import { Star, Users, Target, ThumbsUp } from 'lucide-react';
 import type { ProjectSummary, ProjectMetrics } from '../../services/marketplaceApi';
 
 interface FeaturedProjectCardProps {
@@ -12,7 +12,8 @@ interface FeaturedProjectCardProps {
 export function FeaturedProjectCard({ project, metrics }: FeaturedProjectCardProps) {
   const users   = metrics?.uniqueUsers  ?? project.stats.totalUsers;
   const quests  = metrics?.activeQuests ?? project.stats.activeQuests;
-  const rating  = (project.stats as Record<string, unknown>).rating as number | undefined;
+  const positivePct = metrics?.positivePercent ?? 0;
+  const ratingCount = metrics?.ratingCount ?? 0;
 
   return (
     <Link to={`/apps/${project.slug}`} draggable={false}>
@@ -62,8 +63,10 @@ export function FeaturedProjectCard({ project, metrics }: FeaturedProjectCardPro
           <div className="flex items-center gap-3 mt-2 text-[11px] text-white/60">
             <span className="flex items-center gap-1" title="Users"><Users className="w-3 h-3" />{users.toLocaleString()}</span>
             <span className="flex items-center gap-1" title="Active quests"><Target className="w-3 h-3" />{quests.toLocaleString()}</span>
-            {rating != null && rating > 0 && (
-              <span className="flex items-center gap-1" title="Rating"><Star className="w-3 h-3" fill="currentColor" />{rating.toFixed(1)}</span>
+            {ratingCount > 0 && (
+              <span className="flex items-center gap-1" title={`${ratingCount} reviews`}>
+                <ThumbsUp className="w-3 h-3" />{positivePct}%
+              </span>
             )}
           </div>
         </div>

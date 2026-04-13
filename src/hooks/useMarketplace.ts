@@ -7,6 +7,8 @@ import {
   fetchProjectAchievements,
   fetchProjectMetrics,
   fetchProjectMetricsBatch,
+  fetchProjectRatings,
+  fetchRatingReplies,
   fetchCategories,
 } from '../services/marketplaceApi';
 
@@ -74,5 +76,23 @@ export function useProjectMetricsBatch(projectIds: string[]) {
     queryFn: () => fetchProjectMetricsBatch(projectIds),
     enabled: projectIds.length > 0,
     staleTime: 60_000,
+  });
+}
+
+export function useProjectRatings(slug: string | undefined, page = 1, sort: 'helpful' | 'recent' = 'helpful') {
+  return useQuery({
+    queryKey: ['marketplace', 'ratings', slug, page, sort],
+    queryFn: () => fetchProjectRatings(slug!, page, 20, sort),
+    enabled: !!slug,
+    staleTime: 30_000,
+  });
+}
+
+export function useRatingReplies(ratingId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: ['marketplace', 'replies', ratingId],
+    queryFn: () => fetchRatingReplies(ratingId!),
+    enabled: enabled && !!ratingId,
+    staleTime: 15_000,
   });
 }

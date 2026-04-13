@@ -126,6 +126,12 @@ export interface ProjectMetrics {
   activeInstallers: number;
   totalCompletions: number;
   activeQuests:     number;
+  /** Total reviews left on the project */
+  ratingCount:      number;
+  positiveCount:    number;
+  negativeCount:    number;
+  /** 0..100 integer (0 if no ratings) */
+  positivePercent:  number;
 }
 
 export async function fetchProjectMetrics(projectId: string): Promise<ProjectMetrics> {
@@ -138,5 +144,70 @@ export async function fetchProjectMetricsBatch(projectIds: string[]): Promise<Re
   if (projectIds.length === 0) return {};
   const res = await fetch(`${API_BASE}/api/metrics/projects?ids=${projectIds.join(',')}`);
   if (!res.ok) throw new Error(`Metrics API error: ${res.status}`);
+  return res.json();
+}
+
+// ── Public project ratings (Steam-style reviews) ──────────────────────
+
+export interface ProjectRatingEntry {
+  _id:             string;
+  userAddress:     string;
+  userNametag:     string | null;
+  recommended:     boolean;
+  comment:         string | null;
+  helpfulCount:    number;
+  notHelpfulCount: number;
+  replyCount:      number;
+  createdAt:       string;
+  updatedAt:       string;
+}
+
+export interface PaginatedRatings {
+  ratings:    ProjectRatingEntry[];
+  total:      number;
+  page:       number;
+  limit:      number;
+  totalPages: number;
+}
+
+export async function fetchProjectRatings(
+  slug: string,
+  page = 1,
+  limit = 20,
+  sort: 'helpful' | 'recent' = 'helpful',
+): Promise<PaginatedRatings> {
+  const res = await fetch(`${API_BASE}/api/marketplace/${slug}/ratings?page=${page}&limit=${limit}&sort=${sort}`);
+  if (!res.ok) throw new Error(`Ratings API error: ${res.status}`);
+  return res.json();
+}
+
+// ── Public reply thread for a single rating ───────────────────────────
+
+export interface RatingReplyEntry {
+  _id:         string;
+  ratingId:    string;
+  userAddress: string;
+  userNametag: string | null;
+  comment:     string;
+  createdAt:   string;
+  quoted: null | {
+    _id:         string;
+    userAddress: string;
+    userNametag: string | null;
+    comment:     string;
+  };
+}
+
+export interface PaginatedReplies {
+  replies:    RatingReplyEntry[];
+  total:      number;
+  page:       number;
+  limit:      number;
+  totalPages: number;
+}
+
+export async function fetchRatingReplies(ratingId: string, page = 1, limit = 50): Promise<PaginatedReplies> {
+  const res = await fetch(`${API_BASE}/api/marketplace/ratings/${ratingId}/replies?page=${page}&limit=${limit}`);
+  if (!res.ok) throw new Error(`Replies API error: ${res.status}`);
   return res.json();
 }
