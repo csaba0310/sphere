@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_MARKETPLACE_API_URL ?? 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_SPHERE_API_URL ?? 'http://localhost:3001';
 
 // ── Types ─────────────────────────────────────────────────────────────
 export interface ProjectSummary {
@@ -110,4 +110,33 @@ export function fetchProjectAchievements(slug: string): Promise<ProjectAchieveme
 
 export function fetchCategories(): Promise<CategoryCount[]> {
   return get('/categories');
+}
+
+// ── Public project metrics (live user/install/completion counts) ──────
+
+export interface ProjectMetrics {
+  projectId:        string;
+  /** completers ∪ installers — canonical "users" number */
+  uniqueUsers:      number;
+  /** wallets that completed a quest or claimed an achievement */
+  completers:       number;
+  /** wallets that ever installed (active + uninstalled) */
+  installers:       number;
+  /** wallets that currently have it installed */
+  activeInstallers: number;
+  totalCompletions: number;
+  activeQuests:     number;
+}
+
+export async function fetchProjectMetrics(projectId: string): Promise<ProjectMetrics> {
+  const res = await fetch(`${API_BASE}/api/metrics/projects/${projectId}`);
+  if (!res.ok) throw new Error(`Metrics API error: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchProjectMetricsBatch(projectIds: string[]): Promise<Record<string, ProjectMetrics>> {
+  if (projectIds.length === 0) return {};
+  const res = await fetch(`${API_BASE}/api/metrics/projects?ids=${projectIds.join(',')}`);
+  if (!res.ok) throw new Error(`Metrics API error: ${res.status}`);
+  return res.json();
 }

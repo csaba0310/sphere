@@ -1,21 +1,26 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Users, Target, Plus, Check } from 'lucide-react';
-import type { ProjectSummary } from '../../services/marketplaceApi';
+import { Users, Target, Star, Plus, Check } from 'lucide-react';
+import type { ProjectSummary, ProjectMetrics } from '../../services/marketplaceApi';
 import { useInstalledProjects } from '../../hooks/useInstalledProjects';
 
 interface ProjectCardProps {
   project: ProjectSummary;
   index?: number;
+  /** Live metrics from /api/metrics/projects — overrides the denormalized project.stats snapshot */
+  metrics?: ProjectMetrics;
 }
 
 const categoryLabels: Record<string, string> = {
   game: 'Game', defi: 'DeFi', social: 'Social', tool: 'Tool', nft: 'NFT', other: 'Other',
 };
 
-export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
+export function ProjectCard({ project, index = 0, metrics }: ProjectCardProps) {
   const { isInstalled, toggle } = useInstalledProjects();
   const installed = isInstalled(project.slug);
+  const users   = metrics?.uniqueUsers  ?? project.stats.totalUsers;
+  const quests  = metrics?.activeQuests ?? project.stats.activeQuests;
+  const rating  = (project.stats as Record<string, unknown>).rating as number | undefined;
 
   const handleInstall = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -104,8 +109,11 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
               {categoryLabels[project.category] ?? project.category}
             </span>
             <div className="flex items-center gap-3 text-[11px] text-neutral-400 dark:text-white/35">
-              <span className="flex items-center gap-1"><Users className="w-3 h-3" />{project.stats.totalUsers.toLocaleString()}</span>
-              <span className="flex items-center gap-1"><Target className="w-3 h-3" />{project.stats.activeQuests}</span>
+              <span className="flex items-center gap-1" title="Users"><Users className="w-3 h-3" />{users.toLocaleString()}</span>
+              <span className="flex items-center gap-1" title="Active quests"><Target className="w-3 h-3" />{quests.toLocaleString()}</span>
+              {rating != null && rating > 0 && (
+                <span className="flex items-center gap-1" title="Rating"><Star className="w-3 h-3" fill="currentColor" />{rating.toFixed(1)}</span>
+              )}
             </div>
           </div>
         </div>

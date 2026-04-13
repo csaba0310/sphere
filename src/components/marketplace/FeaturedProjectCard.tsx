@@ -1,13 +1,19 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, Users } from 'lucide-react';
-import type { ProjectSummary } from '../../services/marketplaceApi';
+import { Star, Users, Target } from 'lucide-react';
+import type { ProjectSummary, ProjectMetrics } from '../../services/marketplaceApi';
 
 interface FeaturedProjectCardProps {
   project: ProjectSummary;
+  /** Live metrics from /api/metrics/projects — overrides the denormalized project.stats snapshot */
+  metrics?: ProjectMetrics;
 }
 
-export function FeaturedProjectCard({ project }: FeaturedProjectCardProps) {
+export function FeaturedProjectCard({ project, metrics }: FeaturedProjectCardProps) {
+  const users   = metrics?.uniqueUsers  ?? project.stats.totalUsers;
+  const quests  = metrics?.activeQuests ?? project.stats.activeQuests;
+  const rating  = (project.stats as Record<string, unknown>).rating as number | undefined;
+
   return (
     <Link to={`/apps/${project.slug}`} draggable={false}>
       <motion.div
@@ -54,8 +60,11 @@ export function FeaturedProjectCard({ project }: FeaturedProjectCardProps) {
             </div>
           </div>
           <div className="flex items-center gap-3 mt-2 text-[11px] text-white/60">
-            <span className="flex items-center gap-1"><Users className="w-3 h-3" />{project.stats.totalUsers.toLocaleString()}</span>
-            <span>{project.stats.activeQuests} quests</span>
+            <span className="flex items-center gap-1" title="Users"><Users className="w-3 h-3" />{users.toLocaleString()}</span>
+            <span className="flex items-center gap-1" title="Active quests"><Target className="w-3 h-3" />{quests.toLocaleString()}</span>
+            {rating != null && rating > 0 && (
+              <span className="flex items-center gap-1" title="Rating"><Star className="w-3 h-3" fill="currentColor" />{rating.toFixed(1)}</span>
+            )}
           </div>
         </div>
       </motion.div>

@@ -5,6 +5,8 @@ import {
   fetchProject,
   fetchProjectQuests,
   fetchProjectAchievements,
+  fetchProjectMetrics,
+  fetchProjectMetricsBatch,
   fetchCategories,
 } from '../services/marketplaceApi';
 
@@ -54,5 +56,23 @@ export function useCategories() {
     queryKey: ['marketplace', 'categories'],
     queryFn: fetchCategories,
     staleTime: 10 * 60_000,
+  });
+}
+
+export function useProjectMetrics(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ['metrics', 'project', projectId],
+    queryFn: () => fetchProjectMetrics(projectId!),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+}
+
+export function useProjectMetricsBatch(projectIds: string[]) {
+  return useQuery({
+    queryKey: ['metrics', 'projects', projectIds.slice().sort().join(',')],
+    queryFn: () => fetchProjectMetricsBatch(projectIds),
+    enabled: projectIds.length > 0,
+    staleTime: 60_000,
   });
 }

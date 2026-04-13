@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Plus, Check, Download, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { useProject, useProjectQuests, useProjectAchievements } from '../hooks/useMarketplace';
+import { useProject, useProjectQuests, useProjectAchievements, useProjectMetrics } from '../hooks/useMarketplace';
 import { QuestPreviewCard } from '../components/marketplace/QuestPreviewCard';
 import { DiscordIcon, XIcon } from '../components/icons/SocialIcons';
 import { useDesktopState } from '../hooks/useDesktopState';
@@ -219,6 +219,7 @@ export function ProjectPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const { data: quests } = useProjectQuests(slug ?? '');
   const { data: achievements } = useProjectAchievements(slug ?? '');
+  const { data: metrics } = useProjectMetrics(project?._id);
 
   // All media items (screenshots + videos) in one list
   const mediaItems = project?.media ?? [];
@@ -341,12 +342,16 @@ export function ProjectPage() {
         {/* Stats */}
         <div className="flex gap-6 sm:gap-10 border-t border-neutral-200 dark:border-white/8 mt-6 pt-5">
           {[
-            { label: (project as Record<string, unknown>).type === 'skill' ? 'Installs' : 'Users', value: project.stats.totalUsers, icon: Users },
+            {
+              label: (project as Record<string, unknown>).type === 'skill' ? 'Installs' : 'Users',
+              value: metrics?.uniqueUsers ?? project.stats.totalUsers,
+              icon: Users,
+            },
             ...((project as Record<string, unknown>).type === 'skill'
               ? []
               : [
-                  { label: 'Quests', value: project.stats.activeQuests, icon: Target },
-                  { label: 'Completions', value: project.stats.totalCompletions, icon: Trophy },
+                  { label: 'Quests',      value: metrics?.activeQuests     ?? project.stats.activeQuests,     icon: Target },
+                  { label: 'Completions', value: metrics?.totalCompletions ?? project.stats.totalCompletions, icon: Trophy },
                 ]),
             { label: 'Rating', value: (project.stats as Record<string, unknown>).rating as number ?? 0, icon: Star },
           ].map(({ label, value, icon: Icon }) => (

@@ -20,7 +20,7 @@ import { useDesktopState } from '../../hooks/useDesktopState';
 import { useRemoteApps, type RemoteApp } from '../../hooks/useRemoteApps';
 import { useDmUnreadCount } from '../chat/hooks/useDmUnreadCount';
 import { useGroupUnreadCount } from '../chat/hooks/useGroupUnreadCount';
-import { useFeaturedProjects, useProjects } from '../../hooks/useMarketplace';
+import { useFeaturedProjects, useProjects, useProjectMetricsBatch } from '../../hooks/useMarketplace';
 import { useInstalledProjects } from '../../hooks/useInstalledProjects';
 import type { ProjectSummary } from '../../services/marketplaceApi';
 import { DesktopIcon } from './DesktopIcon';
@@ -100,6 +100,13 @@ export function DesktopShortcuts() {
   const allProjects = projectsData?.projects;
   const { installedSlugs, reorder } = useInstalledProjects();
 
+  // Batch live metrics for every project rendered on the desktop (featured + apps list)
+  const allProjectIds = [...new Set([
+    ...(featuredProjects ?? []).map((p) => p._id),
+    ...(allProjects ?? []).map((p) => p._id),
+  ])];
+  const { data: metricsByProject = {} } = useProjectMetricsBatch(allProjectIds);
+
   // Require 8px drag distance before activating — prevents accidental drags on click
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -164,7 +171,7 @@ export function DesktopShortcuts() {
             <DragScroll>
               {featuredProjects.map((project) => (
                 <div key={project.slug} className="shrink-0">
-                  <FeaturedProjectCard project={project} />
+                  <FeaturedProjectCard project={project} metrics={metricsByProject[project._id]} />
                 </div>
               ))}
             </DragScroll>
