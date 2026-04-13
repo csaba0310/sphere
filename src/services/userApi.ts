@@ -170,3 +170,86 @@ export async function pingOpenApp(sphere: Sphere, projectId: string): Promise<vo
     /* swallow */
   }
 }
+
+// ── Ratings: recommend / helpful voting / replies ────────────────────
+
+export interface MyRating {
+  _id:         string;
+  projectId:   string;
+  recommended: boolean;
+  comment:     string | null;
+  updatedAt:   string;
+}
+
+export async function fetchMyRatings(sphere: Sphere): Promise<MyRating[]> {
+  const res = await authFetch(sphere, '/api/user/ratings');
+  if (!res.ok) throw new Error(`fetchMyRatings: ${res.status}`);
+  return res.json();
+}
+
+export async function submitRating(
+  sphere: Sphere,
+  projectId: string,
+  recommended: boolean,
+  comment?: string,
+): Promise<MyRating> {
+  const res = await authFetch(sphere, '/api/user/ratings', {
+    method: 'POST',
+    body:   JSON.stringify({ projectId, recommended, ...(comment ? { comment } : {}) }),
+  });
+  if (res.status === 403) throw new Error('not-eligible');
+  if (!res.ok) throw new Error(`submitRating: ${res.status}`);
+  return res.json();
+}
+
+export async function deleteMyRating(sphere: Sphere, projectId: string): Promise<void> {
+  const res = await authFetch(sphere, `/api/user/ratings/${projectId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`deleteMyRating: ${res.status}`);
+}
+
+// ── Helpful voting on a specific rating ──────────────────────────────
+
+export type HelpfulVote = 'helpful' | 'not_helpful';
+
+export async function voteRating(sphere: Sphere, ratingId: string, vote: HelpfulVote): Promise<void> {
+  const res = await authFetch(sphere, `/api/user/ratings/${ratingId}/vote`, {
+    method: 'POST',
+    body:   JSON.stringify({ vote }),
+  });
+  if (!res.ok) throw new Error(`voteRating: ${res.status}`);
+}
+
+export async function unvoteRating(sphere: Sphere, ratingId: string): Promise<void> {
+  const res = await authFetch(sphere, `/api/user/ratings/${ratingId}/vote`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`unvoteRating: ${res.status}`);
+}
+
+// ── Replies (Telegram-style comments on a review) ────────────────────
+
+export interface PostedReply {
+  _id:            string;
+  ratingId:       string;
+  userAddress:    string;
+  replyToReplyId: string | null;
+  comment:        string;
+  createdAt:      string;
+}
+
+export async function postReply(
+  sphere: Sphere,
+  ratingId: string,
+  comment: string,
+  replyToReplyId?: string,
+): Promise<PostedReply> {
+  const res = await authFetch(sphere, `/api/user/ratings/${ratingId}/replies`, {
+    method: 'POST',
+    body:   JSON.stringify({ comment, ...(replyToReplyId ? { replyToReplyId } : {}) }),
+  });
+  if (!res.ok) throw new Error(`postReply: ${res.status}`);
+  return res.json();
+}
+
+export async function deleteReply(sphere: Sphere, ratingId: string, replyId: string): Promise<void> {
+  const res = await authFetch(sphere, `/api/user/ratings/${ratingId}/replies/${replyId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`deleteReply: ${res.status}`);
+}

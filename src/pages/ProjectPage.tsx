@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Plus, Check, Download, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useProject, useProjectQuests, useProjectAchievements, useProjectMetrics } from '../hooks/useMarketplace';
 import { QuestPreviewCard } from '../components/marketplace/QuestPreviewCard';
+import { ProjectReviewsSection } from '../components/marketplace/ProjectReviewsSection';
 import { DiscordIcon, XIcon } from '../components/icons/SocialIcons';
 import { useDesktopState } from '../hooks/useDesktopState';
 import { useInstalledProjects } from '../hooks/useInstalledProjects';
@@ -353,7 +354,9 @@ export function ProjectPage() {
                   { label: 'Quests',      value: metrics?.activeQuests     ?? project.stats.activeQuests,     icon: Target },
                   { label: 'Completions', value: metrics?.totalCompletions ?? project.stats.totalCompletions, icon: Trophy },
                 ]),
-            { label: 'Rating', value: (project.stats as Record<string, unknown>).rating as number ?? 0, icon: Star },
+            ...(metrics && metrics.ratingCount > 0
+              ? [{ label: `${metrics.positivePercent}% +`, value: metrics.ratingCount, icon: Star, isCount: true as const }]
+              : []),
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="text-center sm:text-left">
               <div className="flex items-center gap-1.5 justify-center sm:justify-start">
@@ -405,6 +408,17 @@ export function ProjectPage() {
           </div>
         </section>
       )}
+
+      {/* Reviews — aggregate, rater (if eligible), list */}
+      <ProjectReviewsSection
+        projectId={project._id}
+        slug={project.slug}
+        canRate={installed}
+        positivePercent={metrics?.positivePercent ?? 0}
+        positiveCount={metrics?.positiveCount ?? 0}
+        negativeCount={metrics?.negativeCount ?? 0}
+        ratingCount={metrics?.ratingCount ?? 0}
+      />
 
       {/* Social */}
       {(project.socialLinks.twitter || project.socialLinks.discord || project.socialLinks.telegram) && (
