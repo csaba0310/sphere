@@ -1,0 +1,63 @@
+name: Validate Docker Images
+
+# Build-validate Dockerfiles on PRs and main pushes so image-definition
+# regressions fail CI, not deploy. No push — validation only.
+#
+# NOTE on Dockerfile.ssl: its base image is
+# `ghcr.io/unicitynetwork/ssl-manager` which lives in a *different* org
+# than this repo (unicity-sphere). The default GITHUB_TOKEN cannot read
+# packages across orgs, so Dockerfile.ssl cannot be validated here
+# without additional configuration. To enable:
+#   (a) Grant the unicity-sphere/sphere repo read access to the
+#       unicitynetwork/ssl-manager package (GitHub → Packages → ssl-manager
+#       → Package settings → Manage Actions access → add sphere), or
+#   (b) Add a PAT with packages:read on unicitynetwork as a repo secret
+#       (e.g. GHCR_CROSS_ORG_TOKEN) and log in with it below.
+# Until then, Dockerfile.ssl is build-validated locally on deploy hosts
+# (see run-sphere.sh) — the Dockerfile matrix row below catches the
+# shared builder stage regardless.
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - 'Dockerfile.ssl'
+      - 'deploy/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/**'
+      - 'public/**'
+      - 'tsconfig*.json'
+      - 'vite.config.ts'
+      - '.dockerignore'
+      - '.github/workflows/docker-validate.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Dockerfile.ssl is intentionally excluded — see top-of-file note.
+        dockerfile: [Dockerfile]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.dockerfile }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          load: false
+          cache-from: type=gha,scope=${{ matrix.dockerfile }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.dockerfile }}
