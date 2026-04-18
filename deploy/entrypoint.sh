@@ -7,12 +7,18 @@ export SSL_HTTPS_PORT="${SSL_HTTPS_PORT:-443}"
 
 # ── Normalize SSL_REQUIRED (fail closed on unknown values) ───────────────────
 # Accept common boolean spellings; anything else errors so a typo doesn't
-# silently downgrade the security posture.
-case "${SSL_REQUIRED:-true}" in
+# silently downgrade the security posture. Whitespace is trimmed first
+# because operators commonly paste values with stray spaces from .env files
+# or orchestrator dashboards.
+_ssl_req="${SSL_REQUIRED:-true}"
+_ssl_req="${_ssl_req#"${_ssl_req%%[![:space:]]*}"}"  # ltrim
+_ssl_req="${_ssl_req%"${_ssl_req##*[![:space:]]}"}"  # rtrim
+case "$_ssl_req" in
     true|TRUE|True|1|yes|YES|Yes) SSL_REQUIRED=true ;;
     false|FALSE|False|0|no|NO|No) SSL_REQUIRED=false ;;
     *) echo "ERROR: SSL_REQUIRED must be true/false, got: '${SSL_REQUIRED}'" >&2; exit 1 ;;
 esac
+unset _ssl_req
 
 # ── Validate env vars before use in nginx config ────────────────────────────
 validate_port() {
@@ -176,12 +182,19 @@ cleanup() {
     kill_pidfile /tmp/.ssl-http-proxy.pid
     kill_pidfile /tmp/.ssl-renew.pid
     nginx -s quit 2>/dev/null || true
-    # Poll briefly for nginx to flush rather than re-waiting on a reaped PID.
+    # Poll for nginx to flush rather than re-waiting on a reaped PID.
+    # 10s matches nginx's own graceful-stop SLA; integer sleeps keep the
+    # loop portable to BusyBox if the base image is ever swapped from
+    # Debian (which has GNU coreutils sleep supporting fractions).
     if [ -n "$NGINX_PID" ]; then
+        local _drained=""
         for _ in 1 2 3 4 5 6 7 8 9 10; do
-            kill -0 "$NGINX_PID" 2>/dev/null || break
-            sleep 0.2
+            kill -0 "$NGINX_PID" 2>/dev/null || { _drained=1; break; }
+            sleep 1
         done
+        if [ -z "$_drained" ]; then
+            echo "WARNING: nginx did not drain within 10s; forcing exit" >&2
+        fi
     fi
 }
 trap cleanup EXIT
