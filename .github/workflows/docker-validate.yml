@@ -1,0 +1,47 @@
+name: Validate Docker Images
+
+# Build both Dockerfiles on PRs and main pushes so image-definition
+# regressions fail CI, not deploy. No push — validation only.
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - 'Dockerfile.ssl'
+      - 'deploy/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/**'
+      - 'public/**'
+      - 'tsconfig*.json'
+      - 'vite.config.ts'
+      - '.dockerignore'
+      - '.github/workflows/docker-validate.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [Dockerfile, Dockerfile.ssl]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.dockerfile }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          load: false
+          cache-from: type=gha,scope=${{ matrix.dockerfile }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.dockerfile }}
