@@ -96,8 +96,8 @@ export function fetchFeaturedProjects(type?: 'app' | 'skill'): Promise<ProjectSu
   return get(type ? `/featured?type=${type}` : '/featured');
 }
 
-export function fetchProject(slug: string): Promise<ProjectDetail> {
-  return get(`/${slug}`);
+export function fetchProject(slug: string, preview?: boolean): Promise<ProjectDetail> {
+  return get(preview ? `/${slug}?preview=true` : `/${slug}`);
 }
 
 export function fetchProjectQuests(slug: string): Promise<ProjectQuest[]> {

@@ -29,10 +29,10 @@ export function useFeaturedProjects(type?: 'app' | 'skill') {
   });
 }
 
-export function useProject(slug: string) {
+export function useProject(slug: string, preview?: boolean) {
   return useQuery({
-    queryKey: ['marketplace', 'project', slug],
-    queryFn: () => fetchProject(slug),
+    queryKey: ['marketplace', 'project', slug, { preview }],
+    queryFn: () => fetchProject(slug, preview),
     enabled: !!slug,
   });
 }

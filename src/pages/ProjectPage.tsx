@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Plus, Check, Download, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
@@ -212,10 +212,12 @@ const categoryLabels: Record<string, string> = {
 
 export function ProjectPage() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const isPreview = searchParams.get('preview') === 'true';
   const navigate = useNavigate();
   const { openTab } = useDesktopState();
   const { isInstalled, toggle } = useInstalledProjects();
-  const { data: project, isLoading } = useProject(slug ?? '');
+  const { data: project, isLoading } = useProject(slug ?? '', isPreview || undefined);
   const installed = slug ? isInstalled(slug) : false;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const { data: quests } = useProjectQuests(slug ?? '');
@@ -250,6 +252,12 @@ export function ProjectPage() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-neutral-900 dark:text-white pb-12">
+      {/* Preview mode banner */}
+      {isPreview && (
+        <div className="mx-4 sm:mx-6 mt-2 mb-2 px-4 py-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 text-sm font-medium text-center">
+          Preview Mode — this is how your project will appear in the marketplace
+        </div>
+      )}
       {/* Banner */}
       <div className="relative mx-4 sm:mx-6 mt-2">
         <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden">
@@ -299,6 +307,7 @@ export function ProjectPage() {
             </div>
           </div>
 
+          {!isPreview && (
           <div className="flex gap-2 shrink-0 flex-wrap">
             {(project as Record<string, unknown>).type === 'skill' ? (
               /* Skill: Install to Astrid */
@@ -338,6 +347,7 @@ export function ProjectPage() {
               </a>
             )}
           </div>
+          )}
         </div>
 
         {/* Stats */}
@@ -410,15 +420,17 @@ export function ProjectPage() {
       )}
 
       {/* Reviews — aggregate, rater (if eligible), list */}
-      <ProjectReviewsSection
-        projectId={project._id}
-        slug={project.slug}
-        canRate={installed}
-        positivePercent={metrics?.positivePercent ?? 0}
-        positiveCount={metrics?.positiveCount ?? 0}
-        negativeCount={metrics?.negativeCount ?? 0}
-        ratingCount={metrics?.ratingCount ?? 0}
-      />
+      {!isPreview && (
+        <ProjectReviewsSection
+          projectId={project._id}
+          slug={project.slug}
+          canRate={installed}
+          positivePercent={metrics?.positivePercent ?? 0}
+          positiveCount={metrics?.positiveCount ?? 0}
+          negativeCount={metrics?.negativeCount ?? 0}
+          ratingCount={metrics?.ratingCount ?? 0}
+        />
+      )}
 
       {/* Social */}
       {(project.socialLinks.twitter || project.socialLinks.discord || project.socialLinks.telegram) && (
