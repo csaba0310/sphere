@@ -74,7 +74,6 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: /sphere/${{ steps.branch.outputs.name }}/
-          VITE_HASH_ROUTER: 'true'
 
       - name: Deploy branch to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -115,9 +114,10 @@ jobs:
           </html>
           REDIRECT_EOF
 
-          # Root 404.html — SPA fallback for HashRouter-based branch deployments.
-          # Converts /sphere/{branch}/{route}?qs → /sphere/{branch}/#{route}?qs
-          # so deep links like /sphere/main/connect?origin=... route correctly.
+          # Root 404.html — SPA fallback for BrowserRouter branch deployments.
+          # Converts /sphere/{branch}/{route}?qs → /sphere/{branch}/?p=/{route}&qs
+          # so GitHub Pages serves the branch's index.html; the app's decoder
+          # then restores the real path via history.replaceState.
           cat > redirect/404.html << 'SPA_EOF'
           <!DOCTYPE html>
           <html>
@@ -127,8 +127,11 @@ jobs:
               var path = window.location.pathname;
               var m = path.match(/^(\/sphere\/[^/]+)(\/.+)/);
               if (m) {
+                var qs = window.location.search;
                 window.location.replace(
-                  m[1] + '/#' + m[2] + window.location.search + window.location.hash
+                  m[1] + '/?p=' + encodeURIComponent(m[2]) +
+                  (qs ? '&' + qs.substring(1) : '') +
+                  window.location.hash
                 );
               }
             </script>
