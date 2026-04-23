@@ -97,7 +97,7 @@ jobs:
     needs: build-and-deploy
     if: github.event_name != 'delete'
     steps:
-      - name: Create redirect page
+      - name: Create redirect and SPA 404 pages
         run: |
           mkdir -p redirect
           cat > redirect/index.html << 'REDIRECT_EOF'
@@ -114,6 +114,27 @@ jobs:
           </body>
           </html>
           REDIRECT_EOF
+
+          # Root 404.html — SPA fallback for HashRouter-based branch deployments.
+          # Converts /sphere/{branch}/{route}?qs → /sphere/{branch}/#{route}?qs
+          # so deep links like /sphere/main/connect?origin=... route correctly.
+          cat > redirect/404.html << 'SPA_EOF'
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="UTF-8"></head>
+          <body>
+            <script>
+              var path = window.location.pathname;
+              var m = path.match(/^(\/sphere\/[^/]+)(\/.+)/);
+              if (m) {
+                window.location.replace(
+                  m[1] + '/#' + m[2] + window.location.search + window.location.hash
+                );
+              }
+            </script>
+          </body>
+          </html>
+          SPA_EOF
 
       - name: Deploy redirect
         uses: peaceiris/actions-gh-pages@v4
