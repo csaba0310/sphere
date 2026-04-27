@@ -6,6 +6,7 @@ import { useProjects, useFeaturedProjects, useProjectMetricsBatch } from '../hoo
 import { FeaturedProjectCard } from '../components/marketplace/FeaturedProjectCard';
 import { ProjectCard } from '../components/marketplace/ProjectCard';
 import { CategoryFilter } from '../components/marketplace/CategoryFilter';
+import { MaintenanceScreen } from '../components/MaintenanceScreen';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -78,6 +79,16 @@ function FeaturedCarousel({ items, metricsByProject }: {
 export function ExplorePage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
+  const [maintenance, setMaintenance] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    function onForced(e: Event) {
+      const detail = (e as CustomEvent<{ message?: string }>).detail;
+      setMaintenance(detail?.message ?? null);
+    }
+    window.addEventListener('maintenance:forced', onForced);
+    return () => window.removeEventListener('maintenance:forced', onForced);
+  }, []);
 
   // Data — always filtered for apps only
   const { data: projectsData, isLoading } = useProjects({ type: 'app' });
@@ -110,6 +121,10 @@ export function ExplorePage() {
   const categories = APP_CATEGORIES;
   const itemLabel = 'projects';
   const searchPlaceholder = 'Search projects...';
+
+  if (maintenance !== undefined) {
+    return <MaintenanceScreen message={maintenance} />;
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-neutral-900 dark:text-white">
