@@ -122,11 +122,18 @@ async function authFetch(
   const jwt = await ensureJwt(sphere);
   const headers = new Headers(init.headers);
   headers.set('authorization', `Bearer ${jwt}`);
+  headers.set('x-client', 'sphere');
   if (init.body && !headers.has('content-type')) {
     headers.set('content-type', 'application/json');
   }
 
   const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  if (res.status === 503) {
+    const body = await res.clone().json().catch(() => null) as { error?: string; message?: string } | null;
+    if (body?.error === 'under_maintenance') {
+      window.dispatchEvent(new CustomEvent('maintenance:forced', { detail: { message: body.message } }));
+    }
+  }
   if (res.status === 401) {
     // JWT expired/invalid — drop it; caller may retry which will re-sign in
     clearJwt();

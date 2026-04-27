@@ -64,8 +64,21 @@ export interface CategoryCount {
 }
 
 // ── Fetch helpers ─────────────────────────────────────────────────────
+
+/** Central fetch wrapper — adds X-Client header and handles 503 maintenance gate. */
+async function marketplaceFetch(url: string): Promise<Response> {
+  const res = await fetch(url, { headers: { 'x-client': 'sphere' } });
+  if (res.status === 503) {
+    const body = await res.clone().json().catch(() => null) as { error?: string; message?: string } | null;
+    if (body?.error === 'under_maintenance') {
+      window.dispatchEvent(new CustomEvent('maintenance:forced', { detail: { message: body.message } }));
+    }
+  }
+  return res;
+}
+
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}/api/marketplace${path}`);
+  const res = await marketplaceFetch(`${API_BASE}/api/marketplace${path}`);
   if (!res.ok) throw new Error(`Marketplace API error: ${res.status}`);
   return res.json();
 }
@@ -135,14 +148,14 @@ export interface ProjectMetrics {
 }
 
 export async function fetchProjectMetrics(projectId: string): Promise<ProjectMetrics> {
-  const res = await fetch(`${API_BASE}/api/metrics/projects/${projectId}`);
+  const res = await marketplaceFetch(`${API_BASE}/api/metrics/projects/${projectId}`);
   if (!res.ok) throw new Error(`Metrics API error: ${res.status}`);
   return res.json();
 }
 
 export async function fetchProjectMetricsBatch(projectIds: string[]): Promise<Record<string, ProjectMetrics>> {
   if (projectIds.length === 0) return {};
-  const res = await fetch(`${API_BASE}/api/metrics/projects?ids=${projectIds.join(',')}`);
+  const res = await marketplaceFetch(`${API_BASE}/api/metrics/projects?ids=${projectIds.join(',')}`);
   if (!res.ok) throw new Error(`Metrics API error: ${res.status}`);
   return res.json();
 }
@@ -176,7 +189,7 @@ export async function fetchProjectRatings(
   limit = 20,
   sort: 'helpful' | 'recent' = 'helpful',
 ): Promise<PaginatedRatings> {
-  const res = await fetch(`${API_BASE}/api/marketplace/${slug}/ratings?page=${page}&limit=${limit}&sort=${sort}`);
+  const res = await marketplaceFetch(`${API_BASE}/api/marketplace/${slug}/ratings?page=${page}&limit=${limit}&sort=${sort}`);
   if (!res.ok) throw new Error(`Ratings API error: ${res.status}`);
   return res.json();
 }
@@ -207,7 +220,7 @@ export interface PaginatedReplies {
 }
 
 export async function fetchRatingReplies(ratingId: string, page = 1, limit = 50): Promise<PaginatedReplies> {
-  const res = await fetch(`${API_BASE}/api/marketplace/ratings/${ratingId}/replies?page=${page}&limit=${limit}`);
+  const res = await marketplaceFetch(`${API_BASE}/api/marketplace/ratings/${ratingId}/replies?page=${page}&limit=${limit}`);
   if (!res.ok) throw new Error(`Replies API error: ${res.status}`);
   return res.json();
 }
