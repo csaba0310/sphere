@@ -62,7 +62,7 @@ function FeaturedCarousel({ items, metricsByProject }: {
       onMouseUp={stopDrag}
       onMouseLeave={stopDrag}
       onClickCapture={(e) => { if (moved.current) { e.preventDefault(); e.stopPropagation(); } }}
-      className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 select-none"
+      className="flex gap-4 overflow-x-auto scrollbar-hide py-3 select-none"
       style={{ cursor: 'grab' }}
     >
       {(items as import('../services/marketplaceApi').ProjectSummary[]).map((project) => (
@@ -72,6 +72,28 @@ function FeaturedCarousel({ items, metricsByProject }: {
       ))}
     </div>
   );
+}
+
+// ─── Hero stat ────────────────────────────────────────────────────────────────
+
+const compactFormat = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+
+function HeroStat({ value, label, compact = false }: { value: number; label: string; compact?: boolean }) {
+  const display = compact ? compactFormat.format(value) : value.toLocaleString();
+  return (
+    <div className="flex flex-col items-center">
+      <span className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-neutral-900 dark:text-white tracking-tight">
+        {display}
+      </span>
+      <span className="mt-1 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-400 dark:text-white/35">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function HeroDivider() {
+  return <span className="h-8 w-px bg-neutral-200 dark:bg-white/10" aria-hidden />;
 }
 
 // ─── ExplorePage ──────────────────────────────────────────────────────────────
@@ -118,6 +140,17 @@ export function ExplorePage() {
   // Featured items
   const featuredItems = featured ?? [];
 
+  // Hero stats — prefer live metrics, fall back to denormalized stats
+  const heroStats = useMemo(() => {
+    const projects = allItems.length;
+    const users = allItems.reduce((sum, p) => {
+      const live = metricsByProject[p._id]?.uniqueUsers;
+      return sum + (live ?? p.stats.totalUsers ?? 0);
+    }, 0);
+    const categoriesCount = new Set(allItems.map((p) => p.category)).size;
+    return { projects, users, categoriesCount };
+  }, [allItems, metricsByProject]);
+
   const categories = APP_CATEGORIES;
   const itemLabel = 'projects';
   const searchPlaceholder = 'Search projects...';
@@ -132,15 +165,54 @@ export function ExplorePage() {
       <section className="relative px-4 sm:px-6 py-14 sm:py-20 text-center">
         <div className="absolute inset-0 dark:bg-[radial-gradient(ellipse_50%_55%_at_50%_50%,rgba(0,0,0,0.5)_0%,transparent_100%)] pointer-events-none" />
         <div className="relative max-w-3xl mx-auto">
-          <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-xs font-mono uppercase tracking-widest text-orange-500 dark:text-brand-orange mb-4">
-            AgentSphere / Explore
-          </motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight">
-            Explore{' '}<span className="bg-linear-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">Projects</span>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-mono uppercase tracking-[0.22em] text-orange-500 dark:text-brand-orange mb-6"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+            </span>
+            Live <span className="text-neutral-400 dark:text-white/30">·</span> AgentSphere catalog
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-[1.05] tracking-tight"
+          >
+            Built on{' '}
+            <span className="bg-linear-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+              Unicity
+            </span>
+            .
           </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-base sm:text-lg text-neutral-500 dark:text-white/65 max-w-xl mx-auto leading-relaxed">
-            Games, DeFi apps, and tools built on Unicity
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-base sm:text-lg text-neutral-500 dark:text-white/65 max-w-xl mx-auto leading-relaxed"
+          >
+            Games, DeFi, tools and agents — all running on Layer 3.
           </motion.p>
+
+          {heroStats.projects > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18 }}
+              className="mt-10 sm:mt-12 flex items-center justify-center gap-6 sm:gap-10"
+            >
+              <HeroStat value={heroStats.projects} label="Projects" />
+              <HeroDivider />
+              <HeroStat value={heroStats.users} label="Users" compact />
+              <HeroDivider />
+              <HeroStat value={heroStats.categoriesCount} label="Categories" />
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -206,21 +278,41 @@ export function ExplorePage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA — editorial poster for developers */}
       <section className="px-4 sm:px-6 py-12">
-        <div className="no-text-shadow max-w-3xl mx-auto bg-neutral-50 dark:bg-white/4 dark:backdrop-blur-2xl rounded-2xl border border-neutral-200 dark:border-white/8 p-8 sm:p-10 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold mb-3">
-            Build on Sphere
+        <div className="no-text-shadow relative max-w-5xl mx-auto rounded-2xl border border-neutral-200 dark:border-white/8 bg-neutral-50 dark:bg-white/4 dark:backdrop-blur-2xl overflow-hidden p-8 sm:p-12 lg:p-16">
+          {/* Ambient orange glow */}
+          <div className="pointer-events-none absolute -top-32 -left-24 w-md h-112 rounded-full bg-orange-500/15 dark:bg-orange-500/20 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-40 -right-24 w-96 h-96 rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-3xl" aria-hidden />
+
+          {/* Section annotation */}
+          <div className="relative flex items-center gap-3 text-[10px] sm:text-xs font-mono uppercase tracking-[0.22em] text-orange-500 dark:text-brand-orange mb-8 sm:mb-10">
+            <span className="h-px w-8 bg-orange-500/40" aria-hidden />
+            For builders
+          </div>
+
+          {/* Massive statement */}
+          <h2 className="relative text-5xl sm:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight">
+            Build on{' '}
+            <span className="bg-linear-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+              Sphere
+            </span>
+            .
           </h2>
-          <p className="text-neutral-500 dark:text-white/45 mb-6 max-w-md mx-auto text-sm leading-relaxed">
-            Register your project, add quests, and reach thousands of Sphere users.
-          </p>
-          <Link
-            to="/developer"
-            className="inline-flex items-center gap-2 bg-orange-500 dark:bg-brand-orange hover:bg-orange-600 dark:hover:bg-brand-orange-dark text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-orange-500/20"
-          >
-            Developer Portal <ArrowRight className="w-4 h-4" />
-          </Link>
+
+          {/* Description + CTA */}
+          <div className="relative mt-8 sm:mt-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+            <p className="text-neutral-500 dark:text-white/55 text-sm sm:text-base leading-relaxed max-w-md">
+              Register your project, ship quests, and plug into wallets and chat — all from one portal.
+            </p>
+            <Link
+              to="/developers"
+              className="group inline-flex items-center gap-2 self-start sm:self-auto px-6 py-3 rounded-xl bg-orange-500 dark:bg-brand-orange hover:bg-orange-600 dark:hover:bg-brand-orange-dark text-white font-semibold text-sm transition-colors shadow-lg shadow-orange-500/20 shrink-0"
+            >
+              Open developer portal
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
         </div>
       </section>
     </motion.div>

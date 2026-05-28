@@ -40,49 +40,37 @@ export function ProjectCard({ project, index = 0, metrics }: ProjectCardProps) {
         whileHover={{ y: -4 }}
         className="no-text-shadow group rounded-2xl border border-neutral-200 dark:border-white/8 hover:border-orange-500/60 dark:hover:border-brand-orange/60 hover:shadow-lg hover:shadow-orange-500/10 dark:hover:shadow-brand-orange/15 transition-all duration-200 cursor-pointer relative overflow-hidden"
       >
-        {/* Banner background */}
-        {hasBanner ? (
-          <div className="relative h-24 overflow-hidden">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-              style={{ backgroundImage: `url(${project.bannerUrl})` }}
-            />
-            <div className="absolute inset-0" style={{
-              background: `linear-gradient(to bottom, ${project.accentColor}33 0%, ${project.accentColor}99 100%)`,
-            }} />
-
-            {/* Install button on banner */}
-            <button
-              onClick={handleInstall}
-              title={installed ? 'Remove from Desktop' : 'Add to Desktop'}
-              className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all ${
-                installed
-                  ? 'bg-green-500/30 text-white border border-green-400/40'
-                  : 'bg-black/30 text-white/70 border border-white/15 hover:bg-orange-500/40 hover:text-white hover:border-orange-400/40'
-              }`}
-            >
-              {installed ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            </button>
-          </div>
-        ) : (
-          /* Accent gradient fallback when no banner */
-          <div className="relative h-16 overflow-hidden">
+        {/* Banner background — fixed height for uniform card size */}
+        <div className="relative h-24 overflow-hidden">
+          {hasBanner ? (
+            <>
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                style={{ backgroundImage: `url(${project.bannerUrl})` }}
+              />
+              <div className="absolute inset-0" style={{
+                background: `linear-gradient(to bottom, ${project.accentColor}33 0%, ${project.accentColor}99 100%)`,
+              }} />
+            </>
+          ) : (
             <div className="absolute inset-0" style={{
               background: `linear-gradient(135deg, ${project.accentColor}cc 0%, ${project.accentColor}44 100%)`,
             }} />
-            <button
-              onClick={handleInstall}
-              title={installed ? 'Remove from Desktop' : 'Add to Desktop'}
-              className={`absolute top-2 right-2 z-10 w-7 h-7 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all ${
-                installed
-                  ? 'bg-green-500/30 text-white border border-green-400/40'
-                  : 'bg-black/30 text-white/70 border border-white/15 hover:bg-orange-500/40 hover:text-white hover:border-orange-400/40'
-              }`}
-            >
-              {installed ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-            </button>
-          </div>
-        )}
+          )}
+
+          {/* Install button */}
+          <button
+            onClick={handleInstall}
+            title={installed ? 'Remove from Desktop' : 'Add to Desktop'}
+            className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all ${
+              installed
+                ? 'bg-green-500/30 text-white border border-green-400/40'
+                : 'bg-black/30 text-white/70 border border-white/15 hover:bg-orange-500/40 hover:text-white hover:border-orange-400/40'
+            }`}
+          >
+            {installed ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          </button>
+        </div>
 
         {/* Content */}
         <div className="p-4 bg-white dark:bg-white/4 dark:backdrop-blur-2xl">
@@ -91,7 +79,7 @@ export function ProjectCard({ project, index = 0, metrics }: ProjectCardProps) {
             <img
               src={project.logoUrl}
               alt={project.name}
-              className={`w-11 h-11 rounded-xl object-cover border border-neutral-200 dark:border-white/10 shrink-0 ${hasBanner ? '-mt-8 ring-2 ring-white dark:ring-[#0a0a0a] shadow-lg relative z-10' : ''}`}
+              className="w-11 h-11 rounded-xl object-cover border border-neutral-200 dark:border-white/10 shrink-0 -mt-8 ring-2 ring-white dark:ring-[#0a0a0a] shadow-lg relative z-10"
               onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/44x44/${project.accentColor.slice(1)}/white?text=${project.name[0]}`; }}
             />
             <div className="min-w-0 flex-1">

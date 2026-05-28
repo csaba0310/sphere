@@ -1,6 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useRef, useCallback, useEffect } from 'react';
-import { Globe, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { agents, type AgentConfig } from '../../config/activities';
 import { useDesktopState } from '../../hooks/useDesktopState';
-import { useRemoteApps, type RemoteApp } from '../../hooks/useRemoteApps';
 import { useDmUnreadCount } from '../chat/hooks/useDmUnreadCount';
 import { useGroupUnreadCount } from '../chat/hooks/useGroupUnreadCount';
 import { useFeaturedProjects, useProjects, useProjectMetricsBatch } from '../../hooks/useMarketplace';
@@ -26,7 +25,6 @@ import type { ProjectSummary } from '../../services/marketplaceApi';
 import { DesktopIcon } from './DesktopIcon';
 import { InstalledProjectIcon } from './InstalledProjectIcon';
 import { FeaturedProjectCard } from '../marketplace/FeaturedProjectCard';
-import { EcosystemAppCard } from './EcosystemAppCard';
 
 // ── Sortable wrapper for InstalledProjectIcon ──────────────────────────
 function SortableProjectIcon({ project }: { project: ProjectSummary }) {
@@ -91,10 +89,9 @@ function DragScroll({ children }: { children: React.ReactNode }) {
 
 export function DesktopShortcuts() {
   const navigate = useNavigate();
-  const { openTabs, openTab } = useDesktopState();
+  const { openTabs } = useDesktopState();
   const dmUnreadCount = useDmUnreadCount();
   const groupUnreadCount = useGroupUnreadCount();
-  const { data: remoteApps } = useRemoteApps();
   const { data: featuredProjects } = useFeaturedProjects();
   const { data: projectsData } = useProjects();
   const allProjects = projectsData?.projects;
@@ -117,22 +114,12 @@ export function DesktopShortcuts() {
     .map((slug) => allProjects?.find((p) => p.slug === slug))
     .filter(Boolean) as ProjectSummary[];
 
-  // Ecosystem: remote apps + non-featured, non-installed, non-skill marketplace projects
-  const ecosystemProjects = allProjects?.filter(
-    (p) => !p.featured && !installedSlugs.includes(p.slug) && (p as Record<string, unknown>).type !== 'skill',
-  ) ?? [];
-
   const openAppIds = new Set(openTabs.map((t) => t.appId));
 
   const getBadge = (agentId: string): number | undefined => {
     if (agentId === 'dm') return dmUnreadCount || undefined;
     if (agentId === 'group-chat') return groupUnreadCount || undefined;
     return undefined;
-  };
-
-  const handleRemoteAppClick = (app: RemoteApp) => {
-    openTab('custom', { url: app.url, label: app.name });
-    navigate(`/agents/custom?url=${encodeURIComponent(app.url)}`);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -155,7 +142,8 @@ export function DesktopShortcuts() {
 
   return (
     <div data-tutorial="desktop-shortcuts" className="absolute inset-0 overflow-auto flex flex-col">
-      <div className="relative flex-1 px-6 pt-6 sm:px-10 sm:pt-8 pb-8 space-y-6">
+      <div className="relative flex-1 px-6 pt-6 sm:px-10 sm:pt-8 pb-8 flex flex-col">
+        <div className="space-y-6">
 
         {/* 1. Featured Projects carousel */}
         {featuredProjects && featuredProjects.length > 0 && (
@@ -212,38 +200,10 @@ export function DesktopShortcuts() {
           </DndContext>
         </section>
 
-        {/* 4. Ecosystem — remote apps + non-installed marketplace projects */}
-        {((remoteApps && remoteApps.length > 0) || ecosystemProjects.length > 0) && (
-          <section>
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-[rgba(255,255,255,0.3)] mb-3 px-1">
-              Discover
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {remoteApps?.map((app) => (
-                <EcosystemAppCard
-                  key={app.url}
-                  name={app.name}
-                  subtitle={app.description}
-                  iconUrl={app.icon}
-                  onClick={() => handleRemoteAppClick(app)}
-                />
-              ))}
-              {ecosystemProjects.map((project) => (
-                <EcosystemAppCard
-                  key={project.slug}
-                  name={project.name}
-                  subtitle={project.tagline}
-                  iconUrl={project.logoUrl}
-                  accentColor={project.accentColor}
-                  onClick={() => navigate(`/apps/${project.slug}`)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+        </div>
 
-        {/* CTA */}
-        <p className="text-center text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.3)] pt-2 pb-4">
+        {/* CTA — pinned to bottom of the desktop area */}
+        <p className="text-center text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.3)] mt-auto pt-8">
           <Link to="/explore" className="underline hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)] transition-colors">
             Explore marketplace
           </Link>
