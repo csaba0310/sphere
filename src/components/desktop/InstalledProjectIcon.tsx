@@ -84,17 +84,9 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
 
   return (
     <div className="relative" ref={menuRef}>
-      <motion.div
-        role="button"
-        tabIndex={0}
+      <motion.button
         onClick={handleClick}
         onContextMenu={handleContextMenu}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleClick();
-          }
-        }}
         whileHover={{ scale: 1.08, y: -4 }}
         whileTap={{ scale: 0.92 }}
         transition={{ duration: 0.05 }}
@@ -147,7 +139,7 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
         <span className="text-xs sm:text-sm font-medium text-neutral-500 dark:text-[rgba(255,255,255,0.45)] group-hover:text-neutral-900 dark:group-hover:text-white transition-colors truncate max-w-20 sm:max-w-24 text-center leading-tight">
           {project.name}
         </span>
-      </motion.div>
+      </motion.button>
 
       {/* Context menu */}
       <AnimatePresence>
