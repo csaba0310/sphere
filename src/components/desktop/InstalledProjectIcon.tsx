@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type CSSProperties, type Ref } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, ExternalLink, Store, Trash2 } from 'lucide-react';
+import { Globe, ExternalLink, Store, Trash2, MoreVertical } from 'lucide-react';
 import { InstalledProjectIcon as InstalledProjectIconUI } from '@unicitylabs/sphere-ui';
 import { useDesktopState } from '../../hooks/useDesktopState';
 import { useInstalledProjects } from '../../hooks/useInstalledProjects';
@@ -111,6 +111,24 @@ export function InstalledProjectIcon({
         onContextMenu={handleContextMenu}
         buttonRef={buttonRef}
         buttonProps={buttonProps}
+        topRightAction={
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Open context menu"
+            onClick={(e) => { e.stopPropagation(); setMenuOpen((prev) => !prev); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuOpen((prev) => !prev);
+              }
+            }}
+            className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/40 backdrop-blur-sm text-white/70 hover:text-white hover:bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-30 cursor-pointer"
+          >
+            <MoreVertical className="w-2.5 h-2.5" />
+          </div>
+        }
       />
 
       <AnimatePresence>
