@@ -1,9 +1,9 @@
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Plus, Check, Download, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Check, Download, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { ProjectLogo } from '@unicitylabs/sphere-ui';
-import { useProject, useProjectQuests, useProjectAchievements, useProjectMetrics } from '../hooks/useMarketplace';
+import { useProject, useProjectQuests, useProjectMetrics } from '../hooks/useMarketplace';
 import { QuestPreviewCard } from '../components/marketplace/QuestPreviewCard';
 import { ProjectReviewsSection } from '../components/marketplace/ProjectReviewsSection';
 import { DiscordIcon, XIcon } from '../components/icons/SocialIcons';
@@ -222,11 +222,16 @@ export function ProjectPage() {
   const installed = slug ? isInstalled(slug) : false;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const { data: quests } = useProjectQuests(slug ?? '');
-  const { data: achievements } = useProjectAchievements(slug ?? '');
   const { data: metrics } = useProjectMetrics(project?._id);
 
-  // All media items (screenshots + videos) in one list
-  const mediaItems = project?.media ?? [];
+  // All media items (screenshots + videos) in one list. The API returns
+  // `caption: string | null`; coerce nulls to undefined so MediaItem (which
+  // expects `caption?: string`) matches without a cast at every usage.
+  const mediaItems: MediaItem[] = (project?.media ?? []).map((m) => ({
+    type: m.type,
+    url: m.url,
+    caption: m.caption ?? undefined,
+  }));
 
   const handleAddToDesktop = () => {
     if (!project?.appUrl) return;
@@ -314,7 +319,7 @@ export function ProjectPage() {
 
           {!isPreview && (
           <div className="flex gap-2 shrink-0 flex-wrap">
-            {(project as Record<string, unknown>).type === 'skill' ? (
+            {(project as unknown as Record<string, unknown>).type === 'skill' ? (
               /* Skill: Install to Astrid */
               <button
                 onClick={() => slug && toggle(slug)}
@@ -359,11 +364,11 @@ export function ProjectPage() {
         <div className="flex gap-6 sm:gap-10 border-t border-neutral-200 dark:border-white/8 mt-6 pt-5">
           {[
             {
-              label: (project as Record<string, unknown>).type === 'skill' ? 'Installs' : 'Users',
+              label: (project as unknown as Record<string, unknown>).type === 'skill' ? 'Installs' : 'Users',
               value: metrics?.uniqueUsers ?? project.stats.totalUsers,
               icon: Users,
             },
-            ...((project as Record<string, unknown>).type === 'skill'
+            ...((project as unknown as Record<string, unknown>).type === 'skill'
               ? []
               : [
                   { label: 'Quests',      value: metrics?.activeQuests     ?? project.stats.activeQuests,     icon: Target },

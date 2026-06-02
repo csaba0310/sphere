@@ -20,7 +20,6 @@ import { useDesktopState } from '../../hooks/useDesktopState';
 import { useDmUnreadCount } from '../chat/hooks/useDmUnreadCount';
 import { useGroupUnreadCount } from '../chat/hooks/useGroupUnreadCount';
 import { useFeaturedProjects, useProjects, useProjectMetricsBatch } from '../../hooks/useMarketplace';
-import { useInstalledProjects } from '../../hooks/useInstalledProjects';
 import { useDesktopOrder, type DesktopOrderItem } from '../../hooks/useDesktopOrder';
 import type { ProjectSummary } from '../../services/marketplaceApi';
 import { DesktopIcon } from './DesktopIcon';
