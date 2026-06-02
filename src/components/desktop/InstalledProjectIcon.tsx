@@ -124,9 +124,12 @@ export function InstalledProjectIcon({
                 setMenuOpen((prev) => !prev);
               }
             }}
-            className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/40 backdrop-blur-sm text-white/70 hover:text-white hover:bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-30 cursor-pointer"
+            // Outer wrapper extends the click target without growing the visible circle.
+            className="group/menubtn absolute top-0 right-0 p-1.5 z-30 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
           >
-            <MoreVertical className="w-2.5 h-2.5" />
+            <div className="w-4 h-4 rounded-full bg-black/40 backdrop-blur-sm text-white/70 group-hover/menubtn:text-white group-hover/menubtn:bg-black/60 flex items-center justify-center transition-colors">
+              <MoreVertical className="w-2.5 h-2.5" />
+            </div>
           </div>
         }
       />
