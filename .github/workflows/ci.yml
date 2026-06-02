@@ -30,6 +30,3 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          # Bundle-time public URL — kept in sync with deploy-pages-branch.yml.
-          VITE_SPHERE_API_URL: https://quest-api.staging.unicity.network
