@@ -15,22 +15,33 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { agents, type AgentConfig } from '../../config/activities';
+import { getAgentConfig } from '../../config/activities';
 import { useDesktopState } from '../../hooks/useDesktopState';
 import { useDmUnreadCount } from '../chat/hooks/useDmUnreadCount';
 import { useGroupUnreadCount } from '../chat/hooks/useGroupUnreadCount';
 import { useFeaturedProjects, useProjects, useProjectMetricsBatch } from '../../hooks/useMarketplace';
 import { useInstalledProjects } from '../../hooks/useInstalledProjects';
+import { useDesktopOrder, type DesktopOrderItem } from '../../hooks/useDesktopOrder';
 import type { ProjectSummary } from '../../services/marketplaceApi';
 import { DesktopIcon } from './DesktopIcon';
 import { InstalledProjectIcon } from './InstalledProjectIcon';
 import { FeaturedProjectCard } from '../marketplace/FeaturedProjectCard';
 
-// ── Sortable wrapper for InstalledProjectIcon ──────────────────────────
-// dnd-kit listeners sit on the SAME button element framer-motion controls,
-// otherwise pointer events get split between the outer wrapper and the
-// inner motion.button and drag activation can fail intermittently.
-function SortableProjectIcon({ project }: { project: ProjectSummary }) {
+// ── Sortable wrappers ──────────────────────────────────────────────────
+// dnd-kit listeners are threaded onto the inner motion.button (via
+// setActivatorNodeRef + spread props) so framer-motion's whileTap and
+// the PointerSensor share the same element instead of fighting across
+// wrapper layers.
+
+interface SortableItemProps {
+  item: DesktopOrderItem;
+  projectsBySlug: Map<string, ProjectSummary>;
+  openAppIds: Set<string>;
+  getBadge: (agentId: string) => number | undefined;
+  onAgentClick: (agentId: string) => void;
+}
+
+function SortableDesktopItem({ item, projectsBySlug, openAppIds, getBadge, onAgentClick }: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -39,18 +50,37 @@ function SortableProjectIcon({ project }: { project: ProjectSummary }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: project.slug });
+  } = useSortable({ id: item.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform:  CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 50 : undefined,
+    zIndex:  isDragging ? 50  : undefined,
     opacity: isDragging ? 0.7 : 1,
   };
 
+  if (item.kind === 'app') {
+    const project = projectsBySlug.get(item.refId);
+    if (!project) return null;
+    return (
+      <InstalledProjectIcon
+        project={project}
+        containerRef={setNodeRef}
+        containerStyle={style}
+        buttonRef={setActivatorNodeRef}
+        buttonProps={{ ...attributes, ...listeners }}
+      />
+    );
+  }
+
+  const agent = getAgentConfig(item.refId);
+  if (!agent) return null;
   return (
-    <InstalledProjectIcon
-      project={project}
+    <DesktopIcon
+      agent={agent}
+      isOpen={openAppIds.has(agent.id)}
+      badge={getBadge(agent.id)}
+      onClick={() => onAgentClick(agent.id)}
       containerRef={setNodeRef}
       containerStyle={style}
       buttonRef={setActivatorNodeRef}
@@ -103,7 +133,7 @@ export function DesktopShortcuts() {
   const { data: featuredProjects } = useFeaturedProjects();
   const { data: projectsData } = useProjects();
   const allProjects = projectsData?.projects;
-  const { installedSlugs, reorder } = useInstalledProjects();
+  const { orderedIds, orderedItems, reorder } = useDesktopOrder();
 
   // Batch live metrics for every project rendered on the desktop (featured + apps list)
   const allProjectIds = [...new Set([
@@ -117,10 +147,8 @@ export function DesktopShortcuts() {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
-  // Installed projects sorted in user's custom order
-  const installedProjects = installedSlugs
-    .map((slug) => allProjects?.find((p) => p.slug === slug))
-    .filter(Boolean) as ProjectSummary[];
+  const projectsBySlug = new Map<string, ProjectSummary>();
+  for (const p of allProjects ?? []) projectsBySlug.set(p.slug, p);
 
   const openAppIds = new Set(openTabs.map((t) => t.appId));
 
@@ -130,23 +158,17 @@ export function DesktopShortcuts() {
     return undefined;
   };
 
+  const handleAgentClick = (agentId: string) => navigate(`/agents/${agentId}`);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = installedSlugs.indexOf(active.id as string);
-    const newIndex = installedSlugs.indexOf(over.id as string);
-    if (oldIndex !== -1 && newIndex !== -1) {
-      reorder(oldIndex, newIndex);
-    }
+    const oldIndex = orderedIds.indexOf(active.id as string);
+    const newIndex = orderedIds.indexOf(over.id as string);
+    if (oldIndex !== -1 && newIndex !== -1) reorder(oldIndex, newIndex);
   };
 
-  // Group built-in agents by category
-  const builtInByCategory = new Map<string, AgentConfig[]>();
-  for (const agent of agents) {
-    const cat = agent.category;
-    if (!builtInByCategory.has(cat)) builtInByCategory.set(cat, []);
-    builtInByCategory.get(cat)!.push(agent);
-  }
+  const hasInstalled = orderedItems.some((it) => it.kind === 'app');
 
   return (
     <div data-tutorial="desktop-shortcuts" className="absolute inset-0 overflow-auto flex flex-col">
@@ -174,33 +196,26 @@ export function DesktopShortcuts() {
           </section>
         )}
 
-        {/* 2. Installed + Built-in apps together in one draggable section */}
+        {/* 2. Apps + built-in agents in one draggable list — single source of order */}
         <section>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-[rgba(255,255,255,0.3)] mb-3 px-1">
-            {installedProjects.length > 0 ? 'Apps' : 'System'}
+            {hasInstalled ? 'Apps' : 'System'}
           </h2>
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext
-              items={installedSlugs}
-              strategy={rectSortingStrategy}
-            >
+            <SortableContext items={orderedIds} strategy={rectSortingStrategy}>
               <div className="flex flex-wrap gap-1 sm:gap-2">
-                {/* Installed projects — draggable */}
-                {installedProjects.map((project) => (
-                  <SortableProjectIcon key={project.slug} project={project} />
-                ))}
-                {/* Built-in agents — static */}
-                {Array.from(builtInByCategory.values()).flat().map((agent) => (
-                  <DesktopIcon
-                    key={agent.id}
-                    agent={agent}
-                    isOpen={openAppIds.has(agent.id)}
-                    badge={getBadge(agent.id)}
-                    onClick={() => navigate(`/agents/${agent.id}`)}
+                {orderedItems.map((item) => (
+                  <SortableDesktopItem
+                    key={item.id}
+                    item={item}
+                    projectsBySlug={projectsBySlug}
+                    openAppIds={openAppIds}
+                    getBadge={getBadge}
+                    onAgentClick={handleAgentClick}
                   />
                 ))}
               </div>
