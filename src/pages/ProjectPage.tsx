@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { ArrowLeft, ExternalLink, Users, Target, Trophy, Globe, Plus, Check, Download, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ProjectLogo } from '@unicitylabs/sphere-ui';
 import { useProject, useProjectQuests, useProjectAchievements, useProjectMetrics } from '../hooks/useMarketplace';
 import { QuestPreviewCard } from '../components/marketplace/QuestPreviewCard';
 import { ProjectReviewsSection } from '../components/marketplace/ProjectReviewsSection';
@@ -274,12 +275,16 @@ export function ProjectPage() {
           </Link>
         </div>
 
-        {/* Logo — outside overflow-hidden container */}
-        <div className="absolute -bottom-6 left-6 sm:left-8 z-10">
-          <img
-            src={project.logoUrl}
-            alt={project.name}
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-4 border-white dark:border-[#060606] shadow-xl"
+        {/* Logo — outside overflow-hidden container.
+            Uses ProjectLogo for consistency with marketplace cards / desktop dock:
+            real uploaded logo fills the tile (no blik visible); a missing logo
+            falls back to a 2-letter monogram with the gradient blik visible. */}
+        <div className="absolute -bottom-6 left-6 sm:left-8 z-10 rounded-2xl border-4 border-white dark:border-[#060606] shadow-xl overflow-hidden">
+          <ProjectLogo
+            name={project.name}
+            logoUrl={project.logoUrl}
+            accentColor={project.accentColor}
+            size="lg"
           />
         </div>
       </div>
