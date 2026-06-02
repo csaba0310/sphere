@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
 
+/* Tell Tailwind to scan sphere-ui dist for class names (so MarketplaceProjectCard etc. render correctly) */
+@source "../node_modules/@unicitylabs/sphere-ui/dist";
+
 /* Dark mode variant for Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 

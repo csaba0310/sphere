@@ -38,6 +38,19 @@ async function resolveProjectId(slug: string): Promise<string> {
   return detail._id;
 }
 
+/**
+ * Merge server slug list with user-defined local order:
+ *  • keep local ordering for slugs that still exist on server,
+ *  • append any new server slugs at the end (preserves user customization).
+ */
+function mergeSlugs(serverSlugs: string[], localOrder: string[]): string[] {
+  const serverSet = new Set(serverSlugs);
+  const ordered = localOrder.filter((s) => serverSet.has(s));
+  const orderedSet = new Set(ordered);
+  for (const s of serverSlugs) if (!orderedSet.has(s)) ordered.push(s);
+  return ordered;
+}
+
 // ── Hook ──────────────────────────────────────────────────────────────
 
 export function useInstalledProjects() {
@@ -75,18 +88,26 @@ export function useInstalledProjects() {
     gcTime:    Infinity,
   });
 
-  // Mirror the latest server response into the local slug cache so logged-out
-  // sessions still show the right shortcuts.
+  // Mirror the server response into the local slug cache, but PRESERVE the
+  // user's manual ordering (drag-drop on desktop). We only sync the set of
+  // slugs (add new server entries, drop ones that vanished server-side).
   useEffect(() => {
     if (!serverQuery.data) return;
     const serverSlugs = serverQuery.data.map((i) => i.project.slug);
-    queryClient.setQueryData<string[]>(LOCAL_KEY, serverSlugs);
-    saveLocalSlugs(serverSlugs);
+    const current = queryClient.getQueryData<string[]>(LOCAL_KEY) ?? loadLocalSlugs();
+    const merged  = mergeSlugs(serverSlugs, current);
+    const same = merged.length === current.length && merged.every((s, i) => s === current[i]);
+    if (!same) {
+      queryClient.setQueryData<string[]>(LOCAL_KEY, merged);
+      saveLocalSlugs(merged);
+    }
   }, [serverQuery.data, queryClient]);
 
-  // The set of slugs currently shown — server is authoritative when present
-  const installedSlugs: string[] =
-    serverQuery.data?.map((i) => i.project.slug) ?? localSlugs;
+  // The list shown on the desktop — local order is the authority (it's where
+  // user reorderings land), filtered by server set when wallet is connected.
+  const installedSlugs: string[] = serverQuery.data
+    ? mergeSlugs(serverQuery.data.map((i) => i.project.slug), localSlugs)
+    : localSlugs;
 
   const isInstalled = useCallback(
     (slug: string) => installedSlugs.includes(slug),

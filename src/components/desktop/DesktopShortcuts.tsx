@@ -27,11 +27,15 @@ import { InstalledProjectIcon } from './InstalledProjectIcon';
 import { FeaturedProjectCard } from '../marketplace/FeaturedProjectCard';
 
 // ── Sortable wrapper for InstalledProjectIcon ──────────────────────────
+// dnd-kit listeners sit on the SAME button element framer-motion controls,
+// otherwise pointer events get split between the outer wrapper and the
+// inner motion.button and drag activation can fail intermittently.
 function SortableProjectIcon({ project }: { project: ProjectSummary }) {
   const {
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
@@ -45,9 +49,13 @@ function SortableProjectIcon({ project }: { project: ProjectSummary }) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <InstalledProjectIcon project={project} />
-    </div>
+    <InstalledProjectIcon
+      project={project}
+      containerRef={setNodeRef}
+      containerStyle={style}
+      buttonRef={setActivatorNodeRef}
+      buttonProps={{ ...attributes, ...listeners }}
+    />
   );
 }
 

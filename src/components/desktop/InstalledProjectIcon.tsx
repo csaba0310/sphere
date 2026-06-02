@@ -1,24 +1,37 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type CSSProperties, type Ref } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, ExternalLink, Store, Trash2, MoreVertical } from 'lucide-react';
+import { InstalledProjectIcon as InstalledProjectIconUI } from '@unicitylabs/sphere-ui';
 import { useDesktopState } from '../../hooks/useDesktopState';
 import { useInstalledProjects } from '../../hooks/useInstalledProjects';
 import type { ProjectSummary } from '../../services/marketplaceApi';
 
 interface InstalledProjectIconProps {
   project: ProjectSummary & { appUrl?: string | null; websiteUrl?: string | null };
+  /** Outer container ref (e.g. dnd-kit `setNodeRef`). */
+  containerRef?: Ref<HTMLDivElement>;
+  /** Outer container inline style (e.g. dnd-kit transform/transition). */
+  containerStyle?: CSSProperties;
+  /** Inner button ref (e.g. dnd-kit `setActivatorNodeRef`). */
+  buttonRef?: Ref<HTMLButtonElement>;
+  /** Extra props spread on the inner button (e.g. dnd-kit attributes+listeners). */
+  buttonProps?: { className?: string; style?: CSSProperties } & Record<string, unknown>;
 }
 
-export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
+export function InstalledProjectIcon({
+  project,
+  containerRef,
+  containerStyle,
+  buttonRef,
+  buttonProps,
+}: InstalledProjectIconProps) {
   const navigate = useNavigate();
   const { openTab } = useDesktopState();
   const { uninstall, ping } = useInstalledProjects();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [imgError, setImgError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e: MouseEvent) => {
@@ -30,8 +43,6 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
-  // Primary click: always open in iframe tab
-  // Use appUrl if available, otherwise use websiteUrl as fallback
   const launchUrl = project.appUrl ?? project.websiteUrl;
 
   const handleClick = () => {
@@ -40,7 +51,6 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
       openTab('custom', { url: launchUrl, label: project.name });
       navigate(`/agents/custom?url=${encodeURIComponent(launchUrl)}`);
     } else {
-      // Last resort: open marketplace page
       navigate(`/apps/${project.slug}`);
     }
   };
@@ -82,51 +92,26 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
     },
   ];
 
+  // Combine the outer wrapper ref (for menu outside-click) with the dnd-kit container ref
+  const setContainerRef = (node: HTMLDivElement | null) => {
+    (menuRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    if (typeof containerRef === 'function') containerRef(node);
+    else if (containerRef && 'current' in containerRef) {
+      (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    }
+  };
+
   return (
-    <div className="relative" ref={menuRef}>
-      <motion.button
+    <div className="relative" ref={setContainerRef} style={containerStyle}>
+      <InstalledProjectIconUI
+        name={project.name}
+        logoUrl={project.logoUrl}
+        accentColor={project.accentColor}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
-        whileHover={{ scale: 1.08, y: -4 }}
-        whileTap={{ scale: 0.92 }}
-        transition={{ duration: 0.05 }}
-        className="flex flex-col items-center gap-2 p-3 rounded-2xl group cursor-pointer relative"
-      >
-        {/* Icon */}
-        <div className="relative">
-          {/* Glow */}
-          <div
-            className="absolute -inset-1 blur-xl opacity-0 group-hover:opacity-50 transition-all duration-300 rounded-2xl"
-            style={{ backgroundColor: project.accentColor }}
-          />
-
-          <div
-            className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 overflow-hidden"
-            style={{ background: `linear-gradient(135deg, ${project.accentColor}, ${project.accentColor}cc)` }}
-          >
-            {/* Mesh overlay */}
-            <div
-              className="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity duration-500"
-              style={{
-                backgroundImage: `radial-gradient(at 27% 37%, rgba(255,255,255,0.15) 0px, transparent 50%),
-                                 radial-gradient(at 97% 21%, rgba(255,255,255,0.1) 0px, transparent 50%)`,
-              }}
-            />
-            <div className="absolute top-0 right-0 w-8 h-8 bg-white/10 rounded-bl-full group-hover:w-10 group-hover:h-10 transition-all duration-300" />
-
-            {!imgError ? (
-              <img
-                src={project.logoUrl}
-                alt={project.name}
-                onError={() => setImgError(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-lg relative z-10 drop-shadow-lg"
-              />
-            ) : (
-              <span className="text-white font-bold text-lg relative z-10">{project.name[0]}</span>
-            )}
-          </div>
-
-          {/* Context menu button — div instead of button to avoid nested-button HTML spec violation (outer is motion.button) */}
+        buttonRef={buttonRef}
+        buttonProps={buttonProps}
+        topRightAction={
           <div
             role="button"
             tabIndex={0}
@@ -143,15 +128,9 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
           >
             <MoreVertical className="w-3 h-3" />
           </div>
-        </div>
+        }
+      />
 
-        {/* Label */}
-        <span className="text-xs sm:text-sm font-medium text-neutral-500 dark:text-[rgba(255,255,255,0.45)] group-hover:text-neutral-900 dark:group-hover:text-white transition-colors truncate max-w-20 sm:max-w-24 text-center leading-tight">
-          {project.name}
-        </span>
-      </motion.button>
-
-      {/* Context menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
