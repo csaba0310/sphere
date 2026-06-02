@@ -126,13 +126,23 @@ export function InstalledProjectIcon({ project }: InstalledProjectIconProps) {
             )}
           </div>
 
-          {/* Context menu button */}
-          <button
+          {/* Context menu button — div instead of button to avoid nested-button HTML spec violation (outer is motion.button) */}
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Open context menu"
             onClick={(e) => { e.stopPropagation(); setMenuOpen((prev) => !prev); }}
-            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-black/60 backdrop-blur-sm text-white/70 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuOpen((prev) => !prev);
+              }
+            }}
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-black/60 backdrop-blur-sm text-white/70 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 cursor-pointer"
           >
             <MoreVertical className="w-3 h-3" />
-          </button>
+          </div>
         </div>
 
         {/* Label */}
