@@ -74,6 +74,9 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: /sphere/${{ steps.branch.outputs.name }}/
+          # Public URL — baked into the bundle at build time. Hardcoded
+          # because the same value applies to every branch preview deploy.
+          VITE_SPHERE_API_URL: https://quest-api.staging.unicity.network
 
       - name: Deploy branch to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
