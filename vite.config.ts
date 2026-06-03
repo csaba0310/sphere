@@ -104,6 +104,9 @@ export default defineConfig(({ mode }) => {
         'vite-plugin-node-polyfills/shims/process': path.resolve(__dirname, 'node_modules/vite-plugin-node-polyfills/shims/process'),
         'vite-plugin-node-polyfills/shims/global': path.resolve(__dirname, 'node_modules/vite-plugin-node-polyfills/shims/global'),
       },
+      // Dedupe peer deps so file:-linked sphere-ui doesn't pull a second copy of React etc.
+      // through its devDependencies, which would break hooks across the module boundary.
+      dedupe: ['react', 'react-dom', 'framer-motion', '@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
     },
     build: {
       rollupOptions: {
@@ -121,6 +124,9 @@ export default defineConfig(({ mode }) => {
         'react-router-dom',
         '@tanstack/react-query',
       ],
+      // Force re-bundling on dev start so the file:-linked sphere-ui is freshly resolved
+      // against the deduped peer deps (otherwise Vite caches stale pre-bundles).
+      force: true,
     }
   };
 });

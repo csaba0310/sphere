@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties, type Ref } from 'react';
 import { motion } from 'framer-motion';
 import type { AgentConfig } from '../../config/activities';
 
@@ -9,21 +9,44 @@ interface DesktopIconProps {
   iconUrl?: string;
   tooltip?: string;
   onClick: () => void;
+  /** Outer container ref (e.g. dnd-kit `setNodeRef`). */
+  containerRef?: Ref<HTMLDivElement>;
+  /** Outer container inline style (e.g. dnd-kit transform/transition). */
+  containerStyle?: CSSProperties;
+  /** Inner button ref (e.g. dnd-kit `setActivatorNodeRef`). */
+  buttonRef?: Ref<HTMLButtonElement>;
+  /** Extra props spread on the inner button (e.g. dnd-kit attributes+listeners). */
+  buttonProps?: { className?: string; style?: CSSProperties } & Record<string, unknown>;
 }
 
-export function DesktopIcon({ agent, isOpen, badge, iconUrl, tooltip, onClick }: DesktopIconProps) {
+export function DesktopIcon({
+  agent,
+  isOpen,
+  badge,
+  iconUrl,
+  tooltip,
+  onClick,
+  containerRef,
+  containerStyle,
+  buttonRef,
+  buttonProps,
+}: DesktopIconProps) {
   const { Icon, name, color } = agent;
   const [imgError, setImgError] = useState(false);
   const showImage = iconUrl && !imgError;
 
   return (
+    <div ref={containerRef} style={containerStyle}>
     <motion.button
+      ref={buttonRef}
       onClick={onClick}
       whileHover={{ scale: 1.08, y: -4 }}
       whileTap={{ scale: 0.92 }}
       transition={{ duration: 0.05 }}
       title={tooltip}
-      className="flex flex-col items-center gap-2 p-3 rounded-2xl group cursor-pointer relative"
+      {...buttonProps}
+      className={`flex flex-col items-center gap-2 p-3 rounded-2xl group cursor-pointer relative${buttonProps?.className ? ' ' + buttonProps.className : ''}`}
+      style={{ touchAction: 'none', ...buttonProps?.style }}
     >
       {/* Icon container with gradient */}
       <div className="relative">
@@ -72,5 +95,6 @@ export function DesktopIcon({ agent, isOpen, badge, iconUrl, tooltip, onClick }:
         {name}
       </span>
     </motion.button>
+    </div>
   );
 }

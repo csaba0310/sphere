@@ -30,6 +30,8 @@ const DocsPage = lazyWithRetry(() => import('./pages/DocsPage').then(m => ({ def
 const MarketsPage = lazyWithRetry(() => import('./pages/MarketsPage').then(m => ({ default: m.MarketsPage })));
 const AgentsPage = lazyWithRetry(() => import('./pages/AgentsPage').then(m => ({ default: m.AgentsPage })));
 const AboutPage = lazyWithRetry(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const ExplorePage = lazyWithRetry(() => import('./pages/ExplorePage').then(m => ({ default: m.ExplorePage })));
+const ProjectPage = lazyWithRetry(() => import('./pages/ProjectPage').then(m => ({ default: m.ProjectPage })));
 
 function LazyFallback() {
   return (
@@ -55,6 +57,8 @@ export default function App() {
         <Route path="/markets" element={<Suspense fallback={<LazyFallback />}><MarketsPage /></Suspense>} />
         <Route path="/explore-agents" element={<Suspense fallback={<LazyFallback />}><AgentsPage /></Suspense>} />
         <Route path="/about" element={<Suspense fallback={<LazyFallback />}><AboutPage /></Suspense>} />
+        <Route path="/explore" element={<Suspense fallback={<LazyFallback />}><ExplorePage /></Suspense>} />
+        <Route path="/apps/:slug" element={<Suspense fallback={<LazyFallback />}><ProjectPage /></Suspense>} />
       </Route>
     </Routes>
   );

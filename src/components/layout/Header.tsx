@@ -17,6 +17,7 @@ import logoUrl from '/Union.svg';
 
 const navItems: { label: string; path: string; external?: boolean }[] = [
   { label: 'Home', path: '/home' },
+  { label: 'Explore', path: '/explore' },
   { label: 'Markets', path: '/markets' },
   { label: 'Devs', path: '/developers' },
   { label: 'Agents', path: '/explore-agents' },
@@ -62,6 +63,9 @@ export function Header() {
     if (!path) return false;
     if (path === '/home') {
       return location.pathname === '/home' || location.pathname.startsWith('/agents/');
+    }
+    if (path === '/explore') {
+      return location.pathname === '/explore' || location.pathname.startsWith('/apps/');
     }
     if (path === '/developers') {
       return location.pathname.startsWith('/developers');

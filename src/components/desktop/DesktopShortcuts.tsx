@@ -1,45 +1,153 @@
-import { useNavigate } from 'react-router-dom';
-import { Globe } from 'lucide-react';
-import { agents, type AgentConfig } from '../../config/activities';
+import { useNavigate, Link } from 'react-router-dom';
+import { useRef, useCallback, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { getAgentConfig } from '../../config/activities';
 import { useDesktopState } from '../../hooks/useDesktopState';
-import { useRemoteApps, type RemoteApp } from '../../hooks/useRemoteApps';
 import { useDmUnreadCount } from '../chat/hooks/useDmUnreadCount';
 import { useGroupUnreadCount } from '../chat/hooks/useGroupUnreadCount';
+import { useFeaturedProjects, useProjects, useProjectMetricsBatch } from '../../hooks/useMarketplace';
+import { useDesktopOrder, type DesktopOrderItem } from '../../hooks/useDesktopOrder';
+import type { ProjectSummary } from '../../services/marketplaceApi';
 import { DesktopIcon } from './DesktopIcon';
+import { InstalledProjectIcon } from './InstalledProjectIcon';
+import { FeaturedProjectCard } from '../marketplace/FeaturedProjectCard';
 
-// Consistent gradient palette for remote app categories
-const CATEGORY_COLORS: Record<string, string> = {
-  games: 'from-emerald-500 to-teal-500',
-  dev: 'from-amber-500 to-orange-500',
-  defi: 'from-violet-500 to-purple-500',
-  social: 'from-pink-500 to-rose-500',
-  tools: 'from-sky-500 to-blue-500',
-};
-const DEFAULT_REMOTE_COLOR = 'from-slate-500 to-zinc-500';
+// ── Sortable wrappers ──────────────────────────────────────────────────
+// dnd-kit listeners are threaded onto the inner motion.button (via
+// setActivatorNodeRef + spread props) so framer-motion's whileTap and
+// the PointerSensor share the same element instead of fighting across
+// wrapper layers.
 
-function remoteAppToAgent(app: RemoteApp): AgentConfig {
-  return {
-    id: `remote-${app.url}`,
-    name: app.name,
-    description: app.name,
-    Icon: Globe,
-    category: app.category,
-    color: CATEGORY_COLORS[app.category.toLowerCase()] ?? DEFAULT_REMOTE_COLOR,
-    type: 'iframe',
-    iframeUrl: app.url,
-  };
+interface SortableItemProps {
+  item: DesktopOrderItem;
+  projectsBySlug: Map<string, ProjectSummary>;
+  openAppIds: Set<string>;
+  getBadge: (agentId: string) => number | undefined;
+  onAgentClick: (agentId: string) => void;
 }
 
-function formatCategory(category: string): string {
-  return category.charAt(0).toUpperCase() + category.slice(1);
+function SortableDesktopItem({ item, projectsBySlug, openAppIds, getBadge, onAgentClick }: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform:  CSS.Transform.toString(transform),
+    transition,
+    zIndex:  isDragging ? 50  : undefined,
+    opacity: isDragging ? 0.7 : 1,
+  };
+
+  if (item.kind === 'app') {
+    const project = projectsBySlug.get(item.refId);
+    if (!project) return null;
+    return (
+      <InstalledProjectIcon
+        project={project}
+        containerRef={setNodeRef}
+        containerStyle={style}
+        buttonRef={setActivatorNodeRef}
+        buttonProps={{ ...attributes, ...listeners }}
+      />
+    );
+  }
+
+  const agent = getAgentConfig(item.refId);
+  if (!agent) return null;
+  return (
+    <DesktopIcon
+      agent={agent}
+      isOpen={openAppIds.has(agent.id)}
+      badge={getBadge(agent.id)}
+      onClick={() => onAgentClick(agent.id)}
+      containerRef={setNodeRef}
+      containerStyle={style}
+      buttonRef={setActivatorNodeRef}
+      buttonProps={{ ...attributes, ...listeners }}
+    />
+  );
+}
+
+// Drag-scrollable container (same pattern as MediaGallery)
+function DragScroll({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const sl = useRef(0);
+  const moved = useRef(false);
+
+  const stop = useCallback(() => {
+    dragging.current = false;
+    if (ref.current) ref.current.style.cursor = 'grab';
+    setTimeout(() => { moved.current = false; }, 0);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', stop);
+    return () => window.removeEventListener('mouseup', stop);
+  }, [stop]);
+
+  return (
+    <div
+      ref={ref}
+      onDragStart={e => e.preventDefault()}
+      onMouseDown={e => { e.preventDefault(); dragging.current = true; moved.current = false; startX.current = e.pageX; sl.current = ref.current?.scrollLeft ?? 0; if (ref.current) ref.current.style.cursor = 'grabbing'; }}
+      onMouseMove={e => { if (!dragging.current || !ref.current) return; e.preventDefault(); const w = (e.pageX - startX.current) * 1.2; ref.current.scrollLeft = sl.current - w; if (Math.abs(w) > 5) moved.current = true; }}
+      onMouseUp={stop}
+      onMouseLeave={stop}
+      onClickCapture={e => { if (moved.current) { e.preventDefault(); e.stopPropagation(); } }}
+      className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 select-none"
+      style={{ cursor: 'grab', userSelect: 'none' }}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function DesktopShortcuts() {
   const navigate = useNavigate();
-  const { openTabs, openTab } = useDesktopState();
+  const { openTabs } = useDesktopState();
   const dmUnreadCount = useDmUnreadCount();
   const groupUnreadCount = useGroupUnreadCount();
-  const { data: remoteApps } = useRemoteApps();
+  const { data: featuredProjects } = useFeaturedProjects();
+  const { data: projectsData } = useProjects();
+  const allProjects = projectsData?.projects;
+  const { orderedIds, orderedItems, reorder } = useDesktopOrder();
+
+  // Batch live metrics for every project rendered on the desktop (featured + apps list)
+  const allProjectIds = [...new Set([
+    ...(featuredProjects ?? []).map((p) => p._id),
+    ...(allProjects ?? []).map((p) => p._id),
+  ])];
+  const { data: metricsByProject = {} } = useProjectMetricsBatch(allProjectIds);
+
+  // Require 8px drag distance before activating — prevents accidental drags on click
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  );
+
+  const projectsBySlug = new Map<string, ProjectSummary>();
+  for (const p of allProjects ?? []) projectsBySlug.set(p.slug, p);
 
   const openAppIds = new Set(openTabs.map((t) => t.appId));
 
@@ -49,87 +157,81 @@ export function DesktopShortcuts() {
     return undefined;
   };
 
-  const handleRemoteAppClick = (app: RemoteApp) => {
-    const label = app.name;
-    openTab('custom', { url: app.url, label });
-    navigate(`/agents/custom?url=${encodeURIComponent(app.url)}`);
+  const handleAgentClick = (agentId: string) => navigate(`/agents/${agentId}`);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = orderedIds.indexOf(active.id as string);
+    const newIndex = orderedIds.indexOf(over.id as string);
+    if (oldIndex !== -1 && newIndex !== -1) reorder(oldIndex, newIndex);
   };
 
-  // Group built-in agents by category
-  const builtInByCategory = new Map<string, AgentConfig[]>();
-  for (const agent of agents) {
-    const cat = agent.category;
-    if (!builtInByCategory.has(cat)) builtInByCategory.set(cat, []);
-    builtInByCategory.get(cat)!.push(agent);
-  }
-
-  // Group remote apps by category
-  const remoteByCategory = new Map<string, RemoteApp[]>();
-  if (remoteApps) {
-    for (const app of remoteApps) {
-      const cat = formatCategory(app.category);
-      if (!remoteByCategory.has(cat)) remoteByCategory.set(cat, []);
-      remoteByCategory.get(cat)!.push(app);
-    }
-  }
-
-  // Collect all category names preserving built-in order first, then remote
-  const allCategories: string[] = [];
-  for (const cat of builtInByCategory.keys()) {
-    allCategories.push(cat);
-  }
-  for (const cat of remoteByCategory.keys()) {
-    if (!allCategories.includes(cat)) allCategories.push(cat);
-  }
+  const hasInstalled = orderedItems.some((it) => it.kind === 'app');
 
   return (
     <div data-tutorial="desktop-shortcuts" className="absolute inset-0 overflow-auto flex flex-col">
-      <div className="relative flex-1 px-6 pt-6 sm:px-10 sm:pt-8 pb-8 space-y-6">
-        {allCategories.map((category) => {
-          const builtIn = builtInByCategory.get(category) ?? [];
-          const remote = remoteByCategory.get(category) ?? [];
-          if (builtIn.length === 0 && remote.length === 0) return null;
+      <div className="relative flex-1 px-6 pt-6 sm:px-10 sm:pt-8 pb-8 flex flex-col">
+        <div className="space-y-6">
 
-          return (
-            <section key={category}>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-[rgba(255,255,255,0.3)] mb-3 px-1">
-                {category}
+        {/* 1. Featured Projects carousel */}
+        {featuredProjects && featuredProjects.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-[rgba(255,255,255,0.3)]">
+                Featured Projects
               </h2>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1 sm:gap-3">
-                {builtIn.map((agent) => (
-                  <DesktopIcon
-                    key={agent.id}
-                    agent={agent}
-                    isOpen={openAppIds.has(agent.id)}
-                    badge={getBadge(agent.id)}
-                    onClick={() => navigate(`/agents/${agent.id}`)}
-                  />
-                ))}
-                {remote.map((app) => (
-                  <DesktopIcon
-                    key={app.url}
-                    agent={remoteAppToAgent(app)}
-                    iconUrl={app.icon}
-                    tooltip={app.description}
-                    isOpen={openTabs.some((t) => t.url === app.url)}
-                    onClick={() => handleRemoteAppClick(app)}
+              <Link to="/explore" className="text-[11px] font-medium text-orange-500 dark:text-brand-orange hover:underline flex items-center gap-1">
+                View all <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <DragScroll>
+              {featuredProjects.map((project) => (
+                <div key={project.slug} className="shrink-0">
+                  <FeaturedProjectCard project={project} metrics={metricsByProject[project._id]} />
+                </div>
+              ))}
+            </DragScroll>
+          </section>
+        )}
+
+        {/* 2. Apps + built-in agents in one draggable list — single source of order */}
+        <section>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-[rgba(255,255,255,0.3)] mb-3 px-1">
+            {hasInstalled ? 'Apps' : 'System'}
+          </h2>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={orderedIds} strategy={rectSortingStrategy}>
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                {orderedItems.map((item) => (
+                  <SortableDesktopItem
+                    key={item.id}
+                    item={item}
+                    projectsBySlug={projectsBySlug}
+                    openAppIds={openAppIds}
+                    getBadge={getBadge}
+                    onAgentClick={handleAgentClick}
                   />
                 ))}
               </div>
-            </section>
-          );
-        })}
+            </SortableContext>
+          </DndContext>
+        </section>
 
-        {/* Community CTA */}
-        <p className="text-center text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.3)] pt-2 pb-4">
-          Built something for Sphere?{' '}
-          <a
-            href="https://github.com/unicity-sphere/sphere-apps"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)] transition-colors"
-          >
-            Add it to the directory
+        </div>
+
+        {/* CTA — pinned to bottom of the desktop area */}
+        <p className="text-center text-xs text-neutral-400 dark:text-[rgba(255,255,255,0.3)] mt-auto pt-8">
+          <Link to="/explore" className="underline hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)] transition-colors">
+            Explore marketplace
+          </Link>
+          {' '}&middot;{' '}
+          <a href="https://github.com/unicity-sphere/sphere-apps" target="_blank" rel="noopener noreferrer" className="underline hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)] transition-colors">
+            Submit your project
           </a>
         </p>
       </div>
