@@ -106,7 +106,7 @@ interface SphereProviderProps {
 
 export function SphereProvider({
   children,
-  network = 'testnet',
+  network = 'testnet2',
 }: SphereProviderProps) {
   const queryClient = useQueryClient();
   const [sphere, setSphere] = useState<Sphere | null>(null);
@@ -132,6 +132,9 @@ export function SphereProvider({
 
       const browserProviders = createBrowserProviders({
         network,
+        // v2 token engine: aggregator URL + trust base (networkId 4) come from the
+        // testnet2 network preset; only the apiKey is injected (non-secret on testnet2).
+        oracle: { apiKey: import.meta.env.VITE_AGGREGATOR_API_KEY },
         price: { platform: 'coingecko', baseUrl: COINGECKO_BASE_URL, cacheTtlMs: 5 * 60_000 },
         groupChat: true,
         market: true,
