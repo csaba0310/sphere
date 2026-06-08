@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Receipt, CheckCircle, XCircle, ArrowRight, Loader2 } from 'lucide-react';
-import { useIdentity } from '../../../../sdk';
+import { useTopUp } from '../../../../sdk';
 import { getErrorMessage } from '../../../../sdk/errors';
-import { FaucetService } from '../../../../services/FaucetService';
 import { showToast } from '../../../ui/toast-utils';
 import { WalletScreen } from '../../ui/WalletScreen';
 import { ModalHeader } from '../../ui';
@@ -15,46 +14,52 @@ interface TopUpModalProps {
 }
 
 export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
-  const { nametag } = useIdentity();
+  const { topUp } = useTopUp();
 
-  const [isFaucetLoading, setIsFaucetLoading] = useState(false);
-  const [faucetSuccess, setFaucetSuccess] = useState(false);
-  const [faucetError, setFaucetError] = useState<string | null>(null);
+  const [isToppingUp, setIsToppingUp] = useState(false);
+  const [topUpSuccess, setTopUpSuccess] = useState(false);
+  const [topUpError, setTopUpError] = useState<string | null>(null);
   const [isPaymentRequestOpen, setIsPaymentRequestOpen] = useState(false);
 
-  const handleFaucetRequest = async () => {
-    if (!nametag || isFaucetLoading) return;
+  const handleTopUp = async () => {
+    if (isToppingUp) return;
 
-    setIsFaucetLoading(true);
-    setFaucetError(null);
-    setFaucetSuccess(false);
+    setIsToppingUp(true);
+    setTopUpError(null);
+    setTopUpSuccess(false);
 
     try {
-      const results = await FaucetService.requestAllCoins(nametag);
-      const failedRequests = results.filter(r => !r.success);
+      // Self-mint test tokens to this wallet (v2; no faucet, no nametag).
+      const results = await topUp();
+      const failed = results.filter((r) => !r.success);
 
-      if (failedRequests.length > 0) {
-        const uniqueReasons = [...new Set(failedRequests.map(r => r.message || 'Unknown error'))];
-        if (uniqueReasons.length === 1) {
-          setFaucetError(uniqueReasons[0]);
-        } else {
-          const reasons = failedRequests.map(r => `${r.coin}: ${r.message || 'Unknown error'}`);
-          setFaucetError(`Failed to request:\n${reasons.join('\n')}`);
-        }
+      if (failed.length === results.length) {
+        // All failed — surface the reason(s).
+        const uniqueReasons = [...new Set(failed.map((r) => r.error || 'Unknown error'))];
+        setTopUpError(
+          uniqueReasons.length === 1
+            ? uniqueReasons[0]
+            : failed.map((r) => `${r.symbol}: ${r.error || 'Unknown error'}`).join('\n'),
+        );
+      } else if (failed.length > 0) {
+        // Partial success — minted some; note which failed but treat as success.
+        setTopUpSuccess(true);
+        showToast(`Some coins failed: ${failed.map((r) => r.symbol).join(', ')}`, 'info', 4000);
+        setTimeout(() => setTopUpSuccess(false), 3000);
       } else {
-        setFaucetSuccess(true);
-        setTimeout(() => setFaucetSuccess(false), 3000);
+        setTopUpSuccess(true);
+        setTimeout(() => setTopUpSuccess(false), 3000);
       }
     } catch (error) {
-      setFaucetError(getErrorMessage(error));
+      setTopUpError(getErrorMessage(error));
     } finally {
-      setIsFaucetLoading(false);
+      setIsToppingUp(false);
     }
   };
 
   const handleClose = () => {
-    setFaucetError(null);
-    setFaucetSuccess(false);
+    setTopUpError(null);
+    setTopUpSuccess(false);
     onClose();
   };
 
@@ -73,28 +78,28 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
 
         <div className="flex flex-col px-6 py-6 gap-3">
 
-          {/* Faucet card */}
+          {/* Self-mint test tokens card */}
           <motion.button
-            whileHover={!nametag || isFaucetLoading ? {} : { scale: 1.01 }}
-            whileTap={!nametag || isFaucetLoading ? {} : { scale: 0.99 }}
-            onClick={handleFaucetRequest}
-            disabled={!nametag || isFaucetLoading}
+            whileHover={isToppingUp ? {} : { scale: 1.01 }}
+            whileTap={isToppingUp ? {} : { scale: 0.99 }}
+            onClick={handleTopUp}
+            disabled={isToppingUp}
             className={`w-full p-5 flex items-center gap-4 rounded-2xl border text-left transition-colors ${
-              faucetSuccess
+              topUpSuccess
                 ? 'bg-emerald-500/10 border-emerald-500/20'
-                : faucetError
+                : topUpError
                   ? 'bg-red-500/10 border-red-500/20'
                   : 'bg-neutral-50 dark:bg-white/4 border-neutral-200 dark:border-white/8 hover:bg-neutral-100 dark:hover:bg-white/8 disabled:opacity-50 disabled:cursor-not-allowed'
             }`}
           >
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-              faucetSuccess ? 'bg-emerald-500/15' : faucetError ? 'bg-red-500/15' : 'bg-orange-500/10'
+              topUpSuccess ? 'bg-emerald-500/15' : topUpError ? 'bg-red-500/15' : 'bg-orange-500/10'
             }`}>
-              {isFaucetLoading ? (
+              {isToppingUp ? (
                 <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
-              ) : faucetSuccess ? (
+              ) : topUpSuccess ? (
                 <CheckCircle className="w-6 h-6 text-emerald-500" />
-              ) : faucetError ? (
+              ) : topUpError ? (
                 <XCircle className="w-6 h-6 text-red-500" />
               ) : (
                 <Sparkles className="w-6 h-6 text-orange-500" />
@@ -102,21 +107,19 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
             </div>
             <div className="flex-1 min-w-0">
               <div className={`font-semibold font-mono ${
-                faucetSuccess ? 'text-emerald-500' : faucetError ? 'text-red-500' : 'text-neutral-900 dark:text-white'
+                topUpSuccess ? 'text-emerald-500' : topUpError ? 'text-red-500' : 'text-neutral-900 dark:text-white'
               }`}>
-                {isFaucetLoading ? 'Requesting...' : faucetSuccess ? 'Tokens received!' : faucetError ? 'Request failed' : 'Faucet'}
+                {isToppingUp ? 'Minting...' : topUpSuccess ? 'Tokens minted!' : topUpError ? 'Mint failed' : 'Get test tokens'}
               </div>
               <div className="text-xs text-neutral-500 dark:text-white/45 mt-0.5 line-clamp-2">
-                {faucetError
-                  ? faucetError
-                  : faucetSuccess
-                    ? 'Test tokens have been sent to your wallet'
-                    : nametag
-                      ? 'Request test tokens from the Unicity faucet'
-                      : 'Nametag required to use the faucet'}
+                {topUpError
+                  ? topUpError
+                  : topUpSuccess
+                    ? 'Test tokens have been minted to your wallet'
+                    : 'Mint test tokens directly to your wallet'}
               </div>
             </div>
-            {!isFaucetLoading && !faucetSuccess && !faucetError && nametag && (
+            {!isToppingUp && !topUpSuccess && !topUpError && (
               <ArrowRight className="w-4 h-4 text-neutral-400 dark:text-neutral-600 shrink-0" />
             )}
           </motion.button>
