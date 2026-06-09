@@ -159,6 +159,7 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Loading wallet...' });
         const { sphere: instance } = await Sphere.init({
           ...browserProviders,
+          network, // ensure the SDK configures TokenRegistry for THIS network (not the testnet default)
           l1: {},
           discoverAddresses: false, // Run separately below for UX
           onProgress: setInitProgress,
@@ -236,6 +237,7 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Creating wallet...' });
         const { sphere: instance, generatedMnemonic } = await Sphere.init({
           ...providers,
+          network,
           autoGenerate: true,
           nametag: options?.nametag,
           l1: {},
@@ -259,7 +261,7 @@ export function SphereProvider({
         throw err;
       }
     },
-    [providers],
+    [providers, network],
   );
 
   const resolveNametag = useCallback(
