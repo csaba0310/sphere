@@ -18,25 +18,24 @@ export interface UseTopUpReturn {
 }
 
 /**
- * Human-readable mint amounts per symbol (mirrors the old faucet amounts).
- * Any other fungible coin in the registry gets DEFAULT_AMOUNT.
+ * Predefined Top Up basket: exactly which coins to self-mint and how much
+ * (human-readable units). This is the single source of truth — editing this
+ * map is the only thing needed to change what a top-up delivers. Coins present
+ * in the registry but NOT listed here are intentionally never minted.
  */
 const AMOUNTS: Record<string, number> = {
   UCT: 100,
-  BTC: 1,
-  SOL: 1000,
-  ETH: 42,
-  USDT: 1000,
-  USDC: 1000,
-  USDU: 1000,
+  BTC: 0.01,
+  SOL: 1,
+  ETH: 0.5,
 };
-const DEFAULT_AMOUNT = 100;
 
 /**
- * Self-mint test tokens to this wallet (v2 faucet replacement). Mints every
- * fungible coin in the TokenRegistry to the wallet's own identity via
- * `payments.mintFungibleToken`, then refreshes the payment queries. No faucet,
- * no nametag required.
+ * Self-mint test tokens to this wallet (v2 faucet replacement). Mints ONLY the
+ * predefined `AMOUNTS` basket to the wallet's own identity via
+ * `payments.mintFungibleToken`, then refreshes the payment queries. The
+ * TokenRegistry is used solely to resolve each symbol's coinId + decimals — it
+ * does NOT drive which coins are minted. No faucet, no nametag required.
  */
 export function useTopUp(): UseTopUpReturn {
   const { sphere } = useSphereContext();
@@ -46,17 +45,24 @@ export function useTopUp(): UseTopUpReturn {
     mutationFn: async (): Promise<TopUpResult[]> => {
       if (!sphere) throw new Error('Wallet not initialized');
 
-      const defs = TokenRegistry.getInstance()
-        .getFungibleTokens()
-        .filter((d) => d.id && d.symbol);
-      if (defs.length === 0) {
+      const fungible = TokenRegistry.getInstance().getFungibleTokens();
+      if (fungible.length === 0) {
         throw new Error('Token registry not loaded yet — try again in a moment');
       }
 
+      // Resolve each predefined symbol to its registry definition (coinId +
+      // decimals). The registry only supplies metadata; the basket above
+      // decides which coins are minted.
+      const bySymbol = new Map(
+        fungible.filter((d) => d.id && d.symbol).map((d) => [d.symbol as string, d]),
+      );
+
       return Promise.all(
-        defs.map(async (def): Promise<TopUpResult> => {
-          const symbol = def.symbol as string;
-          const human = AMOUNTS[symbol] ?? DEFAULT_AMOUNT;
+        Object.entries(AMOUNTS).map(async ([symbol, human]): Promise<TopUpResult> => {
+          const def = bySymbol.get(symbol);
+          if (!def) {
+            return { symbol, success: false, error: 'Not in token registry' };
+          }
           const amount = toSmallestUnit(human, def.decimals ?? 0);
           try {
             const res = await sphere.payments.mintFungibleToken(def.id, amount);
