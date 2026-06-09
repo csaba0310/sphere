@@ -27,6 +27,9 @@ export interface AgentConfig {
   requiresWallet?: boolean;
   iframeUrl?: string;
   iframeUrls?: { label: string; url: string }[];
+  // When false, the agent is disabled: it is excluded from the public `agents`
+  // list, so its desktop icon is not rendered and it cannot be opened/routed.
+  enabled?: boolean;
 }
 
 // All agents configuration
@@ -50,6 +53,8 @@ const allAgents: AgentConfig[] = [
     color: 'from-indigo-500 to-purple-500',
     type: 'chat',
     requiresWallet: true,
+    // Group Chat is currently disabled — hidden from the desktop and not openable.
+    enabled: false,
   },
   {
     id: 'custom',
@@ -62,7 +67,9 @@ const allAgents: AgentConfig[] = [
   },
 ];
 
-export const agents: AgentConfig[] = allAgents;
+// Only enabled agents are exposed: disabled ones (enabled === false) are
+// excluded everywhere — no desktop icon, and getAgentConfig() won't resolve them.
+export const agents: AgentConfig[] = allAgents.filter((a) => a.enabled !== false);
 
 // Get agent by ID
 export function getAgentConfig(agentId: string): AgentConfig | undefined {
