@@ -159,6 +159,12 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Loading wallet...' });
         const { sphere: instance } = await Sphere.init({
           ...browserProviders,
+          // Pass the network so the SDK's configureTokenRegistry loads the
+          // matching registry. Without it options.network is undefined and the
+          // SDK overwrites our (testnet2) registry with testnet v1, whose
+          // coinIds differ — getDefinition(coinId) then misses for every held
+          // token, so getAssets never calls getPrices (no prices, no request).
+          network,
           l1: {},
           discoverAddresses: false, // Run separately below for UX
           onProgress: setInitProgress,
@@ -236,6 +242,7 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Creating wallet...' });
         const { sphere: instance, generatedMnemonic } = await Sphere.init({
           ...providers,
+          network, // load the matching token registry (see init() above)
           autoGenerate: true,
           nametag: options?.nametag,
           l1: {},
@@ -259,7 +266,7 @@ export function SphereProvider({
         throw err;
       }
     },
-    [providers],
+    [providers, network],
   );
 
   const resolveNametag = useCallback(
