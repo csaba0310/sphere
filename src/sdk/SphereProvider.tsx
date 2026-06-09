@@ -302,6 +302,7 @@ export function SphereProvider({
       setInitProgress({ step: 'initializing', message: 'Importing wallet...' });
       const instance = await Sphere.import({
         ...providers,
+        network,
         mnemonic,
         nametag: options?.nametag,
         l1: {},
@@ -313,7 +314,7 @@ export function SphereProvider({
       // finalizeWallet(sphere) after address selection / nametag are done.
       return instance;
     },
-    [providers],
+    [providers, network],
   );
 
   const importFromFile = useCallback(
@@ -325,6 +326,7 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Importing file...' });
         const result = await Sphere.importFromLegacyFile({
           ...providers,
+          network,
           fileContent: options.fileContent,
           fileName: options.fileName,
           password: options.password,
@@ -355,7 +357,7 @@ export function SphereProvider({
         };
       }
     },
-    [providers],
+    [providers, network],
   );
 
   const deleteWallet = useCallback(async () => {
