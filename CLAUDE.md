@@ -30,7 +30,6 @@ npx tsc --noEmit     # Type check only
 - `@unicitylabs/sphere-sdk` ^0.5 for all wallet operations (L1, L3, Nostr, IPFS)
 - Lucide React for icons
 - KaTeX for math rendering
-- Mixpanel for analytics
 
 ### Routes (App.tsx)
 
@@ -177,7 +176,6 @@ Wallet encryption/storage is handled internally by the SDK.
 ## Environment Variables
 
 ```env
-VITE_MIXPANEL_TOKEN         # Analytics token (has default fallback)
 VITE_WELCOME_AGENT_NAMETAG  # Welcome DM agent nametag (default: kbbot)
 VITE_WELCOME_DELAY_MS       # Delay before sending welcome DM (default: 4000)
 SSL_CERT_PATH               # HTTPS cert path for dev server
