@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef } from 'react';
 import { useSphereContext } from '../core/useSphere';
 import { useRegistryReady } from './useRegistryReady';
 import { SPHERE_KEYS } from '../../queryKeys';
@@ -25,6 +25,7 @@ export interface UseAssetsReturn {
 export function useAssets(): UseAssetsReturn {
   const { sphere } = useSphereContext();
   const registryReady = useRegistryReady();
+  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: SPHERE_KEYS.payments.assets.list,
@@ -35,6 +36,20 @@ export function useAssets(): UseAssetsReturn {
     enabled: !!sphere,
     staleTime: 30_000,
   });
+
+  // If the token registry finishes loading AFTER the first getAssets() call,
+  // the SDK may have returned price-less assets (getAssets skips getPrices when
+  // it can't yet resolve coinIds → definitions). Refetch once on the
+  // not-ready → ready transition so prices populate without waiting for an
+  // unrelated invalidation (transfer/sync). The ref guard avoids a redundant
+  // refetch when the registry was already loaded at mount (returning user).
+  const wasRegistryReady = useRef(registryReady);
+  useEffect(() => {
+    if (registryReady && !wasRegistryReady.current) {
+      queryClient.refetchQueries({ queryKey: SPHERE_KEYS.payments.assets.all });
+    }
+    wasRegistryReady.current = registryReady;
+  }, [registryReady, queryClient]);
 
   // Enrich assets with registry data — SDK bakes symbol at token creation
   // time before the registry has loaded, so we override here.

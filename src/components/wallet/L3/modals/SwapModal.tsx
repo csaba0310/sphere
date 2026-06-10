@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowDownUp, Loader2, CheckCircle, ChevronDown } from 'lucide-react';
-import { useIdentity, useAssets, useTransfer } from '../../../../sdk';
+import { useAssets, useTransfer } from '../../../../sdk';
 import type { Asset } from '@unicitylabs/sphere-sdk';
 import { toSmallestUnit, toHumanReadable } from '@unicitylabs/sphere-sdk';
 import { TokenRegistry } from '@unicitylabs/sphere-sdk';
-import { FaucetService } from '../../../../services/FaucetService';
 import { useSphereContext } from '../../../../sdk/hooks/core/useSphere';
+import { SPHERE_KEYS } from '../../../../sdk/queryKeys';
 import { getErrorMessage } from '../../../../sdk/errors';
 import { WalletScreen } from '../../ui/WalletScreen';
 import { ModalHeader } from '../../ui';
@@ -28,10 +29,10 @@ interface SwapModalProps {
 }
 
 export function SwapModal({ isOpen, onClose }: SwapModalProps) {
-  const { nametag } = useIdentity();
   const { assets } = useAssets();
   const { transfer } = useTransfer();
-  const { providers } = useSphereContext();
+  const { sphere, providers } = useSphereContext();
+  const queryClient = useQueryClient();
 
   const [step, setStep] = useState<Step>('swap');
   const [fromAsset, setFromAsset] = useState<Asset | null>(null);
@@ -123,12 +124,25 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
   };
 
   const handleSwap = async () => {
-    if (!fromAsset || !toAsset || !fromAmount || !exchangeInfo || !nametag) return;
+    if (!fromAsset || !toAsset || !fromAmount || !exchangeInfo || !sphere) return;
     setStep('processing'); setError(null);
     try {
+      // 1. Send the "from" asset to the swap stub recipient (unchanged).
       const fromAmountSmallestUnit = toSmallestUnit(fromAmount, fromAsset.decimals);
       await transfer({ recipient: 'sphere-swap', amount: fromAmountSmallestUnit.toString(), coinId: fromAsset.coinId });
-      await FaucetService.requestTokens(nametag, toAsset.name!.toLowerCase(), exchangeInfo.toAmount);
+
+      // 2. Self-mint the "to" asset to this wallet (replaces the faucet call).
+      const toAmountSmallestUnit = toSmallestUnit(exchangeInfo.toAmount.toFixed(toAsset.decimals), toAsset.decimals);
+      const mintResult = await sphere.payments.mintFungibleToken(toAsset.coinId, toAmountSmallestUnit);
+      if (!mintResult.success) throw new Error(mintResult.error);
+
+      // useTransfer's refetch already fired after step 1 (before the mint), so
+      // refetch again here for the freshly minted asset to show up immediately.
+      queryClient.refetchQueries({ queryKey: SPHERE_KEYS.payments.tokens.all });
+      queryClient.refetchQueries({ queryKey: SPHERE_KEYS.payments.balance.all });
+      queryClient.refetchQueries({ queryKey: SPHERE_KEYS.payments.assets.all });
+      queryClient.refetchQueries({ queryKey: SPHERE_KEYS.payments.transactions.all });
+
       setStep('success');
     } catch (e: unknown) {
       setError(getErrorMessage(e));

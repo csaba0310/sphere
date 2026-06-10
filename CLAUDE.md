@@ -111,7 +111,7 @@ src/
 │   └── ui/                  # ComingSoonModal, Toast, toast-utils
 ├── pages/                   # 10 page components (see Routes)
 ├── contexts/                # ServicesContext, ServicesProvider, useServices
-├── services/                # FaucetService
+├── services/                # marketplaceApi, userApi
 ├── config/
 │   ├── activities.ts        # Agent definitions (AgentConfig, getAgentConfig)
 │   └── storageKeys.ts       # All localStorage key constants
@@ -160,7 +160,7 @@ GROUP_CHAT_KEYS:
 | `dm-typing` | useSphereEvents | composing indicator |
 | `payment-requests-updated` | useSphereEvents | — |
 | `show-toast` | toast-utils | `ShowToastDetail` |
-| `wallet-updated` | FaucetService, modals, onboarding | — |
+| `wallet-updated` | modals, onboarding | — |
 | `wallet-loaded` | onboarding flows | — |
 | `dev-config-changed` | Header (dev settings) | — |
 

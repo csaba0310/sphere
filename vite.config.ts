@@ -21,6 +21,12 @@ export default defineConfig(({ mode }) => {
   // HMR host from .env (optional - for remote development)
   const hmrHost = env.HMR_HOST || '';
 
+  // Paths served by the dev proxy (see server.proxy below). These MUST bypass
+  // the SPA HTML fallback — a proxied URL without a "." (e.g.
+  // /coingecko/simple/price?ids=bitcoin) would otherwise be rewritten to
+  // index.html and never reach the proxy (the SDK then gets HTML, not JSON).
+  const proxyPaths = ['/rpc', '/dev-rpc', '/coingecko'];
+
   return {
     plugins: [
       react(),
@@ -39,8 +45,9 @@ export default defineConfig(({ mode }) => {
           // both "/" and deep routes like "/home", "/agents/dm", etc.
           server.middlewares.use((req, _res, next) => {
             const url = req.url || '';
+            const isProxied = proxyPaths.some((p) => url.startsWith(p));
             const isAsset = url.startsWith('/src/') || url.startsWith('/node_modules/') || url.startsWith('/@') || url.includes('.');
-            if (!isAsset) {
+            if (!isProxied && !isAsset) {
               req.url = '/src/index.html';
             }
             next();
