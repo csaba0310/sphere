@@ -45,10 +45,10 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
         // Partial success — minted some; note which failed but treat as success.
         setTopUpSuccess(true);
         showToast(`Some coins failed: ${failed.map((r) => r.symbol).join(', ')}`, 'info', 4000);
-        setTimeout(() => setTopUpSuccess(false), 3000);
+        setTimeout(handleClose, 1500);
       } else {
         setTopUpSuccess(true);
-        setTimeout(() => setTopUpSuccess(false), 3000);
+        setTimeout(handleClose, 1500);
       }
     } catch (error) {
       setTopUpError(getErrorMessage(error));
