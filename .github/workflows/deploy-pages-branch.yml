@@ -77,6 +77,11 @@ jobs:
           # Public URL — baked into the bundle at build time. Hardcoded
           # because the same value applies to every branch preview deploy.
           VITE_SPHERE_API_URL: https://quest-api.staging.unicity.network
+          # Aggregator API key — inlined into the bundle at build time.
+          # The testnet2 value is NOT a secret (see .env / .env.example), so it
+          # is safe to hardcode here. Without it the deployed bundle gets
+          # undefined and the aggregator rejects mints with "unauthorized".
+          VITE_AGGREGATOR_API_KEY: sk_ddc3cfcc001e4a28ac3fad7407f99590
 
       - name: Deploy branch to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
