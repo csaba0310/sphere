@@ -136,7 +136,9 @@ export function SphereProvider({
         // testnet2 network preset; only the apiKey is injected (non-secret on testnet2).
         oracle: { apiKey: import.meta.env.VITE_AGGREGATOR_API_KEY },
         price: { platform: 'coingecko', baseUrl: COINGECKO_BASE_URL, cacheTtlMs: 5 * 60_000 },
-        groupChat: true,
+        // Group chat (NIP-29) is disabled: the UI is already hidden (PR #339), and
+        // skipping the module here stops the SDK from connecting to NIP-29 relays.
+        groupChat: false,
         market: true,
         ...getIpfsConfig(),
       });
@@ -159,12 +161,7 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Loading wallet...' });
         const { sphere: instance } = await Sphere.init({
           ...browserProviders,
-          // Pass the network so the SDK's configureTokenRegistry loads the
-          // matching registry. Without it options.network is undefined and the
-          // SDK overwrites our (testnet2) registry with testnet v1, whose
-          // coinIds differ — getDefinition(coinId) then misses for every held
-          // token, so getAssets never calls getPrices (no prices, no request).
-          network,
+          network, // ensure the SDK configures TokenRegistry for THIS network (not the testnet default)
           l1: {},
           discoverAddresses: false, // Run separately below for UX
           onProgress: setInitProgress,
@@ -242,7 +239,7 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Creating wallet...' });
         const { sphere: instance, generatedMnemonic } = await Sphere.init({
           ...providers,
-          network, // load the matching token registry (see init() above)
+          network,
           autoGenerate: true,
           nametag: options?.nametag,
           l1: {},
@@ -307,6 +304,7 @@ export function SphereProvider({
       setInitProgress({ step: 'initializing', message: 'Importing wallet...' });
       const instance = await Sphere.import({
         ...providers,
+        network,
         mnemonic,
         nametag: options?.nametag,
         l1: {},
@@ -318,7 +316,7 @@ export function SphereProvider({
       // finalizeWallet(sphere) after address selection / nametag are done.
       return instance;
     },
-    [providers],
+    [providers, network],
   );
 
   const importFromFile = useCallback(
@@ -330,6 +328,7 @@ export function SphereProvider({
         setInitProgress({ step: 'initializing', message: 'Importing file...' });
         const result = await Sphere.importFromLegacyFile({
           ...providers,
+          network,
           fileContent: options.fileContent,
           fileName: options.fileName,
           password: options.password,
@@ -360,7 +359,7 @@ export function SphereProvider({
         };
       }
     },
-    [providers],
+    [providers, network],
   );
 
   const deleteWallet = useCallback(async () => {
@@ -387,8 +386,22 @@ export function SphereProvider({
           tokenStorage: providers.tokenStorage,
         });
       } catch (err) {
-        logger.warn('SphereProvider', 'Sphere.clear() failed, deleting IndexedDB directly', err);
-        // Fallback: nuke the IndexedDB databases directly
+        logger.warn('SphereProvider', 'Sphere.clear() failed, sweeping IndexedDB directly', err);
+      }
+      // Sweep ALL Sphere IndexedDB databases by prefix. The token DB is now per-network
+      // (sphere-token-storage-{network}-{chainPubkey}), so a fixed-name delete would miss
+      // both the active per-network DB and any orphaned-network DBs. Run this always (not
+      // just on clear() failure): Sphere.clear() closes its own handles, so deletion is not
+      // blocked. Falls back to the known base names where indexedDB.databases() is missing.
+      try {
+        const dbs = (await indexedDB.databases?.()) ?? [];
+        const toDelete = dbs
+          .map((d) => d.name)
+          .filter((n): n is string => !!n && (n === 'sphere-storage' || n.startsWith('sphere-token-storage')));
+        for (const name of toDelete) {
+          try { indexedDB.deleteDatabase(name); } catch { /* best effort */ }
+        }
+      } catch {
         for (const dbName of ['sphere-storage', 'sphere-token-storage']) {
           try { indexedDB.deleteDatabase(dbName); } catch { /* best effort */ }
         }
