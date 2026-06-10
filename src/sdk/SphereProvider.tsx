@@ -386,8 +386,22 @@ export function SphereProvider({
           tokenStorage: providers.tokenStorage,
         });
       } catch (err) {
-        logger.warn('SphereProvider', 'Sphere.clear() failed, deleting IndexedDB directly', err);
-        // Fallback: nuke the IndexedDB databases directly
+        logger.warn('SphereProvider', 'Sphere.clear() failed, sweeping IndexedDB directly', err);
+      }
+      // Sweep ALL Sphere IndexedDB databases by prefix. The token DB is now per-network
+      // (sphere-token-storage-{network}-{chainPubkey}), so a fixed-name delete would miss
+      // both the active per-network DB and any orphaned-network DBs. Run this always (not
+      // just on clear() failure): Sphere.clear() closes its own handles, so deletion is not
+      // blocked. Falls back to the known base names where indexedDB.databases() is missing.
+      try {
+        const dbs = (await indexedDB.databases?.()) ?? [];
+        const toDelete = dbs
+          .map((d) => d.name)
+          .filter((n): n is string => !!n && (n === 'sphere-storage' || n.startsWith('sphere-token-storage')));
+        for (const name of toDelete) {
+          try { indexedDB.deleteDatabase(name); } catch { /* best effort */ }
+        }
+      } catch {
         for (const dbName of ['sphere-storage', 'sphere-token-storage']) {
           try { indexedDB.deleteDatabase(dbName); } catch { /* best effort */ }
         }
