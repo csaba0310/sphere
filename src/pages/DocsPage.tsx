@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { DEV_PORTAL_URL } from '../config/devPortal';
 
 type Section =
   | 'getting-started'
@@ -1832,9 +1832,9 @@ main();`}
               <a href="https://github.com/unicity-sphere/sphere" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
                 GitHub
               </a>
-              <Link to="/developers" className="hover:text-orange-500 transition">
+              <a href={DEV_PORTAL_URL} target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition">
                 Developer Portal
-              </Link>
+              </a>
             </div>
             <p className="text-sm text-neutral-500">
               AgentSphere by Unicity Labs
