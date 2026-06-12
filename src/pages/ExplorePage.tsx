@@ -7,6 +7,7 @@ import { FeaturedProjectCard } from '../components/marketplace/FeaturedProjectCa
 import { ProjectCard } from '../components/marketplace/ProjectCard';
 import { CategoryFilter } from '../components/marketplace/CategoryFilter';
 import { MaintenanceScreen } from '../components/MaintenanceScreen';
+import { useMaintenanceStatus } from '../hooks/useMaintenanceStatus';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -101,16 +102,10 @@ function HeroDivider() {
 export function ExplorePage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
-  const [maintenance, setMaintenance] = useState<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    function onForced(e: Event) {
-      const detail = (e as CustomEvent<{ message?: string }>).detail;
-      setMaintenance(detail?.message ?? null);
-    }
-    window.addEventListener('maintenance:forced', onForced);
-    return () => window.removeEventListener('maintenance:forced', onForced);
-  }, []);
+  // Proactive maintenance status — the hook polls the allowlisted status endpoint
+  // and also listens for `maintenance:forced`, so the marketplace queries (gated on
+  // the same status) never fire requests that would 503 during maintenance.
+  const { data: maintenance } = useMaintenanceStatus();
 
   // Data — always filtered for apps only
   const { data: projectsData, isLoading } = useProjects({ type: 'app' });
@@ -155,8 +150,8 @@ export function ExplorePage() {
   const itemLabel = 'projects';
   const searchPlaceholder = 'Search projects...';
 
-  if (maintenance !== undefined) {
-    return <MaintenanceScreen message={maintenance} />;
+  if (maintenance?.enabled) {
+    return <MaintenanceScreen message={maintenance.message} />;
   }
 
   return (
