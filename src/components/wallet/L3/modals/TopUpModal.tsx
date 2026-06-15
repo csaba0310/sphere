@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Receipt, CheckCircle, XCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useTopUp } from '../../../../sdk';
 import { getErrorMessage } from '../../../../sdk/errors';
-import { showToast } from '../../../ui/toast-utils';
+import { showToast, showMintToast } from '../../../ui/toast-utils';
 import { WalletScreen } from '../../ui/WalletScreen';
 import { ModalHeader } from '../../ui';
 import { SendPaymentRequestModal } from './SendPaymentRequestModal';
@@ -32,6 +32,11 @@ export function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
       // Self-mint test tokens to this wallet (v2; no faucet, no nametag).
       const results = await topUp();
       const failed = results.filter((r) => !r.success);
+
+      // One toast per minted coin — outlives the modal's 1.5s auto-close.
+      for (const r of results) {
+        if (r.success) showMintToast(r);
+      }
 
       if (failed.length === results.length) {
         // All failed — surface the reason(s).
