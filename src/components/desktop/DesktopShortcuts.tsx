@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { getAgentConfig } from '../../config/activities';
+import { DEV_PORTAL_URL } from '../../config/devPortal';
 import { useDesktopState } from '../../hooks/useDesktopState';
 import { useDmUnreadCount } from '../chat/hooks/useDmUnreadCount';
 import { useGroupUnreadCount } from '../chat/hooks/useGroupUnreadCount';
@@ -230,7 +231,7 @@ export function DesktopShortcuts() {
             Explore marketplace
           </Link>
           {' '}&middot;{' '}
-          <a href="https://github.com/unicity-sphere/sphere-apps" target="_blank" rel="noopener noreferrer" className="underline hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)] transition-colors">
+          <a href={DEV_PORTAL_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-neutral-600 dark:hover:text-[rgba(255,255,255,0.6)] transition-colors">
             Submit your project
           </a>
         </p>

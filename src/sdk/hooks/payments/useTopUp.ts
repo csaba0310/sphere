@@ -6,6 +6,9 @@ import { TokenRegistry, toSmallestUnit } from '@unicitylabs/sphere-sdk';
 /** Per-coin result of a top-up mint, for partial-success display. */
 export interface TopUpResult {
   symbol: string;
+  /** Human-readable minted amount from the predefined basket (e.g. "100"). */
+  amount: string;
+  iconUrl?: string;
   success: boolean;
   error?: string;
 }
@@ -57,20 +60,23 @@ export function useTopUp(): UseTopUpReturn {
         fungible.filter((d) => d.id && d.symbol).map((d) => [d.symbol as string, d]),
       );
 
+      const registry = TokenRegistry.getInstance();
       return Promise.all(
         Object.entries(AMOUNTS).map(async ([symbol, human]): Promise<TopUpResult> => {
+          const base = { symbol, amount: String(human) };
           const def = bySymbol.get(symbol);
           if (!def) {
-            return { symbol, success: false, error: 'Not in token registry' };
+            return { ...base, success: false, error: 'Not in token registry' };
           }
+          const iconUrl = registry.getIconUrl(def.id) ?? undefined;
           const amount = toSmallestUnit(human, def.decimals ?? 0);
           try {
             const res = await sphere.payments.mintFungibleToken(def.id, amount);
             return res.success
-              ? { symbol, success: true }
-              : { symbol, success: false, error: res.error };
+              ? { ...base, iconUrl, success: true }
+              : { ...base, iconUrl, success: false, error: res.error };
           } catch (e) {
-            return { symbol, success: false, error: e instanceof Error ? e.message : String(e) };
+            return { ...base, iconUrl, success: false, error: e instanceof Error ? e.message : String(e) };
           }
         }),
       );
