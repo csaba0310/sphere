@@ -19,6 +19,8 @@ export { useAssets } from './payments/useAssets';
 export type { UseAssetsReturn } from './payments/useAssets';
 export { useTransfer } from './payments/useTransfer';
 export type { UseTransferReturn, TransferParams } from './payments/useTransfer';
+export { useTopUp } from './payments/useTopUp';
+export type { UseTopUpReturn, TopUpResult } from './payments/useTopUp';
 export { useTransactionHistory } from './payments/useTransactionHistory';
 export type { UseTransactionHistoryReturn } from './payments/useTransactionHistory';
 

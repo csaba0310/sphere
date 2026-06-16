@@ -34,7 +34,7 @@ function TransferToast({ data, onClose }: { data: TransferToastData; onClose: ()
           <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
             <ArrowDownLeft className="w-3 h-3 text-white" />
           </div>
-          <span className="text-xs font-medium text-emerald-400">Incoming Transfer</span>
+          <span className="text-xs font-medium text-emerald-400">{data.title ?? 'Incoming Transfer'}</span>
         </div>
         <button
           onClick={onClose}
@@ -59,9 +59,11 @@ function TransferToast({ data, onClose }: { data: TransferToastData; onClose: ()
           <div className="text-lg font-bold text-white">
             +{data.amount} <span className="text-emerald-400">{data.symbol}</span>
           </div>
-          <div className="text-xs text-neutral-400">
-            from <span className="text-neutral-200 font-medium">{data.sender}</span>
-          </div>
+          {data.sender && (
+            <div className="text-xs text-neutral-400">
+              from <span className="text-neutral-200 font-medium">{data.sender}</span>
+            </div>
+          )}
         </div>
       </div>
 

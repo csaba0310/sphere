@@ -1,7 +1,10 @@
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
 
 export interface TransferToastData {
-  sender: string;
+  /** Header label; defaults to 'Incoming Transfer' when omitted. */
+  title?: string;
+  /** Omitted for self-mints (top-up), where there is no counterparty. */
+  sender?: string;
   amount: string;
   symbol: string;
   iconUrl?: string | null;
@@ -29,6 +32,23 @@ export function showTransferToast(transfer: TransferToastData, duration = 6000) 
   window.dispatchEvent(
     new CustomEvent<ShowToastDetail>('show-toast', {
       detail: { message, type: 'success', duration, transfer },
+    })
+  );
+}
+
+/** Toast for coins self-minted via top-up — a transfer toast without a sender. */
+export function showMintToast(
+  mint: { amount: string; symbol: string; iconUrl?: string | null },
+  duration = 6000,
+) {
+  window.dispatchEvent(
+    new CustomEvent<ShowToastDetail>('show-toast', {
+      detail: {
+        message: `Received ${mint.amount} ${mint.symbol}`,
+        type: 'success',
+        duration,
+        transfer: { title: 'Top Up', amount: mint.amount, symbol: mint.symbol, iconUrl: mint.iconUrl },
+      },
     })
   );
 }

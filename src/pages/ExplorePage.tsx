@@ -1,12 +1,13 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useProjects, useFeaturedProjects, useProjectMetricsBatch } from '../hooks/useMarketplace';
 import { FeaturedProjectCard } from '../components/marketplace/FeaturedProjectCard';
 import { ProjectCard } from '../components/marketplace/ProjectCard';
 import { CategoryFilter } from '../components/marketplace/CategoryFilter';
 import { MaintenanceScreen } from '../components/MaintenanceScreen';
+import { useMaintenanceStatus } from '../hooks/useMaintenanceStatus';
+import { DEV_PORTAL_URL } from '../config/devPortal';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -101,16 +102,10 @@ function HeroDivider() {
 export function ExplorePage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
-  const [maintenance, setMaintenance] = useState<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    function onForced(e: Event) {
-      const detail = (e as CustomEvent<{ message?: string }>).detail;
-      setMaintenance(detail?.message ?? null);
-    }
-    window.addEventListener('maintenance:forced', onForced);
-    return () => window.removeEventListener('maintenance:forced', onForced);
-  }, []);
+  // Proactive maintenance status — the hook polls the allowlisted status endpoint
+  // and also listens for `maintenance:forced`, so the marketplace queries (gated on
+  // the same status) never fire requests that would 503 during maintenance.
+  const { data: maintenance } = useMaintenanceStatus();
 
   // Data — always filtered for apps only
   const { data: projectsData, isLoading } = useProjects({ type: 'app' });
@@ -155,8 +150,8 @@ export function ExplorePage() {
   const itemLabel = 'projects';
   const searchPlaceholder = 'Search projects...';
 
-  if (maintenance !== undefined) {
-    return <MaintenanceScreen message={maintenance} />;
+  if (maintenance?.enabled) {
+    return <MaintenanceScreen message={maintenance.message} />;
   }
 
   return (
@@ -305,13 +300,15 @@ export function ExplorePage() {
             <p className="text-neutral-500 dark:text-white/55 text-sm sm:text-base leading-relaxed max-w-md">
               Register your project, ship quests, and plug into wallets and chat — all from one portal.
             </p>
-            <Link
-              to="/developers"
+            <a
+              href={DEV_PORTAL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 self-start sm:self-auto px-6 py-3 rounded-xl bg-orange-500 dark:bg-brand-orange hover:bg-orange-600 dark:hover:bg-brand-orange-dark text-white font-semibold text-sm transition-colors shadow-lg shadow-orange-500/20 shrink-0"
             >
               Open developer portal
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            </a>
           </div>
         </div>
       </section>

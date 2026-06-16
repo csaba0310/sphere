@@ -11,18 +11,11 @@ import { SphereProvider } from './sdk/SphereProvider'
 import { ServicesProvider } from './contexts/ServicesProvider'
 import { ConnectProvider } from './components/connect'
 import { ToastContainer } from './components/ui/Toast'
-import mixpanel from 'mixpanel-browser'
-mixpanel.init(import.meta.env.VITE_MIXPANEL_TOKEN || '19d06212425213a4eeb34337016d0186', {
-  autocapture: true,
-  record_sessions_percent: 100,
-  api_host: 'https://api-eu.mixpanel.com',
-})
-
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <SphereProvider network="testnet">
+      <SphereProvider network="testnet2">
         <ServicesProvider>
           <ConnectProvider>
             <ThemeInitializer>

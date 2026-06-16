@@ -100,7 +100,6 @@ npm run test:run     # Vitest single run
 Copy `.env.example` to `.env`. Key variables:
 
 ```env
-VITE_MIXPANEL_TOKEN=             # Analytics (optional)
 VITE_WELCOME_AGENT_NAMETAG=kbbot # Welcome DM agent nametag
 VITE_WELCOME_DELAY_MS=4000       # Delay before welcome DM (ms)
 SSL_CERT_PATH=                   # Dev server HTTPS (optional)
