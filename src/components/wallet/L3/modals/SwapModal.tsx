@@ -66,7 +66,7 @@ export function SwapModal({ isOpen, onClose }: SwapModalProps) {
         return {
           coinId: def.id, symbol, name: def.name,
           totalAmount: '0', decimals: def.decimals || 0, tokenCount: 0,
-          confirmedAmount: '0', unconfirmedAmount: '0',
+          confirmedAmount: '0', unconfirmedAmount: '0', transferringAmount: '0',
           confirmedTokenCount: 0, unconfirmedTokenCount: 0, transferringTokenCount: 0,
           iconUrl: iconUrl ?? undefined,
           priceUsd: priceData?.priceUsd || fallback?.priceUsd || 1.0,

@@ -53,8 +53,6 @@ const allAgents: AgentConfig[] = [
     color: 'from-indigo-500 to-purple-500',
     type: 'chat',
     requiresWallet: true,
-    // Group Chat is currently disabled — hidden from the desktop and not openable.
-    enabled: false,
   },
   {
     id: 'custom',

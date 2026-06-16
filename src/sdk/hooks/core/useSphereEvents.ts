@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSphereContext } from './useSphere';
 import { SPHERE_KEYS } from '../../queryKeys';
 import { formatAmount } from '../../index';
-import { showTransferToast } from '../../../components/ui/toast-utils';
+import { showToast, showTransferToast } from '../../../components/ui/toast-utils';
 import { CHAT_KEYS, GROUP_CHAT_KEYS, type DmReceivedDetail } from '../../../components/chat/data/chatTypes';
 import { sendWelcomeDM } from '../../welcomeDM';
 import type { IncomingTransfer } from '@unicitylabs/sphere-sdk';
@@ -98,6 +98,10 @@ export function useSphereEvents(): void {
     };
 
     const handleIdentityChange = () => {
+      // New identity = new transfer stream (wallet-api sessions are
+      // per-identity): clear the toast dedup set so the new address's
+      // transfers are never swallowed by ids seen under the old one.
+      seenTransferIdsRef.current.clear();
       refreshIdentityCache();
       queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
       queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.payments.all });
@@ -163,6 +167,17 @@ export function useSphereEvents(): void {
       });
     };
 
+    // sphere-sdk#515 F2: a background custody save failed — the active
+    // custody provider rejected a write. Surface it (never log-only); the
+    // SEND pipeline already fails hard on its own writes.
+    const handleStorageDegraded = (data: { providerId: string; error: string }) => {
+      showToast(
+        `Token storage degraded (${data.providerId}): a background save failed — ${data.error}`,
+        'error',
+        10000,
+      );
+    };
+
     sphere.on('transfer:incoming', handleIncomingTransfer);
     sphere.on('transfer:confirmed', handleTransferConfirmed);
     sphere.on('history:updated', handleHistoryUpdated);
@@ -175,6 +190,7 @@ export function useSphereEvents(): void {
     sphere.on('message:read', handleMessageRead);
     sphere.on('composing:started', handleComposingStarted);
     sphere.on('payment_request:incoming', handlePaymentRequestIncoming);
+    sphere.on('storage:degraded', handleStorageDegraded);
 
     return () => {
       if (invalidateTimerRef.current) {
@@ -193,6 +209,7 @@ export function useSphereEvents(): void {
       sphere.off('message:read', handleMessageRead);
       sphere.off('composing:started', handleComposingStarted);
       sphere.off('payment_request:incoming', handlePaymentRequestIncoming);
+      sphere.off('storage:degraded', handleStorageDegraded);
     };
   }, [sphere, queryClient]);
 }

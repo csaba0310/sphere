@@ -22,7 +22,7 @@ export function WalletPanel() {
   const { isLoading: isWalletLoading, walletExists, error: walletError } = useWalletStatus();
   const { identity, nametag, isLoading: isLoadingIdentity } = useIdentity();
   const { initProgress } = useSphereContext();
-  const { pendingCount, requests, reject, paid, clearProcessed } = useIncomingPaymentRequests();
+  const { pendingCount, requests, reject, pay, clearProcessed } = useIncomingPaymentRequests();
   const { setFullscreen } = useUIState();
 
   // Track previous pending count to detect new requests
@@ -60,7 +60,11 @@ export function WalletPanel() {
           </div>
           <div className="space-y-1">
             <p className="text-sm font-medium text-neutral-900 dark:text-[#fefefe]">Initialization error</p>
-            <p className="text-xs text-neutral-500 dark:text-[rgba(255,255,255,0.45)]">Please reload the page</p>
+            {/* Show the actual message: composition asserts (#351) name the
+                misconfigured env vars — a generic "reload" hides the cause. */}
+            <p className="text-xs text-neutral-500 dark:text-[rgba(255,255,255,0.45)] break-words">
+              {walletError.message || 'Please reload the page'}
+            </p>
           </div>
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -252,7 +256,7 @@ export function WalletPanel() {
           paymentRequests={requests}
           paymentRequestsPendingCount={pendingCount}
           paymentRequestsReject={reject}
-          paymentRequestsPaid={paid}
+          paymentRequestsPay={pay}
           paymentRequestsClearProcessed={clearProcessed}
         />
       </div>
