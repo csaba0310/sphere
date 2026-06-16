@@ -125,9 +125,7 @@ function buildProviders(network: NetworkType): SphereAppProviders {
     // preset; only the apiKey is injected (non-secret on testnet2).
     oracle: { apiKey: import.meta.env.VITE_AGGREGATOR_API_KEY },
     price: { platform: 'coingecko', baseUrl: COINGECKO_BASE_URL, cacheTtlMs: 5 * 60_000 },
-    // Group chat (NIP-29) is disabled: the UI is already hidden (PR #339), and
-    // skipping the module here stops the SDK from connecting to NIP-29 relays.
-    groupChat: false,
+    groupChat: true,
     market: true,
     ...getIpfsConfig(),
   });
