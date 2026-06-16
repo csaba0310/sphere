@@ -249,6 +249,7 @@ export function L3WalletView({
       tokenCount: 1,
       confirmedAmount: totalAmount,
       unconfirmedAmount: '0',
+      transferringAmount: '0',
       confirmedTokenCount: 1,
       unconfirmedTokenCount: 0,
       transferringTokenCount: 0,
