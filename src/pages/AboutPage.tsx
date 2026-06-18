@@ -241,7 +241,7 @@ const stack = [
   {
     protocol: 'Unicity',
     role: 'Settlement',
-    description: "A purpose built L1 blockchain that delivers on Satoshi's vision of peer to peer electronic cash.",
+    description: "A purpose built settlement layer that delivers on Satoshi's vision of peer to peer electronic cash.",
     url: 'https://github.com/unicity-sphere/sphere',
   },
 ];

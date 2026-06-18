@@ -2,7 +2,6 @@
  * AddressSelectionScreen - Multi-select address list with balances and nametags.
  * Receive addresses are selectable (checkbox). Change addresses are shown read-only.
  */
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Wallet,
@@ -19,13 +18,11 @@ import { addrKey } from "./addrKey";
 
 export interface DerivedAddressInfo {
   index: number;
-  l1Address: string;
   l3Address: string;
   path: string;
   hasNametag: boolean;
   existingNametag?: string;
   isChange?: boolean;
-  fromL1Wallet?: boolean;
   nametagData?: {
     name: string;
     token: object;
@@ -36,9 +33,7 @@ export interface DerivedAddressInfo {
   ipnsName?: string;
   ipnsLoading?: boolean;
   ipnsError?: string;
-  /** L1 balance in ALPHA */
-  l1Balance?: number;
-  /** Whether L1 balance check is in progress */
+  /** Whether a balance check is in progress */
   balanceLoading?: boolean;
 }
 
@@ -55,12 +50,6 @@ interface AddressSelectionScreenProps {
   onBack: () => void;
 }
 
-function formatBalance(balance: number): string {
-  if (balance === 0) return "0";
-  if (balance < 0.001) return "<0.001";
-  return balance.toLocaleString(undefined, { maximumFractionDigits: 8 });
-}
-
 export function AddressSelectionScreen({
   derivedAddresses,
   selectedKeys,
@@ -73,7 +62,6 @@ export function AddressSelectionScreen({
   onContinue,
   onBack,
 }: AddressSelectionScreenProps) {
-  const [showL1, setShowL1] = useState(false);
   const selectableAddresses = derivedAddresses.filter(a => !a.isChange);
   const selectedCount = selectedKeys.size;
   const allSelected = selectedCount === selectableAddresses.length && selectableAddresses.length > 0;
@@ -108,7 +96,7 @@ export function AddressSelectionScreen({
         </span>
       </p>
 
-      {/* Select All / Deselect All + L1/L3 toggle */}
+      {/* Select All / Deselect All */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={allSelected ? onDeselectAll : onSelectAll}
@@ -116,17 +104,9 @@ export function AddressSelectionScreen({
         >
           {allSelected ? "Deselect All" : "Select All"}
         </button>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowL1(!showL1)}
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full border transition-colors bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-300 dark:hover:border-purple-600"
-          >
-            {showL1 ? "Show L3" : "Show L1"}
-          </button>
-          <span className="text-xs text-neutral-400 dark:text-neutral-500">
-            {selectedCount}/{selectableAddresses.length}
-          </span>
-        </div>
+        <span className="text-xs text-neutral-400 dark:text-neutral-500">
+          {selectedCount}/{selectableAddresses.length}
+        </span>
       </div>
 
       {/* Address List */}
@@ -143,7 +123,6 @@ export function AddressSelectionScreen({
             const key = addrKey(addr.index, addr.isChange);
             const isChange = !!addr.isChange;
             const isSelected = selectedKeys.has(key);
-            const hasBalance = (addr.l1Balance ?? 0) > 0;
 
             return (
               <div
@@ -179,9 +158,7 @@ export function AddressSelectionScreen({
                       #{addr.index}
                     </span>
                     <span className={`text-xs font-mono truncate ${isChange ? "text-neutral-500 dark:text-neutral-400" : "text-neutral-900 dark:text-white"}`}>
-                      {showL1
-                        ? truncateAddress(addr.l1Address)
-                        : truncateAddress(addr.l3Address, 16, 8)}
+                      {truncateAddress(addr.l3Address, 16, 8)}
                     </span>
                     {isChange && (
                       <span className="px-1 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[8px] font-bold rounded shrink-0">
@@ -190,13 +167,8 @@ export function AddressSelectionScreen({
                     )}
                   </div>
 
-                  {/* Balance + Nametag row */}
+                  {/* Nametag row */}
                   <div className="flex items-center gap-2 mt-0.5">
-                    {hasBalance && (
-                      <span className={`text-[11px] font-medium ${isChange ? "text-neutral-500 dark:text-neutral-400" : "text-neutral-600 dark:text-neutral-300"}`}>
-                        {formatBalance(addr.l1Balance!)} ALPHA
-                      </span>
-                    )}
                     {addr.hasNametag && addr.existingNametag && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-medium">
                         <Check className="w-2.5 h-2.5" />

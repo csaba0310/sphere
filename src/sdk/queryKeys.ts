@@ -42,15 +42,6 @@ export const SPHERE_KEYS = {
     },
   },
 
-  l1: {
-    all: ['sphere', 'l1'] as const,
-    balance: ['sphere', 'l1', 'balance'] as const,
-    utxos: ['sphere', 'l1', 'utxos'] as const,
-    transactions: ['sphere', 'l1', 'transactions'] as const,
-    vesting: ['sphere', 'l1', 'vesting'] as const,
-    blockHeight: ['sphere', 'l1', 'blockHeight'] as const,
-  },
-
   communications: {
     all: ['sphere', 'communications'] as const,
     conversations: ['sphere', 'communications', 'conversations'] as const,

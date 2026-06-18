@@ -1,14 +1,14 @@
-import { useState, useCallback } from 'react';
-import { MessageSquare, PenLine } from 'lucide-react';
+import { useState } from 'react';
+import { MessageSquare, PenLine, Coins } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
+import { TokenRegistry, formatAmount } from '@unicitylabs/sphere-sdk';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
 import { SendModal } from '../wallet/L3/modals/SendModal';
 import { SendPaymentRequestModal } from '../wallet/L3/modals/SendPaymentRequestModal';
-import { SendModal as L1SendModal } from '../wallet/L1/components/modals/SendModal';
 import { useConnectContext } from './ConnectContext';
 import { useSendDM } from '../../sdk/hooks/comms/useSendDM';
 import { getErrorMessage } from '../../sdk/errors';
-import { useIdentity, useL1Balance, useL1Send, useSphereContext } from '../../sdk';
+import { useSphereContext } from '../../sdk';
 
 export function ConnectIntentHandler() {
   const { pendingIntent, resolveIntent, rejectIntent, registerAutoIntent } = useConnectContext();
@@ -17,23 +17,8 @@ export function ConnectIntentHandler() {
   const [dmError, setDmError] = useState<string | null>(null);
   const [autoApproveDM, setAutoApproveDM] = useState(false);
   const [signError, setSignError] = useState<string | null>(null);
-
-  // L1 hooks (always called — hooks cannot be conditional)
-  const { l1Address } = useIdentity();
-  const { balance: l1BalanceData } = useL1Balance();
-  const { send: l1Send, estimateFee, resolveAddress } = useL1Send();
-  const l1VestingBalances = l1BalanceData ? {
-    vested: BigInt(l1BalanceData.vested),
-    unvested: BigInt(l1BalanceData.unvested),
-    all: BigInt(l1BalanceData.total),
-  } : { vested: 0n, unvested: 0n, all: 0n };
-
-  const handleL1Send = useCallback(async (destination: string, amount: string) => {
-    const amountAlpha = Number(amount);
-    if (isNaN(amountAlpha) || amountAlpha <= 0) throw new Error('Invalid amount');
-    const amountSatoshis = Math.round(amountAlpha * 1e8).toString();
-    await l1Send({ toAddress: destination, amount: amountSatoshis });
-  }, [l1Send]);
+  const [mintError, setMintError] = useState<string | null>(null);
+  const [isMinting, setIsMinting] = useState(false);
 
   if (!pendingIntent) return null;
 
@@ -84,37 +69,6 @@ export function ConnectIntentHandler() {
           coinId: (params.coinId as string) ?? 'UCT',
           message: params.message as string | undefined,
         }}
-        asModal
-      />
-    );
-  }
-
-  // --- L1 Send Intent ---
-  if (action === 'l1_send') {
-    const toParam = params.to as string | undefined;
-    const amountParam = params.amount as string | undefined;
-    // Convert sats to ALPHA if amount looks like sats (integer >= 1000)
-    let amountAlpha = amountParam;
-    if (amountParam && /^\d+$/.test(amountParam) && Number(amountParam) >= 1000) {
-      amountAlpha = (Number(amountParam) / 1e8).toString();
-    }
-
-    return (
-      <L1SendModal
-        show={true}
-        selectedAddress={l1Address ?? ''}
-        onClose={(result) => {
-          if (result?.success) {
-            resolveIntent({ success: true });
-          } else {
-            rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
-          }
-        }}
-        onSend={handleL1Send}
-        vestingBalances={l1VestingBalances}
-        onEstimateFee={estimateFee}
-        onResolveAddress={resolveAddress}
-        prefill={toParam ? { to: toParam, amount: amountAlpha ?? '' } : undefined}
         asModal
       />
     );
@@ -259,6 +213,108 @@ export function ConnectIntentHandler() {
             </Button>
             <Button variant="primary" fullWidth onClick={handleSign}>
               Sign
+            </Button>
+          </div>
+        </div>
+      </BaseModal>
+    );
+  }
+
+  // --- Mint Intent: self-mint a fungible token to the user's own wallet ---
+  if (action === 'mint') {
+    const coinId = params.coinId as string;
+    const amount = params.amount as string;
+
+    const handleMint = async () => {
+      setMintError(null);
+      if (!sphere) {
+        setMintError('Wallet not available');
+        return;
+      }
+      // Validate params before touching the engine (fail fast with INVALID_PARAMS).
+      if (typeof coinId !== 'string' || !/^([0-9a-f]{2})+$/.test(coinId)) {
+        rejectIntent(ERROR_CODES.INVALID_PARAMS, 'coinId must be lowercase even-length hex');
+        return;
+      }
+      let amountBig: bigint;
+      try {
+        amountBig = BigInt(amount);
+      } catch {
+        rejectIntent(ERROR_CODES.INVALID_PARAMS, 'amount must be an integer string');
+        return;
+      }
+      if (amountBig <= 0n) {
+        rejectIntent(ERROR_CODES.INVALID_PARAMS, 'amount must be greater than zero');
+        return;
+      }
+
+      setIsMinting(true);
+      try {
+        const result = await sphere.payments.mintFungibleToken(coinId, amountBig);
+        if (result.success) {
+          resolveIntent({ tokenId: result.tokenId, coinId, amount });
+        } else {
+          rejectIntent(ERROR_CODES.INTERNAL_ERROR, result.error);
+        }
+      } catch (err) {
+        setMintError(getErrorMessage(err));
+      } finally {
+        setIsMinting(false);
+      }
+    };
+
+    // Resolve registry metadata for a friendlier confirmation (icon + symbol +
+    // human-readable amount), falling back to the raw values when the coin is
+    // unknown. Display-only — the actual mint uses the raw coinId/amount.
+    const registry = TokenRegistry.getInstance();
+    const def = typeof coinId === 'string' ? registry.getDefinition(coinId) : undefined;
+    const iconUrl = def ? registry.getIconUrl(coinId) : null;
+    const displayAmount =
+      def?.symbol && def.decimals != null && /^\d+$/.test(String(amount))
+        ? formatAmount(amount, { decimals: def.decimals, symbol: def.symbol, maxFractionDigits: 8 })
+        : null;
+
+    return (
+      <BaseModal isOpen={true} onClose={handleClose}>
+        <ModalHeader title="Mint Tokens" icon={Coins} onClose={handleClose} />
+
+        <div className="px-6 py-5 flex-1 flex flex-col justify-center">
+          <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-5 border border-neutral-200 dark:border-white/10">
+            <div className="text-sm text-neutral-500 mb-4">
+              This dApp is asking to mint tokens{' '}
+              <span className="text-neutral-900 dark:text-white font-medium">to your own wallet</span>.
+            </div>
+
+            <div className="flex items-center gap-3 mb-3">
+              {iconUrl && (
+                <img src={iconUrl} alt="" className="w-9 h-9 rounded-full shrink-0" />
+              )}
+              <span className="text-2xl font-semibold text-neutral-900 dark:text-white break-all">
+                {displayAmount ?? amount}
+              </span>
+            </div>
+
+            <div className="text-[11px] text-neutral-400 break-all">
+              <span className="text-neutral-500 dark:text-neutral-400">Coin ID:</span>{' '}
+              <span className="font-mono">{coinId}</span>
+              {!def && (
+                <div className="mt-1 text-amber-600 dark:text-amber-500">
+                  Unrecognized coin — verify the ID before approving
+                </div>
+              )}
+            </div>
+          </div>
+
+          {mintError && (
+            <div className="text-red-500 text-sm mb-3 text-center">{mintError}</div>
+          )}
+
+          <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={handleClose} disabled={isMinting}>
+              Cancel
+            </Button>
+            <Button variant="primary" fullWidth disabled={isMinting} onClick={handleMint}>
+              {isMinting ? 'Minting…' : 'Mint'}
             </Button>
           </div>
         </div>

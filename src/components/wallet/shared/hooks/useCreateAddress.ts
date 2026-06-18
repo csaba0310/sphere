@@ -25,7 +25,8 @@ export interface CreateAddressState {
   step: CreateAddressStep;
   error: string | null;
   newAddress: {
-    l1Address: string;
+    /** Display address for the new address (L3 direct address or chain pubkey) */
+    address: string;
     path: string;
     index: number;
   } | null;
@@ -33,7 +34,6 @@ export interface CreateAddressState {
 }
 
 export interface ExistingAddressData {
-  l1Address: string;
   l3Address: string;
   path: string;
   index: number;
@@ -125,7 +125,7 @@ export function useCreateAddress(): UseCreateAddressReturn {
           step: 'complete',
           progress: 'Address created successfully!',
           newAddress: {
-            l1Address: derived.address,
+            address: derived.publicKey,
             path: derived.path,
             index: derived.index,
           },
@@ -133,7 +133,6 @@ export function useCreateAddress(): UseCreateAddressReturn {
         window.dispatchEvent(new Event("wallet-updated"));
         await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
         await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.payments.tokens.all });
-        await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.l1.all });
         // Send welcome DMs to agents for the new address
         sendWelcomeDM(sphere);
         return;
@@ -144,7 +143,7 @@ export function useCreateAddress(): UseCreateAddressReturn {
         step: 'nametag_input',
         progress: '',
         newAddress: {
-          l1Address: derived.address,
+          address: derived.publicKey,
           path: derived.path,
           index: derived.index,
         },
@@ -166,7 +165,7 @@ export function useCreateAddress(): UseCreateAddressReturn {
       error: null,
       progress: '',
       newAddress: {
-        l1Address: address.l1Address,
+        address: address.l3Address,
         path: address.path,
         index: address.index,
       },
@@ -218,7 +217,6 @@ export function useCreateAddress(): UseCreateAddressReturn {
       await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
       await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.nametag });
       await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.payments.tokens.all });
-      await queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.l1.all });
 
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create nametag";

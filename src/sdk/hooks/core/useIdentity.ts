@@ -8,7 +8,6 @@ export interface UseIdentityReturn {
   isLoading: boolean;
   error: Error | null;
   directAddress: string | null;
-  l1Address: string | null;
   nametag: string | null;
   displayName: string;
   shortAddress: string;
@@ -31,7 +30,6 @@ export function useIdentity(): UseIdentityReturn {
     isLoading: query.isLoading,
     error: query.error,
     directAddress: identity?.directAddress ?? null,
-    l1Address: identity?.l1Address ?? null,
     nametag: identity?.nametag ?? null,
     displayName: identity?.nametag
       ? `@${identity.nametag}`

@@ -31,10 +31,6 @@ type Section =
   | 'api-payments-gethistory'
   | 'api-payments-receive'
   | 'api-payments-request'
-  | 'api-l1'
-  | 'api-l1-send'
-  | 'api-l1-getbalance'
-  | 'api-l1-gethistory'
   | 'api-comms'
   | 'api-comms-senddm'
   | 'api-comms-ondm'
@@ -112,15 +108,6 @@ const navigation: NavItem[] = [
       { id: 'api-payments-gethistory', label: 'payments.getHistory()' },
       { id: 'api-payments-receive', label: 'payments.receive()' },
       { id: 'api-payments-request', label: 'Payment Requests' },
-    ],
-  },
-  {
-    id: 'api-l1',
-    label: 'L1 (ALPHA)',
-    children: [
-      { id: 'api-l1-send', label: 'l1.send()' },
-      { id: 'api-l1-getbalance', label: 'l1.getBalance()' },
-      { id: 'api-l1-gethistory', label: 'l1.getHistory()' },
     ],
   },
   {
@@ -496,14 +483,13 @@ const providers = createBrowserProviders({
                 <li>No registration or API keys needed</li>
                 <li>BIP32 HD wallet with derivation path <code className="text-amber-600 dark:text-amber-400">m/44'/0'/0'</code></li>
                 <li>Multiple addresses from a single seed</li>
-                <li>Identity includes chain pubkey, L1 address, direct address, and optional nametag</li>
+                <li>Identity includes chain pubkey, direct address, and optional nametag</li>
               </ul>
               <CodeBlock
                 code={`// Access identity after initialization
 console.log(sphere.identity);
 // {
 //   chainPubkey: '02abc...',
-//   l1Address: 'alpha1...',
 //   directAddress: 'DIRECT://...',
 //   nametag: '@alice'
 // }`}
@@ -518,13 +504,11 @@ console.log(sphere.identity);
               <ul className="list-disc list-inside text-neutral-600 dark:text-neutral-400 space-y-2 mb-4">
                 <li><strong>DIRECT address</strong> (<code className="text-amber-600 dark:text-amber-400">DIRECT://...</code>) - Used for L3 token transfers</li>
                 <li><strong>PROXY address</strong> (<code className="text-amber-600 dark:text-amber-400">PROXY://...</code>) - Derived from nametag, used when direct address is unknown</li>
-                <li><strong>L1 address</strong> (<code className="text-amber-600 dark:text-amber-400">alpha1...</code>) - Bech32 address for ALPHA blockchain</li>
               </ul>
               <CodeBlock
                 code={`// Derive additional addresses
 const addr = sphere.deriveAddress(1); // second address
-console.log(addr.address);    // alpha1...
-console.log(addr.publicKey);  // hex pubkey
+console.log(addr.publicKey);  // chain pubkey (hex)
 
 // Switch active address
 await sphere.switchToAddress(1);
@@ -556,8 +540,7 @@ await sphere.payments.send({
 
 // Resolve a nametag to peer info
 const peer = await sphere.resolve('@bob');
-console.log(peer?.directAddress);
-console.log(peer?.l1Address);`}
+console.log(peer?.directAddress);`}
               />
             </div>
 
@@ -639,7 +622,6 @@ unsub(); // stop listening`}
                   { name: 'mnemonic', type: 'string', description: 'BIP39 mnemonic to create wallet from (if no wallet exists)' },
                   { name: 'autoGenerate', type: 'boolean', description: 'Auto-generate mnemonic if wallet does not exist' },
                   { name: 'nametag', type: 'string', description: 'Register nametag on creation' },
-                  { name: 'l1', type: 'L1Config | {}', description: 'L1 ALPHA blockchain config. Pass {} for defaults' },
                   { name: 'groupChat', type: 'boolean | config', description: 'Enable NIP-29 group chat module' },
                   { name: 'market', type: 'boolean | config', description: 'Enable market intent module' },
                   { name: 'password', type: 'string', description: 'Encrypt wallet with password' },
@@ -668,14 +650,12 @@ const { sphere, generatedMnemonic } = await Sphere.init({
   ...providers,
   autoGenerate: true,
   nametag: 'myagent',
-  l1: {},
 });
 
 // Or import with known mnemonic
 const { sphere: imported } = await Sphere.init({
   ...providers,
   mnemonic: 'abandon badge cable drama ...',
-  l1: {},
 });`}
               />
             </div>
@@ -740,13 +720,12 @@ console.log(isValid); // true or false`}
               <CodeBlock
                 code={`interface Identity {
   chainPubkey: string;     // secp256k1 public key (hex)
-  l1Address: string;       // L1 ALPHA address (alpha1...)
   directAddress: string;   // DIRECT:// address for L3
   nametag?: string;        // registered @nametag
 }
 
 console.log(sphere.identity?.chainPubkey);
-console.log(sphere.identity?.l1Address);
+console.log(sphere.identity?.directAddress);
 console.log(sphere.identity?.nametag); // '@alice'`}
               />
             </div>
@@ -786,7 +765,6 @@ const available = await sphere.isNametagAvailable('bob'); // boolean`}
                 code={`const peer = await sphere.resolve('@alice');
 if (peer) {
   console.log(peer.directAddress);  // DIRECT://...
-  console.log(peer.l1Address);      // alpha1...
   console.log(peer.transportPubkey);
 }`}
               />
@@ -946,8 +924,8 @@ const assets = sphere.payments.getBalance();
 assets.forEach(a => console.log(\`\${a.symbol}: \${a.totalAmount}\`));
 
 // Specific coin
-const [alpha] = sphere.payments.getBalance('0x...');
-console.log('ALPHA balance:', alpha?.totalAmount);`}
+const [asset] = sphere.payments.getBalance('0x...');
+console.log('Balance:', asset?.totalAmount);`}
               />
             </div>
 
@@ -1061,75 +1039,6 @@ await sphere.payments.payPaymentRequest(requestId, 'Paid!');
 
 // Or reject
 await sphere.payments.rejectPaymentRequest(requestId);`}
-              />
-            </div>
-          </section>
-
-          {/* ============================================================ */}
-          {/* API REFERENCE - L1                                           */}
-          {/* ============================================================ */}
-          <section id="api-l1" data-section="api-l1" className="mb-16">
-            <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-neutral-200 dark:border-neutral-700">
-              API Reference &mdash; L1 (ALPHA Blockchain)
-            </h2>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-8">
-              Layer 1 operations for the ALPHA blockchain, accessed via <code className="text-amber-600 dark:text-amber-400">sphere.payments.l1</code>.
-              Requires L1 to be enabled during initialization (<code className="text-amber-600 dark:text-amber-400">l1: {'{}'}</code>).
-            </p>
-
-            <div id="api-l1-send" data-section="api-l1-send" className="scroll-mt-24 mb-12">
-              <h3 className="text-xl font-semibold mb-4">
-                <code className="text-amber-600 dark:text-amber-400">sphere.payments.l1.send(request)</code>
-              </h3>
-              <CodeBlock code={`async send(request: L1SendRequest): Promise<L1SendResult>`} />
-              <ParamTable
-                params={[
-                  { name: 'to', type: 'string', description: 'Recipient L1 address (alpha1...) or @nametag', required: true },
-                  { name: 'amount', type: 'string', description: 'Amount in smallest units', required: true },
-                ]}
-              />
-              <CodeBlock
-                filename="l1-send.ts"
-                code={`const result = await sphere.payments.l1.send({
-  to: '@alice',       // or 'alpha1...'
-  amount: '1000000',  // in smallest units
-});
-console.log('TX ID:', result.txid);`}
-              />
-            </div>
-
-            <div id="api-l1-getbalance" data-section="api-l1-getbalance" className="scroll-mt-24 mb-12">
-              <h3 className="text-xl font-semibold mb-4">
-                <code className="text-amber-600 dark:text-amber-400">sphere.payments.l1.getBalance()</code>
-              </h3>
-              <CodeBlock code={`async getBalance(): Promise<L1Balance>`} />
-              <CodeBlock
-                code={`interface L1Balance {
-  confirmed: string;    // confirmed balance
-  unconfirmed: string;  // unconfirmed (mempool)
-  vested: string;       // vested amount
-  unvested: string;     // still vesting
-}`}
-              />
-              <CodeBlock
-                filename="l1-balance.ts"
-                code={`const balance = await sphere.payments.l1.getBalance();
-console.log('Confirmed:', balance.confirmed);
-console.log('Vested:', balance.vested);`}
-              />
-            </div>
-
-            <div id="api-l1-gethistory" data-section="api-l1-gethistory" className="scroll-mt-24 mb-12">
-              <h3 className="text-xl font-semibold mb-4">
-                <code className="text-amber-600 dark:text-amber-400">sphere.payments.l1.getHistory(limit?)</code>
-              </h3>
-              <CodeBlock code={`async getHistory(limit?: number): Promise<L1Transaction[]>`} />
-              <CodeBlock
-                filename="l1-history.ts"
-                code={`const txs = await sphere.payments.l1.getHistory(20);
-txs.forEach(tx => {
-  console.log(tx.txid, tx.amount, tx.confirmations);
-});`}
               />
             </div>
           </section>
@@ -1313,7 +1222,7 @@ const result = await sphere.market.postIntent({
   intentType: 'sell',
   category: 'collectibles',
   price: 12000,
-  currency: 'ALPHA',
+  currency: 'UCT',
 });
 console.log('Posted:', result.intentId);
 
@@ -1577,7 +1486,6 @@ const providers = createBrowserProviders({
 const { sphere } = await Sphere.init({
   ...providers,
   mnemonic: process.env.WALLET_MNEMONIC,
-  l1: {},
 });`}
               />
 
@@ -1589,7 +1497,7 @@ await sphere.market.postIntent({
   intentType: 'sell',
   category: 'watches',
   price: 15000,
-  currency: 'ALPHA',
+  currency: 'UCT',
 });`}
               />
 
@@ -1666,14 +1574,12 @@ const txt = sphere.exportToTxt();`}
 const { sphere } = await Sphere.init({
   ...providers,
   mnemonic: 'abandon badge cable drama ...',
-  l1: {},
 });
 
 // Import from JSON file
 const result = await Sphere.importFromJSON({
   ...providers,
   jsonContent: '{"version":...}',
-  l1: {},
 });
 
 // Import from legacy wallet file
@@ -1682,7 +1588,6 @@ const result = await Sphere.importFromLegacyFile({
   fileContent: fileData,
   fileName: 'wallet.dat',
   password: 'if-encrypted',
-  l1: {},
 });`}
               />
             </div>
@@ -1755,7 +1660,6 @@ async function main() {
   const { sphere } = await Sphere.init({
     ...providers,
     mnemonic: process.env.MNEMONIC,
-    l1: {},
   });
 
   // Post items for sale
@@ -1764,7 +1668,7 @@ async function main() {
     intentType: 'sell',
     category: 'watches',
     price: 15000,
-    currency: 'ALPHA',
+    currency: 'UCT',
   });
 
   await sphere.market.postIntent({
@@ -1772,7 +1676,7 @@ async function main() {
     intentType: 'sell',
     category: 'collectibles',
     price: 12000,
-    currency: 'ALPHA',
+    currency: 'UCT',
   });
 
   console.log('Listings posted!');

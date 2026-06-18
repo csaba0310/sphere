@@ -10,15 +10,14 @@ const PERMISSION_LABELS: Record<string, string> = {
   [PERMISSION_SCOPES.BALANCE_READ]: 'View balance',
   [PERMISSION_SCOPES.TOKENS_READ]: 'View tokens',
   [PERMISSION_SCOPES.HISTORY_READ]: 'View history',
-  [PERMISSION_SCOPES.L1_READ]: 'View L1 data',
   [PERMISSION_SCOPES.EVENTS_SUBSCRIBE]: 'Subscribe to events',
   [PERMISSION_SCOPES.RESOLVE_PEER]: 'Resolve addresses',
   [PERMISSION_SCOPES.TRANSFER_REQUEST]: 'Request transfers',
-  [PERMISSION_SCOPES.L1_TRANSFER]: 'Request L1 transfers',
   [PERMISSION_SCOPES.DM_REQUEST]: 'Send direct messages',
   [PERMISSION_SCOPES.DM_READ]: 'Read direct messages',
   [PERMISSION_SCOPES.PAYMENT_REQUEST]: 'Payment requests',
   [PERMISSION_SCOPES.SIGN_REQUEST]: 'Sign messages',
+  [PERMISSION_SCOPES.MINT_REQUEST]: 'Request minting',
 };
 
 export function ConnectionApprovalModal() {

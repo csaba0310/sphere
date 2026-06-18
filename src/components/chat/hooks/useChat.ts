@@ -251,7 +251,7 @@ export const useChat = (): UseChatReturn => {
 
         // Normalize: add @ for bare nametags (not an address or pubkey)
         const input = identifier.startsWith('@') || identifier.startsWith('DIRECT:') || identifier.startsWith('PROXY:')
-          || identifier.startsWith('alpha') || /^[0-9a-fA-F]{64,66}$/.test(identifier)
+          || /^[0-9a-fA-F]{64,66}$/.test(identifier)
           ? identifier
           : `@${identifier}`;
 
