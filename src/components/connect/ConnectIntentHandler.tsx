@@ -1,14 +1,70 @@
-import { useState } from 'react';
-import { MessageSquare, PenLine, Coins } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MessageSquare, PenLine, Coins, Inbox } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { TokenRegistry, formatAmount } from '@unicitylabs/sphere-sdk';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
-import { SendModal } from '../wallet/L3/modals/SendModal';
-import { SendPaymentRequestModal } from '../wallet/L3/modals/SendPaymentRequestModal';
+import { SendIntentModal } from './SendIntentModal';
+import { PaymentRequestIntentModal } from './PaymentRequestIntentModal';
 import { useConnectContext } from './ConnectContext';
 import { useSendDM } from '../../sdk/hooks/comms/useSendDM';
 import { getErrorMessage } from '../../sdk/errors';
 import { useSphereContext } from '../../sdk';
+
+/** Intents this wallet actually implements. Anything else is rejected cleanly. */
+const SUPPORTED_INTENTS = new Set(['send', 'payment_request', 'dm', 'sign_message', 'mint', 'receive']);
+
+type IntentError = { code: number; message: string };
+
+/** Canonical coinId: even-length lowercase hex (same shape the mint intent requires). */
+const COIN_ID_RE = /^([0-9a-f]{2})+$/;
+
+/**
+ * Validate dApp-supplied intent params up front. Returns a structured error to
+ * reject with (INVALID_PARAMS / METHOD_NOT_FOUND), or null when the intent is
+ * supported and well-formed. `mint` does its own engine-specific validation in
+ * its handler, so it is only checked for support here.
+ */
+function validateIntent(action: string, params: Record<string, unknown>): IntentError | null {
+  if (!SUPPORTED_INTENTS.has(action)) {
+    return {
+      code: ERROR_CODES.METHOD_NOT_FOUND,
+      message: `Intent "${action}" is not supported by this wallet`,
+    };
+  }
+  if (action === 'send' || action === 'payment_request') {
+    if (typeof params.to !== 'string' || params.to.trim() === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "to"' };
+    }
+    // amount is in BASE UNITS (smallest indivisible unit) — a positive integer
+    // string, exactly like the `mint` intent. Whole-token/decimal amounts are
+    // rejected: every major wallet carries dApp-requested amounts in base units
+    // (exactness, no float), and the dApp converts at its own UI edge.
+    const amountStr = params.amount == null ? '' : String(params.amount).trim();
+    if (!/^\d+$/.test(amountStr) || BigInt(amountStr) <= 0n) {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'amount must be a positive integer string in base units' };
+    }
+    if (typeof params.coinId !== 'string' || !COIN_ID_RE.test(params.coinId)) {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'coinId must be lowercase even-length hex' };
+    }
+    return null;
+  }
+  if (action === 'dm') {
+    if (typeof params.to !== 'string' || params.to.trim() === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "to"' };
+    }
+    if (typeof params.message !== 'string' || params.message === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "message"' };
+    }
+    return null;
+  }
+  if (action === 'sign_message') {
+    if (typeof params.message !== 'string' || params.message === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "message"' };
+    }
+    return null;
+  }
+  return null;
+}
 
 export function ConnectIntentHandler() {
   const { pendingIntent, resolveIntent, rejectIntent, registerAutoIntent } = useConnectContext();
@@ -19,57 +75,55 @@ export function ConnectIntentHandler() {
   const [signError, setSignError] = useState<string | null>(null);
   const [mintError, setMintError] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [receiveError, setReceiveError] = useState<string | null>(null);
+  const [isReceiving, setIsReceiving] = useState(false);
+
+  // Validate/normalize params up front: reject malformed or unsupported intents
+  // cleanly (INVALID_PARAMS / METHOD_NOT_FOUND) instead of opening a modal that
+  // silently hangs (unresolved coinId) or crashes (missing sign_message body).
+  // Runs once per pending intent.
+  useEffect(() => {
+    if (!pendingIntent) return;
+    const error = validateIntent(pendingIntent.action, pendingIntent.params);
+    if (error) rejectIntent(error.code, error.message);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingIntent]);
 
   if (!pendingIntent) return null;
 
   const { action, params } = pendingIntent;
 
+  // Malformed / unsupported intents are rejected by the effect above — render nothing.
+  if (validateIntent(action, params)) return null;
+
   const handleClose = () => {
     rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
   };
 
-  // --- Send Intent: reuse the wallet's SendModal ---
+  // --- Send Intent: confirm-only (amount fixed, base units, approve/reject) ---
   if (action === 'send') {
     return (
-      <SendModal
-        isOpen={true}
-        onClose={(result) => {
-          if (result?.success) {
-            resolveIntent({ success: true });
-          } else {
-            rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
-          }
-        }}
-        prefill={{
-          to: params.to as string,
-          amount: params.amount as string,
-          coinId: (params.coinId as string) ?? 'UCT',
-          memo: params.memo as string | undefined,
-        }}
-        asModal
+      <SendIntentModal
+        to={params.to as string}
+        amount={String(params.amount)}
+        coinId={params.coinId as string}
+        memo={params.memo as string | undefined}
+        onResolve={() => resolveIntent({ success: true })}
+        onCancel={handleClose}
       />
     );
   }
 
-  // --- Payment Request Intent: reuse SendPaymentRequestModal ---
+  // --- Payment Request Intent: confirm-only (amount fixed, base units) ---
   if (action === 'payment_request') {
     return (
-      <SendPaymentRequestModal
-        isOpen={true}
-        onClose={(result) => {
-          if (result?.success) {
-            resolveIntent({ success: true, requestId: result.requestId });
-          } else {
-            rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
-          }
-        }}
-        prefill={{
-          to: params.to as string,
-          amount: params.amount as string,
-          coinId: (params.coinId as string) ?? 'UCT',
-          message: params.message as string | undefined,
-        }}
-        asModal
+      <PaymentRequestIntentModal
+        to={params.to as string}
+        amount={String(params.amount)}
+        coinId={params.coinId as string}
+        message={params.message as string | undefined}
+        onResolve={(requestId) => resolveIntent({ success: true, requestId })}
+        onCancel={handleClose}
       />
     );
   }
@@ -89,12 +143,19 @@ export function ConnectIntentHandler() {
         // so it's immune to ConnectHost lifecycle issues.
         if (autoApproveDM && sphere) {
           const sphereRef = sphere;
+          const approvedTo = to;
           registerAutoIntent('dm', async (_action, intentParams) => {
+            const nextTo = intentParams.to;
+            const nextMessage = intentParams.message;
+            // Auto-approval is scoped to the recipient the user approved. A DM to
+            // any other recipient falls back to the normal confirmation modal
+            // (return null) instead of being sent silently.
+            if (typeof nextTo !== 'string' || nextTo !== approvedTo) return null;
+            if (typeof nextMessage !== 'string' || nextMessage === '') {
+              return { error: { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "message"' } };
+            }
             try {
-              const result = await sphereRef.communications.sendDM(
-                intentParams.to as string,
-                intentParams.message as string,
-              );
+              const result = await sphereRef.communications.sendDM(nextTo, nextMessage);
               return { result: { sent: true, messageId: result.id, timestamp: result.timestamp } };
             } catch (err) {
               return {
@@ -322,18 +383,55 @@ export function ConnectIntentHandler() {
     );
   }
 
-  // --- Unknown Intent ---
-  return (
-    <BaseModal isOpen={true} onClose={handleClose}>
-      <ModalHeader title="Unknown Request" onClose={handleClose} />
-      <div className="px-6 py-5 text-center">
-        <p className="text-neutral-500 mb-4">
-          Unsupported intent: <code className="text-neutral-700 dark:text-neutral-300">{action}</code>
-        </p>
-        <Button variant="secondary" onClick={handleClose}>
-          Dismiss
-        </Button>
-      </div>
-    </BaseModal>
-  );
+  // --- Receive Intent: fetch the user's pending incoming transfers ---
+  if (action === 'receive') {
+    const handleReceive = async () => {
+      setReceiveError(null);
+      if (!sphere) {
+        setReceiveError('Wallet not available');
+        return;
+      }
+      setIsReceiving(true);
+      try {
+        const { transfers } = await sphere.payments.receive();
+        resolveIntent({ transfers });
+      } catch (err) {
+        setReceiveError(getErrorMessage(err));
+      } finally {
+        setIsReceiving(false);
+      }
+    };
+
+    return (
+      <BaseModal isOpen={true} onClose={handleClose}>
+        <ModalHeader title="Check for Transfers" icon={Inbox} onClose={handleClose} />
+
+        <div className="px-6 py-5 flex-1 flex flex-col justify-center">
+          <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-5 border border-neutral-200 dark:border-white/10">
+            <div className="text-sm text-neutral-500">
+              This dApp wants to check your wallet for{' '}
+              <span className="text-neutral-900 dark:text-white font-medium">incoming transfers</span>.
+            </div>
+          </div>
+
+          {receiveError && (
+            <div className="text-red-500 text-sm mb-3 text-center">{receiveError}</div>
+          )}
+
+          <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={handleClose} disabled={isReceiving}>
+              Cancel
+            </Button>
+            <Button variant="primary" fullWidth disabled={isReceiving} onClick={handleReceive}>
+              {isReceiving ? 'Checking…' : 'Check'}
+            </Button>
+          </div>
+        </div>
+      </BaseModal>
+    );
+  }
+
+  // Unsupported intents are rejected up front by the validation effect
+  // (METHOD_NOT_FOUND), so there is nothing to render here.
+  return null;
 }

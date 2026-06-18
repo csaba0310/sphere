@@ -21,7 +21,7 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
   const connectHostRef = useRef<ConnectHost | null>(null);
   const [, forceUpdate] = useState(0);
 
-  type AutoHandler = (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } }>;
+  type AutoHandler = (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } } | null>;
   // Auto-approve handlers scoped to a specific ConnectHost instance
   const autoIntentHandlersRef = useRef<Map<string, { host: ConnectHost; handler: AutoHandler }>>(new Map());
 
@@ -61,7 +61,10 @@ export function ConnectProvider({ children }: ConnectProviderProps) {
       const entry = autoIntentHandlersRef.current.get(action);
       if (entry && entry.host === connectHostRef.current) {
         try {
-          return await entry.handler(action, params);
+          const handled = await entry.handler(action, params);
+          // A null result means the handler declined (e.g. a DM to a recipient
+          // other than the one the user approved) — fall through to the modal.
+          if (handled) return handled;
         } catch (err) {
           return { error: { code: ERROR_CODES.INTERNAL_ERROR, message: err instanceof Error ? err.message : 'Auto-approve handler failed' } };
         }
