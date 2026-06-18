@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { MessageSquare, PenLine, Coins } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
+import { TokenRegistry, formatAmount } from '@unicitylabs/sphere-sdk';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
 import { SendModal } from '../wallet/L3/modals/SendModal';
 import { SendPaymentRequestModal } from '../wallet/L3/modals/SendPaymentRequestModal';
@@ -311,21 +312,45 @@ export function ConnectIntentHandler() {
       }
     };
 
+    // Resolve registry metadata for a friendlier confirmation (icon + symbol +
+    // human-readable amount), falling back to the raw values when the coin is
+    // unknown. Display-only — the actual mint uses the raw coinId/amount.
+    const registry = TokenRegistry.getInstance();
+    const def = typeof coinId === 'string' ? registry.getDefinition(coinId) : undefined;
+    const iconUrl = def ? registry.getIconUrl(coinId) : null;
+    const displayAmount =
+      def?.symbol && def.decimals != null && /^\d+$/.test(String(amount))
+        ? formatAmount(amount, { decimals: def.decimals, symbol: def.symbol, maxFractionDigits: 8 })
+        : null;
+
     return (
       <BaseModal isOpen={true} onClose={handleClose}>
         <ModalHeader title="Mint Tokens" icon={Coins} onClose={handleClose} />
 
         <div className="px-6 py-5 flex-1 flex flex-col justify-center">
           <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-5 border border-neutral-200 dark:border-white/10">
-            <div className="text-sm text-neutral-500 mb-3">
+            <div className="text-sm text-neutral-500 mb-4">
               This dApp is asking to mint tokens{' '}
               <span className="text-neutral-900 dark:text-white font-medium">to your own wallet</span>.
             </div>
-            <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-              <span className="text-neutral-400">Amount</span>
-              <span className="text-neutral-900 dark:text-white font-mono break-all">{amount}</span>
-              <span className="text-neutral-400">Coin ID</span>
-              <span className="text-neutral-900 dark:text-white font-mono break-all">{coinId}</span>
+
+            <div className="flex items-center gap-3 mb-3">
+              {iconUrl && (
+                <img src={iconUrl} alt="" className="w-9 h-9 rounded-full shrink-0" />
+              )}
+              <span className="text-2xl font-semibold text-neutral-900 dark:text-white break-all">
+                {displayAmount ?? amount}
+              </span>
+            </div>
+
+            <div className="text-[11px] text-neutral-400 break-all">
+              <span className="text-neutral-500 dark:text-neutral-400">Coin ID:</span>{' '}
+              <span className="font-mono">{coinId}</span>
+              {!def && (
+                <div className="mt-1 text-amber-600 dark:text-amber-500">
+                  Unrecognized coin — verify the ID before approving
+                </div>
+              )}
             </div>
           </div>
 
