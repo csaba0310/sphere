@@ -13,21 +13,10 @@ import { useSphereContext } from '../../sdk';
 /** Intents this wallet actually implements. Anything else is rejected cleanly. */
 const SUPPORTED_INTENTS = new Set(['send', 'payment_request', 'dm', 'sign_message', 'mint']);
 
-/** Default coin when a send/payment_request intent omits coinId. */
-const DEFAULT_COIN = 'UCT';
-
 type IntentError = { code: number; message: string };
 
-/**
- * Resolve a coin identifier to its canonical 64-hex coinId.
- * Accepts an already-canonical even-length lowercase hex id (returned as-is) or a
- * registry symbol (e.g. "UCT") resolved to its hex id. Returns null if neither.
- */
-function resolveCoinId(input: unknown): string | null {
-  if (typeof input !== 'string' || input.length === 0) return null;
-  if (/^([0-9a-f]{2})+$/.test(input)) return input;
-  return TokenRegistry.getInstance().getDefinitionBySymbol(input)?.id ?? null;
-}
+/** Canonical coinId: even-length lowercase hex (same shape the mint intent requires). */
+const COIN_ID_RE = /^([0-9a-f]{2})+$/;
 
 /**
  * Validate dApp-supplied intent params up front. Returns a structured error to
@@ -49,8 +38,8 @@ function validateIntent(action: string, params: Record<string, unknown>): Intent
     if (params.amount == null || String(params.amount).trim() === '') {
       return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "amount"' };
     }
-    if (!resolveCoinId((params.coinId as string | undefined) ?? DEFAULT_COIN)) {
-      return { code: ERROR_CODES.INVALID_PARAMS, message: `Unknown coinId: ${String(params.coinId)}` };
+    if (typeof params.coinId !== 'string' || !COIN_ID_RE.test(params.coinId)) {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'coinId must be lowercase even-length hex' };
     }
     return null;
   }
@@ -106,9 +95,6 @@ export function ConnectIntentHandler() {
 
   // --- Send Intent: reuse the wallet's SendModal ---
   if (action === 'send') {
-    // validateIntent() above guarantees the coinId resolves; narrow defensively.
-    const coinId = resolveCoinId((params.coinId as string | undefined) ?? DEFAULT_COIN);
-    if (!coinId) return null;
     return (
       <SendModal
         isOpen={true}
@@ -122,7 +108,7 @@ export function ConnectIntentHandler() {
         prefill={{
           to: params.to as string,
           amount: params.amount as string,
-          coinId,
+          coinId: params.coinId as string,
           memo: params.memo as string | undefined,
         }}
         asModal
@@ -132,9 +118,6 @@ export function ConnectIntentHandler() {
 
   // --- Payment Request Intent: reuse SendPaymentRequestModal ---
   if (action === 'payment_request') {
-    // validateIntent() above guarantees the coinId resolves; narrow defensively.
-    const coinId = resolveCoinId((params.coinId as string | undefined) ?? DEFAULT_COIN);
-    if (!coinId) return null;
     return (
       <SendPaymentRequestModal
         isOpen={true}
@@ -148,7 +131,7 @@ export function ConnectIntentHandler() {
         prefill={{
           to: params.to as string,
           amount: params.amount as string,
-          coinId,
+          coinId: params.coinId as string,
           message: params.message as string | undefined,
         }}
         asModal
