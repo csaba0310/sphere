@@ -266,13 +266,11 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
       // Show address selection so user can review discovered addresses
       const addresses: DerivedAddressInfo[] = allAddresses.map(a => ({
         index: a.index,
-        l1Address: a.l1Address,
         l3Address: a.directAddress,
         path: `m/44'/60'/0'/0/${a.index}`,
         hasNametag: !!a.nametag,
         existingNametag: a.nametag,
         isChange: false,
-        l1Balance: 0,
         balanceLoading: false,
         ipnsLoading: false,
       }));
@@ -458,13 +456,11 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
       if (allAddresses.length >= 1) {
         const addresses: DerivedAddressInfo[] = allAddresses.map(a => ({
           index: a.index,
-          l1Address: a.l1Address,
           l3Address: a.directAddress,
           path: `m/44'/60'/0'/0/${a.index}`,
           hasNametag: !!a.nametag,
           existingNametag: a.nametag,
           isChange: false,
-          l1Balance: 0,
           balanceLoading: false,
           ipnsLoading: false,
         }));
@@ -649,7 +645,6 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
         ...prev,
         {
           index: nextIndex,
-          l1Address: addr.address,
           l3Address: '', // Will be populated after switching
           path: addr.path,
           hasNametag: false,
@@ -676,7 +671,6 @@ export function useOnboardingFlow(): UseOnboardingFlowReturn {
         const addresses = activeSphere.deriveAddresses(3);
         const results: DerivedAddressInfo[] = addresses.map((addr, i) => ({
           index: i,
-          l1Address: addr.address,
           l3Address: '',
           path: addr.path,
           hasNametag: false,

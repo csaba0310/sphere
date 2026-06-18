@@ -5,7 +5,6 @@ import { L3WalletView } from './L3/views/L3WalletView';
 import { useIdentity, useWalletStatus, useSphereContext } from '../../sdk';
 import { useIncomingPaymentRequests } from './L3/hooks/useIncomingPaymentRequests';
 import { useUIState } from '../../hooks/useUIState';
-import { L1WalletModal } from './L1/modals/L1WalletModal';
 import { RegisterNametagModal } from './shared/components/RegisterNametagModal';
 import { AddressSelector } from './shared/components';
 import { CreateWalletFlow } from './onboarding/CreateWalletFlow';
@@ -17,7 +16,6 @@ export function WalletPanel() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isRequestsOpen, setIsRequestsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isL1WalletOpen, setIsL1WalletOpen] = useState(false);
   const [isNametagModalOpen, setIsNametagModalOpen] = useState(false);
   const { isLoading: isWalletLoading, walletExists, error: walletError } = useWalletStatus();
   const { identity, nametag, isLoading: isLoadingIdentity } = useIdentity();
@@ -251,8 +249,6 @@ export function WalletPanel() {
           setIsRequestsOpen={setIsRequestsOpen}
           isSettingsOpen={isSettingsOpen}
           setIsSettingsOpen={setIsSettingsOpen}
-          isL1WalletOpen={isL1WalletOpen}
-          setIsL1WalletOpen={setIsL1WalletOpen}
           paymentRequests={requests}
           paymentRequestsPendingCount={pendingCount}
           paymentRequestsReject={reject}
@@ -260,13 +256,6 @@ export function WalletPanel() {
           paymentRequestsClearProcessed={clearProcessed}
         />
       </div>
-
-      {/* L1 Wallet Modal - renders over entire panel including header */}
-      <L1WalletModal
-        isOpen={isL1WalletOpen}
-        onClose={() => setIsL1WalletOpen(false)}
-        showBalances={showBalances}
-      />
 
       {/* Register Nametag Modal */}
       <RegisterNametagModal

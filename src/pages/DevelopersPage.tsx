@@ -63,8 +63,8 @@ console.log('Ready:', sphere.isReady);`,
     payments: {
       Icon: Zap,
       title: 'Payments',
-      tagline: 'L3 instant. L1 on-chain.',
-      description: 'Send tokens to anyone via @nametag or address. Instant P2P settlement on Layer 3, ALPHA blockchain on Layer 1.',
+      tagline: 'Instant. Off-chain. P2P.',
+      description: 'Send tokens to anyone via @nametag or address. Instant P2P settlement on Layer 3.',
       code: `await sphere.payments.send({ recipient: '@merchant', amount: '100', coinId });`,
       fullExample: `// Send tokens (use @nametag or direct address)
 await sphere.payments.send({
@@ -84,12 +84,8 @@ const withPrices = await sphere.payments.getAssets();
 // Listen for incoming transfers
 sphere.on('transfer:incoming', (transfer) => {
   console.log('Received tokens:', transfer.tokens);
-});
-
-// L1 ALPHA blockchain
-const l1Balance = await sphere.payments.l1.getBalance();
-console.log('L1 confirmed:', l1Balance.confirmed);`,
-      features: ['L3 instant settlement', 'L1 ALPHA blockchain', 'Payment requests', 'Nametag support']
+});`,
+      features: ['Instant settlement', 'Off-chain tokens', 'Payment requests', 'Nametag support']
     },
     communication: {
       Icon: MessageSquare,
@@ -132,7 +128,7 @@ const result = await sphere.market.postIntent({
   intentType: 'sell',
   category: 'collectibles',
   price: 12000,
-  currency: 'ALPHA',
+  currency: 'UCT',
 });
 console.log('Intent posted:', result.intentId);
 
@@ -165,7 +161,7 @@ await sphere.market.postIntent({
   description: 'PSA-10 Charizard - Mint condition',
   intentType: 'sell',
   price: 12000,
-  currency: 'ALPHA',
+  currency: 'UCT',
 });
 
 // Search for items

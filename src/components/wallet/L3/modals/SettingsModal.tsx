@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Layers, Download, LogOut, Key, AtSign, Link } from 'lucide-react';
+import { Settings, Download, LogOut, Key, AtSign, Link } from 'lucide-react';
 import { WalletScreen } from '../../ui/WalletScreen';
 import { ModalHeader, MenuButton } from '../../ui';
 import { LookupModal } from './LookupModal';
@@ -9,20 +9,16 @@ import { ConnectedSitesModal } from './ConnectedSitesModal';
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onOpenL1Wallet: () => void;
   onBackupWallet: () => void;
   onLogout: () => void;
-  l1Balance?: string;
   hasMnemonic?: boolean;
 }
 
 export function SettingsModal({
   isOpen,
   onClose,
-  onOpenL1Wallet,
   onBackupWallet,
   onLogout,
-  l1Balance,
 }: SettingsModalProps) {
   const [isLookupOpen, setIsLookupOpen] = useState(false);
   const [isAddressManagerOpen, setIsAddressManagerOpen] = useState(false);
@@ -34,17 +30,6 @@ export function SettingsModal({
         <ModalHeader variant="screen" title="Settings" icon={Settings} iconVariant="neutral" onClose={onClose} />
 
         <div className="px-4 py-6 space-y-2 flex-1 overflow-y-auto">
-          <MenuButton
-            icon={Layers}
-            color="blue"
-            label="L1 Wallet"
-            subtitle={l1Balance ? `${l1Balance} ALPHA` : undefined}
-            onClick={() => {
-              onClose();
-              onOpenL1Wallet();
-            }}
-          />
-
           <MenuButton
             icon={AtSign}
             color="purple"

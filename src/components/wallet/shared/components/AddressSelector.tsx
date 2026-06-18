@@ -16,11 +16,9 @@ function truncateNametag(nametag: string, maxLength: number = 20): string {
 interface AddressSelectorProps {
   /** Compact mode - just show nametag with small dropdown trigger */
   compact?: boolean;
-  /** Which address format to display: 'direct' for DIRECT://, 'l1' for alpha1... */
-  addressFormat?: 'direct' | 'l1';
 }
 
-export function AddressSelector({ compact = true, addressFormat = 'direct' }: AddressSelectorProps) {
+export function AddressSelector({ compact = true }: AddressSelectorProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [copied, setCopied] = useState<'nametag' | 'address' | false>(false);
   const [isSwitching, setIsSwitching] = useState(false);
@@ -33,7 +31,7 @@ export function AddressSelector({ compact = true, addressFormat = 'direct' }: Ad
   const nametagInputRef = useRef<HTMLInputElement>(null);
 
   const { sphere, resolveNametag, isDiscoveringAddresses } = useSphereContext();
-  const { l1Address, nametag, directAddress } = useIdentity();
+  const { nametag, directAddress } = useIdentity();
   const queryClient = useQueryClient();
 
   const currentAddressIndex = sphere?.getCurrentAddressIndex() ?? 0;
@@ -97,7 +95,6 @@ export function AddressSelector({ compact = true, addressFormat = 'direct' }: Ad
     // invalidateQueries after removeQueries is a no-op (nothing left to invalidate).
     queryClient.resetQueries({ queryKey: SPHERE_KEYS.identity.all });
     queryClient.resetQueries({ queryKey: SPHERE_KEYS.payments.all });
-    queryClient.resetQueries({ queryKey: SPHERE_KEYS.l1.all });
     window.dispatchEvent(new Event('wallet-updated'));
     if (sphere) setAddresses(sphere.getActiveAddresses());
   }, [queryClient, sphere]);
@@ -225,13 +222,10 @@ export function AddressSelector({ compact = true, addressFormat = 'direct' }: Ad
     return [...addresses].sort((a, b) => a.index - b.index);
   }, [addresses]);
 
-  /** Get display address based on addressFormat prop */
+  /** Get display address (L3 direct address, falling back to the chain pubkey) */
   const getDisplayAddr = useCallback((addr: TrackedAddress): string => {
-    if (addressFormat === 'direct') {
-      return addr.directAddress || addr.l1Address;
-    }
-    return addr.l1Address;
-  }, [addressFormat]);
+    return addr.directAddress || addr.chainPubkey;
+  }, []);
 
   /** Truncate address for display */
   const truncateAddr = useCallback((addr: string): string => {
@@ -500,9 +494,9 @@ export function AddressSelector({ compact = true, addressFormat = 'direct' }: Ad
       >
         {displayNametag ? (
           <span className="text-sm font-medium text-blue-600 dark:text-blue-400">@{displayNametag}</span>
-        ) : l1Address ? (
+        ) : directAddress ? (
           <span className="text-sm font-mono text-neutral-700 dark:text-neutral-300">
-            {l1Address.slice(0, 8)}...{l1Address.slice(-6)}
+            {directAddress.slice(0, 8)}...{directAddress.slice(-6)}
           </span>
         ) : (
           <span className="text-sm font-mono text-neutral-400">...</span>

@@ -215,7 +215,6 @@ export function SphereProvider({
         const { sphere: instance } = await Sphere.init({
           ...browserProviders,
           network, // ensure the SDK configures TokenRegistry for THIS network (not the testnet default)
-          l1: {},
           discoverAddresses: false, // Run separately below for UX
           onProgress: setInitProgress,
         });
@@ -238,7 +237,7 @@ export function SphereProvider({
 
         // Run address discovery in background after wallet is visible
         setIsDiscoveringAddresses(true);
-        instance.discoverAddresses({ autoTrack: true, includeL1Scan: false }).then(result => {
+        instance.discoverAddresses({ autoTrack: true }).then(result => {
           if (result.addresses.length > 0) {
             logger.debug('SphereProvider', `Discovered ${result.addresses.length} address(es)`);
           }
@@ -254,7 +253,6 @@ export function SphereProvider({
         transport.setIdentity({
           privateKey: '0000000000000000000000000000000000000000000000000000000000000001',
           chainPubkey: '000000000000000000000000000000000000000000000000000000000000000000',
-          l1Address: '',
         });
       }
     } catch (err) {
@@ -295,7 +293,6 @@ export function SphereProvider({
           network,
           autoGenerate: true,
           nametag: options?.nametag,
-          l1: {},
           onProgress: setInitProgress,
         });
         setInitProgress(null);
@@ -339,7 +336,6 @@ export function SphereProvider({
         await transport.setIdentity({
           privateKey: '0000000000000000000000000000000000000000000000000000000000000001',
           chainPubkey: '000000000000000000000000000000000000000000000000000000000000000000',
-          l1Address: '',
         });
       }
 
@@ -360,7 +356,6 @@ export function SphereProvider({
         network,
         mnemonic,
         nametag: options?.nametag,
-        l1: {},
         onProgress: setInitProgress,
       });
       setInitProgress(null);
@@ -386,7 +381,6 @@ export function SphereProvider({
           fileName: options.fileName,
           password: options.password,
           nametag: options.nametag,
-          l1: {},
           onProgress: setInitProgress,
         });
         setInitProgress(null);

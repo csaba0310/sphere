@@ -235,7 +235,7 @@ function getExamples(skillId: string) {
     'defi-analyzer': ['Compare yields on SphereSwap vs AlphaDEX', 'What are the safest DeFi protocols?', 'Calculate my impermanent loss'],
     'quest-guide': ['What quests should I do next?', 'How many quests have I completed in Boxiran?', 'What gives the most XP right now?'],
     'nft-scout': ['Show trending NFT collections', 'What is the floor price of CryptoPunks?', 'Track whale wallet 0x1234...'],
-    'trading-signals': ['Give me a buy/sell signal for BTC', 'What are the support levels for ETH?', 'Show volume analysis for ALPHA'],
+    'trading-signals': ['Give me a buy/sell signal for BTC', 'What are the support levels for ETH?', 'Show volume analysis for SOL'],
     'web-search': ['Search for latest Unicity news', 'What is the Agentic Internet?', 'Explain proof-of-history consensus'],
     'social-nostr': ['Send a DM to @bob saying hello', 'Summarize my unread messages', 'Join the Sphere community channel'],
     'code-reviewer': ['Audit this smart contract for vulnerabilities', 'Review my Solidity code', 'Check for reentrancy attacks'],
