@@ -13,6 +13,9 @@ import { useSphereContext } from '../../sdk';
 /** Intents this wallet actually implements. Anything else is rejected cleanly. */
 const SUPPORTED_INTENTS = new Set(['send', 'payment_request', 'dm', 'sign_message', 'mint']);
 
+/** Default coin when a send/payment_request intent omits coinId. */
+const DEFAULT_COIN = 'UCT';
+
 type IntentError = { code: number; message: string };
 
 /**
@@ -46,7 +49,7 @@ function validateIntent(action: string, params: Record<string, unknown>): Intent
     if (params.amount == null || String(params.amount).trim() === '') {
       return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "amount"' };
     }
-    if (!resolveCoinId((params.coinId as string | undefined) ?? 'UCT')) {
+    if (!resolveCoinId((params.coinId as string | undefined) ?? DEFAULT_COIN)) {
       return { code: ERROR_CODES.INVALID_PARAMS, message: `Unknown coinId: ${String(params.coinId)}` };
     }
     return null;
@@ -103,6 +106,9 @@ export function ConnectIntentHandler() {
 
   // --- Send Intent: reuse the wallet's SendModal ---
   if (action === 'send') {
+    // validateIntent() above guarantees the coinId resolves; narrow defensively.
+    const coinId = resolveCoinId((params.coinId as string | undefined) ?? DEFAULT_COIN);
+    if (!coinId) return null;
     return (
       <SendModal
         isOpen={true}
@@ -116,7 +122,7 @@ export function ConnectIntentHandler() {
         prefill={{
           to: params.to as string,
           amount: params.amount as string,
-          coinId: resolveCoinId((params.coinId as string | undefined) ?? 'UCT') ?? 'UCT',
+          coinId,
           memo: params.memo as string | undefined,
         }}
         asModal
@@ -126,6 +132,9 @@ export function ConnectIntentHandler() {
 
   // --- Payment Request Intent: reuse SendPaymentRequestModal ---
   if (action === 'payment_request') {
+    // validateIntent() above guarantees the coinId resolves; narrow defensively.
+    const coinId = resolveCoinId((params.coinId as string | undefined) ?? DEFAULT_COIN);
+    if (!coinId) return null;
     return (
       <SendPaymentRequestModal
         isOpen={true}
@@ -139,7 +148,7 @@ export function ConnectIntentHandler() {
         prefill={{
           to: params.to as string,
           amount: params.amount as string,
-          coinId: resolveCoinId((params.coinId as string | undefined) ?? 'UCT') ?? 'UCT',
+          coinId,
           message: params.message as string | undefined,
         }}
         asModal
