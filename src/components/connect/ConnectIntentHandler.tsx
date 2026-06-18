@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageSquare, PenLine, Coins } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { TokenRegistry, formatAmount } from '@unicitylabs/sphere-sdk';
@@ -10,6 +10,65 @@ import { useSendDM } from '../../sdk/hooks/comms/useSendDM';
 import { getErrorMessage } from '../../sdk/errors';
 import { useSphereContext } from '../../sdk';
 
+/** Intents this wallet actually implements. Anything else is rejected cleanly. */
+const SUPPORTED_INTENTS = new Set(['send', 'payment_request', 'dm', 'sign_message', 'mint']);
+
+type IntentError = { code: number; message: string };
+
+/**
+ * Resolve a coin identifier to its canonical 64-hex coinId.
+ * Accepts an already-canonical even-length lowercase hex id (returned as-is) or a
+ * registry symbol (e.g. "UCT") resolved to its hex id. Returns null if neither.
+ */
+function resolveCoinId(input: unknown): string | null {
+  if (typeof input !== 'string' || input.length === 0) return null;
+  if (/^([0-9a-f]{2})+$/.test(input)) return input;
+  return TokenRegistry.getInstance().getDefinitionBySymbol(input)?.id ?? null;
+}
+
+/**
+ * Validate dApp-supplied intent params up front. Returns a structured error to
+ * reject with (INVALID_PARAMS / METHOD_NOT_FOUND), or null when the intent is
+ * supported and well-formed. `mint` does its own engine-specific validation in
+ * its handler, so it is only checked for support here.
+ */
+function validateIntent(action: string, params: Record<string, unknown>): IntentError | null {
+  if (!SUPPORTED_INTENTS.has(action)) {
+    return {
+      code: ERROR_CODES.METHOD_NOT_FOUND,
+      message: `Intent "${action}" is not supported by this wallet`,
+    };
+  }
+  if (action === 'send' || action === 'payment_request') {
+    if (typeof params.to !== 'string' || params.to.trim() === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "to"' };
+    }
+    if (params.amount == null || String(params.amount).trim() === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "amount"' };
+    }
+    if (!resolveCoinId((params.coinId as string | undefined) ?? 'UCT')) {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: `Unknown coinId: ${String(params.coinId)}` };
+    }
+    return null;
+  }
+  if (action === 'dm') {
+    if (typeof params.to !== 'string' || params.to.trim() === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "to"' };
+    }
+    if (typeof params.message !== 'string' || params.message === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "message"' };
+    }
+    return null;
+  }
+  if (action === 'sign_message') {
+    if (typeof params.message !== 'string' || params.message === '') {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "message"' };
+    }
+    return null;
+  }
+  return null;
+}
+
 export function ConnectIntentHandler() {
   const { pendingIntent, resolveIntent, rejectIntent, registerAutoIntent } = useConnectContext();
   const { sphere } = useSphereContext();
@@ -20,9 +79,23 @@ export function ConnectIntentHandler() {
   const [mintError, setMintError] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
 
+  // Validate/normalize params up front: reject malformed or unsupported intents
+  // cleanly (INVALID_PARAMS / METHOD_NOT_FOUND) instead of opening a modal that
+  // silently hangs (unresolved coinId) or crashes (missing sign_message body).
+  // Runs once per pending intent.
+  useEffect(() => {
+    if (!pendingIntent) return;
+    const error = validateIntent(pendingIntent.action, pendingIntent.params);
+    if (error) rejectIntent(error.code, error.message);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingIntent]);
+
   if (!pendingIntent) return null;
 
   const { action, params } = pendingIntent;
+
+  // Malformed / unsupported intents are rejected by the effect above — render nothing.
+  if (validateIntent(action, params)) return null;
 
   const handleClose = () => {
     rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
@@ -43,7 +116,7 @@ export function ConnectIntentHandler() {
         prefill={{
           to: params.to as string,
           amount: params.amount as string,
-          coinId: (params.coinId as string) ?? 'UCT',
+          coinId: resolveCoinId((params.coinId as string | undefined) ?? 'UCT') ?? 'UCT',
           memo: params.memo as string | undefined,
         }}
         asModal
@@ -66,7 +139,7 @@ export function ConnectIntentHandler() {
         prefill={{
           to: params.to as string,
           amount: params.amount as string,
-          coinId: (params.coinId as string) ?? 'UCT',
+          coinId: resolveCoinId((params.coinId as string | undefined) ?? 'UCT') ?? 'UCT',
           message: params.message as string | undefined,
         }}
         asModal
@@ -322,18 +395,7 @@ export function ConnectIntentHandler() {
     );
   }
 
-  // --- Unknown Intent ---
-  return (
-    <BaseModal isOpen={true} onClose={handleClose}>
-      <ModalHeader title="Unknown Request" onClose={handleClose} />
-      <div className="px-6 py-5 text-center">
-        <p className="text-neutral-500 mb-4">
-          Unsupported intent: <code className="text-neutral-700 dark:text-neutral-300">{action}</code>
-        </p>
-        <Button variant="secondary" onClick={handleClose}>
-          Dismiss
-        </Button>
-      </div>
-    </BaseModal>
-  );
+  // Unsupported intents are rejected up front by the validation effect
+  // (METHOD_NOT_FOUND), so there is nothing to render here.
+  return null;
 }
