@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, PenLine, Coins } from 'lucide-react';
+import { MessageSquare, PenLine, Coins, Inbox } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { TokenRegistry, formatAmount } from '@unicitylabs/sphere-sdk';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../sdk/errors';
 import { useSphereContext } from '../../sdk';
 
 /** Intents this wallet actually implements. Anything else is rejected cleanly. */
-const SUPPORTED_INTENTS = new Set(['send', 'payment_request', 'dm', 'sign_message', 'mint']);
+const SUPPORTED_INTENTS = new Set(['send', 'payment_request', 'dm', 'sign_message', 'mint', 'receive']);
 
 type IntentError = { code: number; message: string };
 
@@ -70,6 +70,8 @@ export function ConnectIntentHandler() {
   const [signError, setSignError] = useState<string | null>(null);
   const [mintError, setMintError] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [receiveError, setReceiveError] = useState<string | null>(null);
+  const [isReceiving, setIsReceiving] = useState(false);
 
   // Validate/normalize params up front: reject malformed or unsupported intents
   // cleanly (INVALID_PARAMS / METHOD_NOT_FOUND) instead of opening a modal that
@@ -154,12 +156,19 @@ export function ConnectIntentHandler() {
         // so it's immune to ConnectHost lifecycle issues.
         if (autoApproveDM && sphere) {
           const sphereRef = sphere;
+          const approvedTo = to;
           registerAutoIntent('dm', async (_action, intentParams) => {
+            const nextTo = intentParams.to;
+            const nextMessage = intentParams.message;
+            // Auto-approval is scoped to the recipient the user approved. A DM to
+            // any other recipient falls back to the normal confirmation modal
+            // (return null) instead of being sent silently.
+            if (typeof nextTo !== 'string' || nextTo !== approvedTo) return null;
+            if (typeof nextMessage !== 'string' || nextMessage === '') {
+              return { error: { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "message"' } };
+            }
             try {
-              const result = await sphereRef.communications.sendDM(
-                intentParams.to as string,
-                intentParams.message as string,
-              );
+              const result = await sphereRef.communications.sendDM(nextTo, nextMessage);
               return { result: { sent: true, messageId: result.id, timestamp: result.timestamp } };
             } catch (err) {
               return {
@@ -380,6 +389,54 @@ export function ConnectIntentHandler() {
             </Button>
             <Button variant="primary" fullWidth disabled={isMinting} onClick={handleMint}>
               {isMinting ? 'Minting…' : 'Mint'}
+            </Button>
+          </div>
+        </div>
+      </BaseModal>
+    );
+  }
+
+  // --- Receive Intent: fetch the user's pending incoming transfers ---
+  if (action === 'receive') {
+    const handleReceive = async () => {
+      setReceiveError(null);
+      if (!sphere) {
+        setReceiveError('Wallet not available');
+        return;
+      }
+      setIsReceiving(true);
+      try {
+        const { transfers } = await sphere.payments.receive();
+        resolveIntent({ transfers });
+      } catch (err) {
+        setReceiveError(getErrorMessage(err));
+      } finally {
+        setIsReceiving(false);
+      }
+    };
+
+    return (
+      <BaseModal isOpen={true} onClose={handleClose}>
+        <ModalHeader title="Check for Transfers" icon={Inbox} onClose={handleClose} />
+
+        <div className="px-6 py-5 flex-1 flex flex-col justify-center">
+          <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-5 border border-neutral-200 dark:border-white/10">
+            <div className="text-sm text-neutral-500">
+              This dApp wants to check your wallet for{' '}
+              <span className="text-neutral-900 dark:text-white font-medium">incoming transfers</span>.
+            </div>
+          </div>
+
+          {receiveError && (
+            <div className="text-red-500 text-sm mb-3 text-center">{receiveError}</div>
+          )}
+
+          <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={handleClose} disabled={isReceiving}>
+              Cancel
+            </Button>
+            <Button variant="primary" fullWidth disabled={isReceiving} onClick={handleReceive}>
+              {isReceiving ? 'Checking…' : 'Check'}
             </Button>
           </div>
         </div>

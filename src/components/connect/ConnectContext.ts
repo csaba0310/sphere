@@ -54,7 +54,7 @@ export interface ConnectContextValue {
   /** Register an auto-approve handler for an intent action (bypasses modal) */
   registerAutoIntent: (
     action: string,
-    handler: (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } }>,
+    handler: (action: string, params: Record<string, unknown>) => Promise<{ result?: unknown; error?: { code: number; message: string } } | null>,
   ) => void;
 }
 
