@@ -46,7 +46,7 @@ export function detectWalletFileType(filename: string, content: string): WalletF
     return "mnemonic";
   }
 
-  // Check for L1 wallet text format
+  // Check for legacy wallet text format
   if (content.includes("MASTER PRIVATE KEY")) {
     return "txt";
   }
@@ -89,8 +89,7 @@ export function isBIP32Wallet(content: string): boolean {
   // Check TXT format markers
   return (
     content.includes("MASTER CHAIN CODE") ||
-    content.includes("WALLET TYPE: BIP32") ||
-    content.includes("WALLET TYPE: Alpha descriptor")
+    content.includes("WALLET TYPE: BIP32")
   );
 }
 

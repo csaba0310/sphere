@@ -25,7 +25,6 @@ function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType }>
 
 // Lazy-load non-core pages to reduce main bundle size
 const DevelopersPage = lazyWithRetry(() => import('./pages/DevelopersPage').then(m => ({ default: m.DevelopersPage })));
-const MineAlphaPage = lazyWithRetry(() => import('./pages/MineAlphaPage').then(m => ({ default: m.MineAlphaPage })));
 const DocsPage = lazyWithRetry(() => import('./pages/DocsPage').then(m => ({ default: m.DocsPage })));
 const MarketsPage = lazyWithRetry(() => import('./pages/MarketsPage').then(m => ({ default: m.MarketsPage })));
 const AgentsPage = lazyWithRetry(() => import('./pages/AgentsPage').then(m => ({ default: m.AgentsPage })));
@@ -52,7 +51,6 @@ export default function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/agents/:agentId" element={<AgentPage />} />
         <Route path="/developers" element={<Suspense fallback={<LazyFallback />}><DevelopersPage /></Suspense>} />
-        <Route path="/mine" element={<Suspense fallback={<LazyFallback />}><MineAlphaPage /></Suspense>} />
         <Route path="/developers/docs" element={<Suspense fallback={<LazyFallback />}><DocsPage /></Suspense>} />
         <Route path="/markets" element={<Suspense fallback={<LazyFallback />}><MarketsPage /></Suspense>} />
         <Route path="/explore-agents" element={<Suspense fallback={<LazyFallback />}><AgentsPage /></Suspense>} />

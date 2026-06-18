@@ -10,7 +10,6 @@ interface ResolvedInfo {
   nametag?: string;
   transportPubkey?: string;
   chainPubkey?: string;
-  l1Address?: string;
   directAddress?: string;
   proxyAddress?: string;
 }
@@ -44,7 +43,7 @@ function CopyableField({ label, value, prefix, copied, onCopy }: {
 
 export function LookupModal({ isOpen, onClose }: LookupModalProps) {
   const { sphere } = useSphereContext();
-  const { nametag, directAddress, l1Address } = useIdentity();
+  const { nametag, directAddress } = useIdentity();
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<ResolvedInfo | null>(null);
   const [myInfo, setMyInfo] = useState<ResolvedInfo | null>(null);
@@ -105,7 +104,6 @@ export function LookupModal({ isOpen, onClose }: LookupModalProps) {
     { label: 'Nametag', value: info.nametag, key: `${prefix}-nametag`, displayPrefix: '@' },
     { label: 'Direct Address', value: info.directAddress, key: `${prefix}-direct` },
     { label: 'Proxy Address', value: info.proxyAddress, key: `${prefix}-proxy` },
-    { label: 'L1 Address', value: info.l1Address, key: `${prefix}-l1` },
     { label: 'Chain Pubkey', value: info.chainPubkey, key: `${prefix}-chain` },
     { label: 'Transport Pubkey', value: info.transportPubkey, key: `${prefix}-transport` },
   ].filter((f): f is { label: string; value: string; key: string; displayPrefix?: string } => !!f.value);
@@ -114,7 +112,6 @@ export function LookupModal({ isOpen, onClose }: LookupModalProps) {
   const myFields = myInfo ? toFields(myInfo, 'my') : [
     nametag && { label: 'Nametag', value: nametag, key: 'my-nametag', displayPrefix: '@' },
     directAddress && { label: 'Direct Address', value: directAddress, key: 'my-direct' },
-    l1Address && { label: 'L1 Address', value: l1Address, key: 'my-l1' },
   ].filter((f): f is { label: string; value: string; key: string; displayPrefix?: string } => !!f);
 
   const lookupFields = result ? toFields(result, 'lookup') : [];
@@ -156,7 +153,7 @@ export function LookupModal({ isOpen, onClose }: LookupModalProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="@nametag, DIRECT://..., alpha1..."
+                placeholder="@nametag, DIRECT://..., 02..."
                 className="w-full pl-8 pr-3 py-2.5 text-sm bg-neutral-100 dark:bg-white/4 text-neutral-900 dark:text-white placeholder-neutral-400 rounded-xl border border-neutral-200 dark:border-white/8 focus:outline-none focus:border-orange-500 transition-colors"
               />
             </div>

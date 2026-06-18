@@ -109,7 +109,7 @@ export function AddressManagerModal({ isOpen, onClose }: AddressManagerModalProp
                       </span>
                     )}
                     <span className="text-[11px] font-mono text-neutral-500 dark:text-white/45 block truncate">
-                      {truncateAddr(addr.l1Address)}
+                      {truncateAddr(addr.directAddress || addr.chainPubkey)}
                     </span>
                   </div>
 

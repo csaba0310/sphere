@@ -219,7 +219,7 @@ function StepNametagInput({
   onKeyDown,
   onSubmit,
 }: {
-  newAddress: { l1Address: string; path: string; index: number };
+  newAddress: { address: string; path: string; index: number };
   nametagInput: string;
   isCheckingAvailability: boolean;
   availabilityError: string | null;
@@ -254,7 +254,7 @@ function StepNametagInput({
           <span className="text-xs text-neutral-500">New Address #{newAddress.index + 1}</span>
         </div>
         <p className="text-xs font-mono text-neutral-600 dark:text-white/45 truncate">
-          {newAddress.l1Address}
+          {newAddress.address}
         </p>
       </div>
 

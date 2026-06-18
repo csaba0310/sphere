@@ -105,7 +105,6 @@ export function useSphereEvents(): void {
       refreshIdentityCache();
       queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.identity.all });
       queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.payments.all });
-      queryClient.invalidateQueries({ queryKey: SPHERE_KEYS.l1.all });
       // Remove (not invalidate) chat caches — address-scoped queries will
       // refetch with fresh data.  Invalidation alone can race with the
       // address switch and display stale data from the previous address.
