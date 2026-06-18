@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { MessageSquare, PenLine } from 'lucide-react';
+import { MessageSquare, PenLine, Coins } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
 import { SendModal } from '../wallet/L3/modals/SendModal';
@@ -17,6 +17,8 @@ export function ConnectIntentHandler() {
   const [dmError, setDmError] = useState<string | null>(null);
   const [autoApproveDM, setAutoApproveDM] = useState(false);
   const [signError, setSignError] = useState<string | null>(null);
+  const [mintError, setMintError] = useState<string | null>(null);
+  const [isMinting, setIsMinting] = useState(false);
 
   // L1 hooks (always called — hooks cannot be conditional)
   const { l1Address } = useIdentity();
@@ -259,6 +261,84 @@ export function ConnectIntentHandler() {
             </Button>
             <Button variant="primary" fullWidth onClick={handleSign}>
               Sign
+            </Button>
+          </div>
+        </div>
+      </BaseModal>
+    );
+  }
+
+  // --- Mint Intent: self-mint a fungible token to the user's own wallet ---
+  if (action === 'mint') {
+    const coinId = params.coinId as string;
+    const amount = params.amount as string;
+
+    const handleMint = async () => {
+      setMintError(null);
+      if (!sphere) {
+        setMintError('Wallet not available');
+        return;
+      }
+      // Validate params before touching the engine (fail fast with INVALID_PARAMS).
+      if (typeof coinId !== 'string' || !/^([0-9a-f]{2})+$/.test(coinId)) {
+        rejectIntent(ERROR_CODES.INVALID_PARAMS, 'coinId must be lowercase even-length hex');
+        return;
+      }
+      let amountBig: bigint;
+      try {
+        amountBig = BigInt(amount);
+      } catch {
+        rejectIntent(ERROR_CODES.INVALID_PARAMS, 'amount must be an integer string');
+        return;
+      }
+      if (amountBig <= 0n) {
+        rejectIntent(ERROR_CODES.INVALID_PARAMS, 'amount must be greater than zero');
+        return;
+      }
+
+      setIsMinting(true);
+      try {
+        const result = await sphere.payments.mintFungibleToken(coinId, amountBig);
+        if (result.success) {
+          resolveIntent({ tokenId: result.tokenId, coinId, amount });
+        } else {
+          rejectIntent(ERROR_CODES.INTERNAL_ERROR, result.error);
+        }
+      } catch (err) {
+        setMintError(getErrorMessage(err));
+      } finally {
+        setIsMinting(false);
+      }
+    };
+
+    return (
+      <BaseModal isOpen={true} onClose={handleClose}>
+        <ModalHeader title="Mint Tokens" icon={Coins} onClose={handleClose} />
+
+        <div className="px-6 py-5 flex-1 flex flex-col justify-center">
+          <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-5 border border-neutral-200 dark:border-white/10">
+            <div className="text-sm text-neutral-500 mb-3">
+              This dApp is asking to mint tokens{' '}
+              <span className="text-neutral-900 dark:text-white font-medium">to your own wallet</span>.
+            </div>
+            <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+              <span className="text-neutral-400">Amount</span>
+              <span className="text-neutral-900 dark:text-white font-mono break-all">{amount}</span>
+              <span className="text-neutral-400">Coin ID</span>
+              <span className="text-neutral-900 dark:text-white font-mono break-all">{coinId}</span>
+            </div>
+          </div>
+
+          {mintError && (
+            <div className="text-red-500 text-sm mb-3 text-center">{mintError}</div>
+          )}
+
+          <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={handleClose} disabled={isMinting}>
+              Cancel
+            </Button>
+            <Button variant="primary" fullWidth disabled={isMinting} onClick={handleMint}>
+              {isMinting ? 'Minting…' : 'Mint'}
             </Button>
           </div>
         </div>

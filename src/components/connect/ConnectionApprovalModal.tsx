@@ -19,6 +19,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   [PERMISSION_SCOPES.DM_READ]: 'Read direct messages',
   [PERMISSION_SCOPES.PAYMENT_REQUEST]: 'Payment requests',
   [PERMISSION_SCOPES.SIGN_REQUEST]: 'Sign messages',
+  [PERMISSION_SCOPES.MINT_REQUEST]: 'Request minting',
 };
 
 export function ConnectionApprovalModal() {
