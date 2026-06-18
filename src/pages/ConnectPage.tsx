@@ -13,6 +13,19 @@ import {
   revokeApprovedOrigin,
 } from '../utils/connected-sites';
 
+type RejectionInfo = { dappName: string; code: number; message: string; data: Record<string, unknown> | undefined };
+
+function describeRejection(data: Record<string, unknown> | undefined): string {
+  const reason = data?.reason as string | undefined;
+  if (reason === 'protocol_incompatible') {
+    return 'was built for an older version of Sphere. Its developer needs to update it before it can connect.';
+  }
+  if (reason === 'network_incompatible') {
+    return 'is built for a different Unicity network than your wallet, so it cannot connect here.';
+  }
+  return 'is not compatible with this wallet.';
+}
+
 export function ConnectPage() {
   const [searchParams] = useSearchParams();
   const origin = searchParams.get('origin');
@@ -23,6 +36,7 @@ export function ConnectPage() {
   const [status, setStatus] = useState<'waiting' | 'ready' | 'error'>('waiting');
   const [errorMsg, setErrorMsg] = useState('');
   const [connectedDapp, setConnectedDapp] = useState<string | null>(null);
+  const [rejection, setRejection] = useState<RejectionInfo | null>(null);
 
   // Stable refs so the effect doesn't re-run when these change
   const sphereRef = useRef(sphere);
@@ -117,6 +131,17 @@ export function ConnectPage() {
         }
         return result;
       },
+      onConnectionRejected: (dapp, error, silent) => {
+        // The compatibility gate refused the connection (protocol/network mismatch).
+        // Surface the reason to the user — but stay quiet for background (silent) auto-connect attempts.
+        if (silent) return;
+        setRejection({
+          dappName: dapp?.name ?? 'An app',
+          code: error.code,
+          message: error.message,
+          data: (error.data as Record<string, unknown> | undefined) ?? undefined,
+        });
+      },
       onDisconnect: () => {
         revokeApprovedOrigin(origin);
         setConnectedDapp(null);
@@ -178,6 +203,29 @@ export function ConnectPage() {
       <div className="flex-1 min-h-0 p-3">
         <WalletPanel />
       </div>
+
+      {rejection && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                <span className="text-amber-600 dark:text-amber-400 text-xl">⚠</span>
+              </div>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-neutral-100">Unable to connect</h2>
+            </div>
+            <p className="text-sm text-gray-700 dark:text-neutral-300">
+              <span className="font-medium">{rejection.dappName}</span> {describeRejection(rejection.data)}
+            </p>
+            <p className="mt-2 text-xs text-gray-400 dark:text-neutral-500">Error code {rejection.code}</p>
+            <button
+              onClick={() => setRejection(null)}
+              className="mt-4 w-full rounded-xl bg-gray-900 dark:bg-neutral-100 text-white dark:text-neutral-900 text-sm font-medium py-2.5 hover:opacity-90 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
