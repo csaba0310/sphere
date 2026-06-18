@@ -1,0 +1,108 @@
+import { useState } from 'react';
+import { Send } from 'lucide-react';
+import { TokenRegistry, formatAmount } from '@unicitylabs/sphere-sdk';
+import { useAssets, useTransfer } from '../../sdk';
+import { getErrorMessage } from '../../sdk/errors';
+import { IntentConfirmModal } from './IntentConfirmModal';
+
+interface SendIntentModalProps {
+  /** Recipient: Unicity ID (@tag) or DIRECT:// address, as supplied by the dApp. */
+  to: string;
+  /** Amount in BASE UNITS (smallest indivisible unit) — integer string. */
+  amount: string;
+  /** Token coinId (lowercase even-length hex). */
+  coinId: string;
+  memo?: string;
+  /** Called after the transfer succeeds (resolves the intent). */
+  onResolve: () => void;
+  /** Called when the user cancels (rejects the intent). */
+  onCancel: () => void;
+}
+
+/**
+ * Confirm-only modal for the Connect `send` intent. The dApp specifies the
+ * recipient, coin and amount (in base units); the user approves or rejects — the
+ * amount is NOT editable here (a different amount = a different dApp request).
+ * The base-unit amount is handed to the SDK verbatim; `formatAmount` is used only
+ * to render a human-readable figure for review.
+ */
+export function SendIntentModal({ to, amount, coinId, memo, onResolve, onCancel }: SendIntentModalProps) {
+  const { assets } = useAssets();
+  const { transfer } = useTransfer();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Prefer the held asset (gives balance); fall back to the registry for
+  // metadata when the coin isn't held, so we can still display it sensibly.
+  const asset = assets.find((a) => a.coinId === coinId);
+  const registry = TokenRegistry.getInstance();
+  const def = registry.getDefinition(coinId);
+  const decimals = asset?.decimals ?? def?.decimals ?? 0;
+  const symbol = asset?.symbol ?? def?.symbol ?? '';
+  const iconUrl = asset?.iconUrl ?? (def ? registry.getIconUrl(coinId) : null) ?? undefined;
+
+  // `amount` is validated as a positive integer (base units) before this renders.
+  const amountBig = BigInt(amount);
+  const held = asset ? BigInt(asset.totalAmount) : 0n;
+  const insufficient = amountBig > held;
+
+  const displayAmount = formatAmount(amount, { decimals, symbol, maxFractionDigits: 8 });
+
+  const handleSend = async () => {
+    setError(null);
+    setBusy(true);
+    try {
+      const recipient = to.startsWith('DIRECT://') ? to : to.replace(/^@/, '');
+      await transfer({ coinId, amount, recipient, ...(memo ? { memo } : {}) });
+      onResolve();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <IntentConfirmModal
+      title="Send Tokens"
+      icon={Send}
+      busy={busy}
+      confirmLabel="Send"
+      busyLabel="Sending…"
+      confirmDisabled={insufficient}
+      error={error}
+      onConfirm={handleSend}
+      onCancel={onCancel}
+    >
+      <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-5 mb-5 border border-neutral-200 dark:border-white/10">
+        <div className="text-sm text-neutral-500 mb-4">
+          This dApp is asking to send tokens from your wallet.
+        </div>
+
+        <div className="flex items-center gap-3 mb-3">
+          {iconUrl && <img src={iconUrl} alt="" className="w-9 h-9 rounded-full shrink-0" />}
+          <span className="text-2xl font-semibold text-neutral-900 dark:text-white break-all">
+            {displayAmount}
+          </span>
+        </div>
+
+        <div className="text-[11px] text-neutral-400 break-all mb-1">
+          <span className="text-neutral-500 dark:text-neutral-400">To:</span>{' '}
+          <span className="font-mono">{to}</span>
+        </div>
+
+        {memo && (
+          <div className="text-sm text-neutral-500 dark:text-white/45 italic mt-2">&ldquo;{memo}&rdquo;</div>
+        )}
+
+        {insufficient && (
+          <div className="mt-3 text-amber-600 dark:text-amber-500 text-xs break-all">
+            {asset
+              ? `Insufficient balance — you have ${formatAmount(asset.totalAmount, { decimals, symbol, maxFractionDigits: 8 })}`
+              : "You don't hold this token"}
+          </div>
+        )}
+      </div>
+    </IntentConfirmModal>
+  );
+}

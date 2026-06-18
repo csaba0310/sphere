@@ -3,8 +3,8 @@ import { MessageSquare, PenLine, Coins, Inbox } from 'lucide-react';
 import { ERROR_CODES } from '@unicitylabs/sphere-sdk/connect';
 import { TokenRegistry, formatAmount } from '@unicitylabs/sphere-sdk';
 import { BaseModal, ModalHeader, Button } from '../wallet/ui';
-import { SendModal } from '../wallet/L3/modals/SendModal';
-import { SendPaymentRequestModal } from '../wallet/L3/modals/SendPaymentRequestModal';
+import { SendIntentModal } from './SendIntentModal';
+import { PaymentRequestIntentModal } from './PaymentRequestIntentModal';
 import { useConnectContext } from './ConnectContext';
 import { useSendDM } from '../../sdk/hooks/comms/useSendDM';
 import { getErrorMessage } from '../../sdk/errors';
@@ -35,8 +35,13 @@ function validateIntent(action: string, params: Record<string, unknown>): Intent
     if (typeof params.to !== 'string' || params.to.trim() === '') {
       return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "to"' };
     }
-    if (params.amount == null || String(params.amount).trim() === '') {
-      return { code: ERROR_CODES.INVALID_PARAMS, message: 'Missing or invalid "amount"' };
+    // amount is in BASE UNITS (smallest indivisible unit) — a positive integer
+    // string, exactly like the `mint` intent. Whole-token/decimal amounts are
+    // rejected: every major wallet carries dApp-requested amounts in base units
+    // (exactness, no float), and the dApp converts at its own UI edge.
+    const amountStr = params.amount == null ? '' : String(params.amount).trim();
+    if (!/^\d+$/.test(amountStr) || BigInt(amountStr) <= 0n) {
+      return { code: ERROR_CODES.INVALID_PARAMS, message: 'amount must be a positive integer string in base units' };
     }
     if (typeof params.coinId !== 'string' || !COIN_ID_RE.test(params.coinId)) {
       return { code: ERROR_CODES.INVALID_PARAMS, message: 'coinId must be lowercase even-length hex' };
@@ -95,48 +100,30 @@ export function ConnectIntentHandler() {
     rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
   };
 
-  // --- Send Intent: reuse the wallet's SendModal ---
+  // --- Send Intent: confirm-only (amount fixed, base units, approve/reject) ---
   if (action === 'send') {
     return (
-      <SendModal
-        isOpen={true}
-        onClose={(result) => {
-          if (result?.success) {
-            resolveIntent({ success: true });
-          } else {
-            rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
-          }
-        }}
-        prefill={{
-          to: params.to as string,
-          amount: params.amount as string,
-          coinId: params.coinId as string,
-          memo: params.memo as string | undefined,
-        }}
-        asModal
+      <SendIntentModal
+        to={params.to as string}
+        amount={String(params.amount)}
+        coinId={params.coinId as string}
+        memo={params.memo as string | undefined}
+        onResolve={() => resolveIntent({ success: true })}
+        onCancel={handleClose}
       />
     );
   }
 
-  // --- Payment Request Intent: reuse SendPaymentRequestModal ---
+  // --- Payment Request Intent: confirm-only (amount fixed, base units) ---
   if (action === 'payment_request') {
     return (
-      <SendPaymentRequestModal
-        isOpen={true}
-        onClose={(result) => {
-          if (result?.success) {
-            resolveIntent({ success: true, requestId: result.requestId });
-          } else {
-            rejectIntent(ERROR_CODES.USER_REJECTED, 'User cancelled');
-          }
-        }}
-        prefill={{
-          to: params.to as string,
-          amount: params.amount as string,
-          coinId: params.coinId as string,
-          message: params.message as string | undefined,
-        }}
-        asModal
+      <PaymentRequestIntentModal
+        to={params.to as string}
+        amount={String(params.amount)}
+        coinId={params.coinId as string}
+        message={params.message as string | undefined}
+        onResolve={(requestId) => resolveIntent({ success: true, requestId })}
+        onCancel={handleClose}
       />
     );
   }
