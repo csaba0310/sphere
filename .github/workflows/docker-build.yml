@@ -49,3 +49,21 @@ jobs:
           # injected at container start by deploy/runtime-config.sh from the
           # ECS task definition's env vars. This is what lets the SAME image
           # auto-deploy to staging and be promoted, unchanged, to prod.
+
+      # Auto-deploy the just-published image to AWS staging. Fires a
+      # repository_dispatch into sphere-infra, whose deploy-sphere-site-staging
+      # workflow listens for `sphere-site-image-published` and rolls the ECS
+      # service to client_payload.image_tag. Runs only after a successful
+      # push on main (implicit success() + the ref guard).
+      - name: Trigger staging deploy (sphere-infra)
+        if: github.ref == 'refs/heads/main'
+        env:
+          # GITHUB_TOKEN can't dispatch cross-repo; DEPLOY_DISPATCH_TOKEN is the
+          # same token wallet-api uses (Contents:write on sphere-infra).
+          GH_TOKEN: ${{ secrets.DEPLOY_DISPATCH_TOKEN }}
+        run: |
+          TAG="sha-${GITHUB_SHA:0:7}"
+          gh api repos/unicity-sphere/sphere-infra/dispatches --method POST --input - <<EOF
+          {"event_type":"sphere-site-image-published","client_payload":{"image_tag":"$TAG","sha":"${{ github.sha }}"}}
+          EOF
+          echo "Dispatched sphere-site-image-published (image_tag=$TAG) to sphere-infra"
