@@ -51,4 +51,5 @@ jobs:
             VITE_WALLET_API_URL=https://wallet-api.unicity.network
             VITE_REQUIRE_WALLET_API=true
             VITE_AGGREGATOR_API_KEY=sk_ddc3cfcc001e4a28ac3fad7407f99590
+            VITE_DEV_PORTAL_URL=https://developers.unicity.network/
             BASE_PATH=/
