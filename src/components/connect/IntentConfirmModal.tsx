@@ -9,8 +9,6 @@ interface IntentConfirmModalProps {
   icon: LucideIcon;
   /** Body content (the amount/recipient card). */
   children: ReactNode;
-  /** Inline error shown above the action buttons. */
-  error?: string | null;
   /** Disables the confirm button (e.g. insufficient balance). */
   confirmDisabled?: boolean;
   /** True while the underlying action is running. */
@@ -32,12 +30,15 @@ interface IntentConfirmModalProps {
  * amount input here. This matches how every major wallet treats a
  * dApp-requested transfer (MetaMask, Phantom, WalletConnect): the amount
  * travels in base units and the wallet only formats it for display.
+ *
+ * On failure the consumer rejects the intent (so the dApp is informed) and the
+ * wallet's global query handler toasts the error — so this shell renders no
+ * inline error.
  */
 export function IntentConfirmModal({
   title,
   icon,
   children,
-  error,
   confirmDisabled,
   busy,
   confirmLabel,
@@ -51,8 +52,6 @@ export function IntentConfirmModal({
 
       <div className="px-6 py-5 flex-1 flex flex-col justify-center">
         {children}
-
-        {error && <div className="text-red-500 text-sm mb-3 text-center">{error}</div>}
 
         <div className="flex gap-3">
           <Button variant="secondary" fullWidth onClick={onCancel} disabled={busy}>

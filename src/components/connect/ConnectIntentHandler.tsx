@@ -109,6 +109,7 @@ export function ConnectIntentHandler() {
         coinId={params.coinId as string}
         memo={params.memo as string | undefined}
         onResolve={() => resolveIntent({ success: true })}
+        onReject={(message) => rejectIntent(ERROR_CODES.TRANSFER_FAILED, message)}
         onCancel={handleClose}
       />
     );
@@ -123,6 +124,7 @@ export function ConnectIntentHandler() {
         coinId={params.coinId as string}
         message={params.message as string | undefined}
         onResolve={(requestId) => resolveIntent({ success: true, requestId })}
+        onReject={(message) => rejectIntent(ERROR_CODES.INTERNAL_ERROR, message)}
         onCancel={handleClose}
       />
     );

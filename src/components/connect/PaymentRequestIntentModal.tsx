@@ -15,6 +15,8 @@ interface PaymentRequestIntentModalProps {
   message?: string;
   /** Called after the request is sent (resolves the intent). */
   onResolve: (requestId?: string) => void;
+  /** Called when sending the request fails (rejects the intent with the message). */
+  onReject: (message: string) => void;
   /** Called when the user cancels (rejects the intent). */
   onCancel: () => void;
 }
@@ -24,7 +26,8 @@ interface PaymentRequestIntentModalProps {
  * specifies who to bill, the coin and the amount (in base units); the user
  * approves or rejects — the amount is NOT editable here. The base-unit amount is
  * passed to the SDK verbatim; `formatAmount` renders a human-readable figure for
- * review only. Coin metadata comes from the registry (a request needs no balance).
+ * review only. Coin metadata comes from the registry (a request needs no
+ * balance). A failed send rejects the intent rather than leaving it hanging.
  */
 export function PaymentRequestIntentModal({
   to,
@@ -32,11 +35,11 @@ export function PaymentRequestIntentModal({
   coinId,
   message,
   onResolve,
+  onReject,
   onCancel,
 }: PaymentRequestIntentModalProps) {
   const { sphere } = useSphereContext();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const registry = TokenRegistry.getInstance();
   const def = registry.getDefinition(coinId);
@@ -47,9 +50,8 @@ export function PaymentRequestIntentModal({
   const displayAmount = formatAmount(amount, { decimals, symbol, maxFractionDigits: 8 });
 
   const handleSend = async () => {
-    setError(null);
     if (!sphere) {
-      setError('Wallet not available');
+      onReject('Wallet not available');
       return;
     }
     setBusy(true);
@@ -63,9 +65,7 @@ export function PaymentRequestIntentModal({
       if (!result.success) throw new Error(result.error || 'Failed to send payment request');
       onResolve(result.requestId || undefined);
     } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setBusy(false);
+      onReject(getErrorMessage(err));
     }
   };
 
@@ -76,7 +76,6 @@ export function PaymentRequestIntentModal({
       busy={busy}
       confirmLabel="Send Request"
       busyLabel="Sending…"
-      error={error}
       onConfirm={handleSend}
       onCancel={onCancel}
     >
