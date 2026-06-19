@@ -14,6 +14,7 @@ import { WalletPanel } from '../wallet/WalletPanel';
 import { WalletRequiredBlocker } from '../agents/WalletRequiredBlocker';
 import { ActivityTicker } from '../activity';
 import { Footer } from '../layout/Footer';
+import { normalizeUrl } from '../../utils/normalizeUrl';
 
 const CUSTOM_URL_PRESETS = [
   { label: 'Sphere Connect Example', url: 'https://unicity-sphere.github.io/sphere-sdk-connect-example/' },
@@ -45,11 +46,9 @@ export function DesktopLayout() {
 
   const handleCustomUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    let url = customUrlInput.trim();
-    if (!url) return;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = url.includes('localhost') || url.match(/^\d/) ? `http://${url}` : `https://${url}`;
-    }
+    const input = customUrlInput.trim();
+    if (!input) return;
+    const url = normalizeUrl(input);
     openTab('custom', { url, label: new URL(url).hostname });
     navigate(`/agents/custom?url=${encodeURIComponent(url)}`);
     setCustomUrlInput('');

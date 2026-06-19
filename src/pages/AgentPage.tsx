@@ -3,6 +3,7 @@ import { useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { DesktopLayout } from '../components/desktop/DesktopLayout';
 import { getAgentConfig } from '../config/activities';
 import { useDesktopState } from '../hooks/useDesktopState';
+import { normalizeUrl } from '../utils/normalizeUrl';
 
 export function AgentPage() {
   const { agentId } = useParams<{ agentId: string }>();
@@ -16,11 +17,14 @@ export function AgentPage() {
   useEffect(() => {
     if (!agentId) return;
 
-    // Custom agent with ?url= parameter — open iframe directly
+    // Custom agent with ?url= parameter — open iframe directly.
+    // Normalize the scheme first (a bare host like "boxy-run.fly.dev" would make
+    // `new URL()` throw, falling back to the prompt) so it matches the in-app
+    // prompt path, which already prepends a scheme via normalizeUrl.
     if (agentId === 'custom' && customUrl) {
       try {
-        const hostname = new URL(customUrl).hostname;
-        openTab('custom', { url: customUrl, label: hostname });
+        const url = normalizeUrl(customUrl);
+        openTab('custom', { url, label: new URL(url).hostname });
       } catch {
         // Invalid URL — fall through to open the custom URL prompt
         openTab(agentId);

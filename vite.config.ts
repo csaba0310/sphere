@@ -64,8 +64,13 @@ export default defineConfig(({ mode }) => {
           // both "/" and deep routes like "/home", "/agents/dm", etc.
           server.middlewares.use((req, _res, next) => {
             const url = req.url || '';
-            const isProxied = proxyPaths.some((p) => url.startsWith(p));
-            const isAsset = url.startsWith('/src/') || url.startsWith('/node_modules/') || url.startsWith('/@') || url.includes('.');
+            // Classify by the PATH ONLY — stripping the query first. Otherwise a
+            // route whose query value contains a dot (e.g.
+            // /agents/custom?url=boxy-run.fly.dev) is misread as a static asset
+            // by the `.` check below and never falls back to index.html (404).
+            const pathname = url.split('?')[0];
+            const isProxied = proxyPaths.some((p) => pathname.startsWith(p));
+            const isAsset = pathname.startsWith('/src/') || pathname.startsWith('/node_modules/') || pathname.startsWith('/@') || pathname.includes('.');
             if (!isProxied && !isAsset) {
               req.url = '/src/index.html';
             }
