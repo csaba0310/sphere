@@ -43,3 +43,12 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Prod public config baked into the bundle (see Dockerfile ARGs).
+          # VITE_* are shipped in the client bundle — the testnet2 aggregator
+          # key is NOT secret (.env.example); for mainnet make it a GH secret.
+          build-args: |
+            VITE_SPHERE_API_URL=https://quest-api.unicity.network
+            VITE_WALLET_API_URL=https://wallet-api.unicity.network
+            VITE_REQUIRE_WALLET_API=true
+            VITE_AGGREGATOR_API_KEY=sk_ddc3cfcc001e4a28ac3fad7407f99590
+            BASE_PATH=/

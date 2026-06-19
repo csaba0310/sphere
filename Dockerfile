@@ -3,6 +3,20 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --ignore-scripts
 COPY . .
+# Build-time public config: Vite inlines VITE_* (and reads BASE_PATH) into the
+# static bundle at `vite build`, so these MUST be present at build time — a
+# runtime env (ECS task def, docker -e) cannot change an already-built bundle.
+# Values are supplied by .github/workflows/docker-build.yml build-args.
+ARG VITE_SPHERE_API_URL
+ARG VITE_WALLET_API_URL
+ARG VITE_REQUIRE_WALLET_API
+ARG VITE_AGGREGATOR_API_KEY
+ARG BASE_PATH=/
+ENV VITE_SPHERE_API_URL=$VITE_SPHERE_API_URL \
+    VITE_WALLET_API_URL=$VITE_WALLET_API_URL \
+    VITE_REQUIRE_WALLET_API=$VITE_REQUIRE_WALLET_API \
+    VITE_AGGREGATOR_API_KEY=$VITE_AGGREGATOR_API_KEY \
+    BASE_PATH=$BASE_PATH
 RUN npm run build
 
 FROM nginx:alpine
