@@ -9,5 +9,6 @@
 !tsconfig*.json
 !vite.config.ts
 
-# Entrypoint for ssl-manager stage
+# Entrypoint for ssl-manager stage + runtime config substitution (both images)
 !deploy/entrypoint.sh
+!deploy/runtime-config.sh

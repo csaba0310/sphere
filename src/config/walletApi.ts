@@ -67,7 +67,15 @@ export function getWalletApiBaseUrl(): string | null {
  * SphereProvider catches it and surfaces a visible initialization error.
  */
 export function isWalletApiEnabled(): boolean {
-  return !!(import.meta.env.VITE_WALLET_API_URL as string | undefined);
+  // Bind to a variable and reference it more than once: a single inline
+  // `!!import.meta.env.VITE_WALLET_API_URL` lets esbuild constant-fold the
+  // build-time value to `true` and strip the literal — which deletes the
+  // __RUNTIME_WALLET_API_URL__ placeholder the Docker image relies on
+  // (deploy/runtime-config.sh substitutes it at container start). Keeping
+  // `raw` as a multiply-referenced variable preserves the literal, exactly
+  // like isWalletApiRequired() above.
+  const raw = import.meta.env.VITE_WALLET_API_URL as string | undefined;
+  return !!raw && raw !== '';
 }
 
 /**

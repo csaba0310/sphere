@@ -69,6 +69,55 @@ jobs:
           docker run --rm --entrypoint nginx \
             sphere-validate:${{ matrix.dockerfile }} -t
 
+      # Runtime config: the published image bakes __RUNTIME_*__ placeholders and
+      # deploy/runtime-config.sh rewrites them from env vars at container start.
+      # Verify a real run leaves NO placeholders and injects the given values —
+      # this is the build-once/promote-many contract that must never regress.
+      - name: Smoke — runtime config substitution
+        if: matrix.dockerfile == 'Dockerfile'
+        run: |
+          cid=$(docker run -d \
+            -e SPHERE_API_URL=https://quest-api.example.test \
+            -e WALLET_API_URL=https://wallet-api.example.test \
+            -e REQUIRE_WALLET_API=true \
+            -e DEV_PORTAL_URL=https://developers.example.test/ \
+            -e AGGREGATOR_API_KEY=sk_smoke_test \
+            sphere-validate:${{ matrix.dockerfile }})
+          trap 'docker rm -f "$cid" >/dev/null 2>&1 || true' EXIT
+
+          # Wait for the /docker-entrypoint.d hook to finish (it runs before
+          # nginx launches; poll the entrypoint log for the completion line).
+          for _ in $(seq 1 20); do
+            docker logs "$cid" 2>&1 | grep -q "applied runtime config" && break
+            sleep 0.5
+          done
+
+          echo "--- entrypoint log ---"; docker logs "$cid" 2>&1 | tail -n 20
+
+          # grep runs inside the container (BusyBox grep — no --include); scan
+          # all files, which is a stricter "placeholders nowhere" assertion.
+          if docker exec "$cid" sh -c "grep -rl '__RUNTIME_' /usr/share/nginx/html"; then
+            echo "ERROR: placeholders survived substitution"; exit 1
+          fi
+          docker exec "$cid" sh -c "grep -rq 'quest-api.example.test' /usr/share/nginx/html" \
+            || { echo "ERROR: injected SPHERE_API_URL not found in bundle"; exit 1; }
+          echo "substitution smoke ok"
+
+      # #351 fail-closed: declaring wallet-api custody (REQUIRE_WALLET_API) with
+      # no WALLET_API_URL must refuse to start, not silently swap custody models.
+      - name: Smoke — fail-closed on missing WALLET_API_URL
+        if: matrix.dockerfile == 'Dockerfile'
+        run: |
+          set +e
+          out=$(docker run --rm -e REQUIRE_WALLET_API=true \
+            sphere-validate:${{ matrix.dockerfile }} 2>&1)
+          rc=$?
+          set -e
+          echo "$out"
+          [ "$rc" -ne 0 ] || { echo "ERROR: expected non-zero exit (fail-closed)"; exit 1; }
+          echo "$out" | grep -q '#351' || { echo "ERROR: missing #351 fail-closed message"; exit 1; }
+          echo "fail-closed smoke ok"
+
       # Smoke for the SSL image: entrypoint is tini → sphere-entrypoint.
       # We can't run the real entrypoint in CI (ssl-setup would need
       # SSL_DOMAIN / network), but we can verify tini, the entrypoint

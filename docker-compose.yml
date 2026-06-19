@@ -6,3 +6,12 @@ services:
     restart: unless-stopped
     ports:
       - "3010:80"
+    # The image bakes __RUNTIME_*__ placeholders; deploy/runtime-config.sh
+    # rewrites them from these env vars at container start (same contract the
+    # ECS task def uses). Defaults below point a local run at staging.
+    environment:
+      SPHERE_API_URL: https://quest-api.staging.unicity.network
+      WALLET_API_URL: https://wallet-api.staging.unicity.network
+      REQUIRE_WALLET_API: "true"
+      DEV_PORTAL_URL: https://developers.staging.unicity.network/
+      AGGREGATOR_API_KEY: sk_ddc3cfcc001e4a28ac3fad7407f99590

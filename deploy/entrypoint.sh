@@ -201,6 +201,13 @@ trap cleanup EXIT
 trap 'cleanup; exit 143' TERM
 trap 'cleanup; exit 130' INT
 
+# ── Runtime public config ────────────────────────────────────────────────────
+# Rewrite the baked __RUNTIME_*__ placeholders in the built JS to the real
+# per-environment values (SPHERE_API_URL, WALLET_API_URL, ...). Runs before
+# nginx serves a byte; its #351 fail-closed check exits non-zero (set -e) so a
+# misconfigured deploy never starts.
+SPHERE_WEBROOT=/usr/share/nginx/html /usr/local/bin/sphere-runtime-config
+
 # ── Start nginx ──────────────────────────────────────────────────────────────
 echo "Starting nginx..."
 nginx -g 'daemon off;' &

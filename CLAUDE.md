@@ -183,6 +183,36 @@ HMR_HOST                    # Remote HMR host
 BASE_PATH                   # Deployment base path (default: /)
 ```
 
+### Docker image: build-once, promote-many
+
+The Docker image (`Dockerfile`, published by `docker-build.yml`) is
+**environment-agnostic** so the *same* image auto-deploys to staging and is
+promoted, unchanged, to prod. Because Vite inlines `VITE_*` at build time, the
+image is built with sentinel **placeholders** (the Dockerfile `ARG` defaults,
+e.g. `__RUNTIME_SPHERE_API_URL__`) and `deploy/runtime-config.sh` rewrites them
+into the built JS from the container's env vars at startup (run as nginx's
+`/docker-entrypoint.d` hook; also invoked from `deploy/entrypoint.sh` in the SSL
+image). Set these on the ECS task definition / `docker -e`:
+
+| Runtime env var (task def) | Replaces placeholder for | Drives |
+|----------------------------|--------------------------|--------|
+| `SPHERE_API_URL`       | `VITE_SPHERE_API_URL`      | quest-api (marketplace / user / maintenance) |
+| `WALLET_API_URL`       | `VITE_WALLET_API_URL`      | wallet-api backend (S4 asset custody) |
+| `REQUIRE_WALLET_API`   | `VITE_REQUIRE_WALLET_API`  | #351 fail-closed custody flag (`''`/`false`/`0` = off) |
+| `DEV_PORTAL_URL`       | `VITE_DEV_PORTAL_URL`      | developer-portal link |
+| `AGGREGATOR_API_KEY`   | `VITE_AGGREGATOR_API_KEY`  | aggregator key (non-secret on testnet2; a real secret on mainnet) |
+
+Notes:
+- **CDN cache:** Vite's content-hashed filenames are identical across env
+  changes, so a CloudFront/CDN in front of the image **must be invalidated**
+  after changing any value (same as `sphere-dev-portal`).
+- **Fail-closed (#351):** if `REQUIRE_WALLET_API` is truthy but `WALLET_API_URL`
+  is empty, the entrypoint exits non-zero and the container won't serve.
+- **`BASE_PATH`** stays a build-time arg (`/` for both AWS envs) — it is *not*
+  runtime-swappable. The GitHub Pages branch deploys are a separate non-Docker
+  build (`deploy-pages-branch.yml`) and are unaffected by this mechanism.
+- **Local:** `docker compose up` sets these to staging values (`docker-compose.yml`).
+
 ## Vite Configuration
 
 - **Plugins:** @vitejs/plugin-react, @tailwindcss/vite, vite-plugin-node-polyfills, custom `html-from-src` plugin

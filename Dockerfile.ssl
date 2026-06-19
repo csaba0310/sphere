@@ -10,6 +10,22 @@ COPY package*.json ./
 # explicitly rather than relaxing this.
 RUN npm ci --ignore-scripts
 COPY . .
+# Build-once, promote-many: bake sentinel placeholders (not real values) so the
+# image is environment-agnostic; deploy/entrypoint.sh rewrites them to the real
+# per-env values at container start. See deploy/runtime-config.sh for the
+# runtime env contract. Override an ARG only to pin a literal at build time.
+ARG VITE_SPHERE_API_URL=__RUNTIME_SPHERE_API_URL__
+ARG VITE_WALLET_API_URL=__RUNTIME_WALLET_API_URL__
+ARG VITE_REQUIRE_WALLET_API=__RUNTIME_REQUIRE_WALLET_API__
+ARG VITE_AGGREGATOR_API_KEY=__RUNTIME_AGGREGATOR_API_KEY__
+ARG VITE_DEV_PORTAL_URL=__RUNTIME_DEV_PORTAL_URL__
+ARG BASE_PATH=/
+ENV VITE_SPHERE_API_URL=$VITE_SPHERE_API_URL \
+    VITE_WALLET_API_URL=$VITE_WALLET_API_URL \
+    VITE_REQUIRE_WALLET_API=$VITE_REQUIRE_WALLET_API \
+    VITE_AGGREGATOR_API_KEY=$VITE_AGGREGATOR_API_KEY \
+    VITE_DEV_PORTAL_URL=$VITE_DEV_PORTAL_URL \
+    BASE_PATH=$BASE_PATH
 RUN npm run build
 
 # Stage 2: ssl-manager base + nginx + tini
@@ -29,7 +45,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends tini nginx curl
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 COPY deploy/entrypoint.sh /usr/local/bin/sphere-entrypoint
-RUN chmod +x /usr/local/bin/sphere-entrypoint
+COPY deploy/runtime-config.sh /usr/local/bin/sphere-runtime-config
+RUN chmod +x /usr/local/bin/sphere-entrypoint /usr/local/bin/sphere-runtime-config
 
 EXPOSE 8080 443
 
