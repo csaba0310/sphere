@@ -20,12 +20,20 @@ const FRIENDLY_OVERRIDES: Partial<Record<SphereErrorCode, string>> = {
  */
 function humanizeRawError(message: string): string {
   const msg = message.trim();
-  // Raw HTML/markup error page (gateway 5xx, proxy, etc.) — never show markup.
+  // Raw HTML/markup error page (gateway 5xx, proxy, etc.): surface the server's
+  // OWN text (e.g. "503 Service Unavailable No server is available to handle this
+  // request.") rather than a canned line — but never the markup itself.
   if (msg.startsWith('<')) {
-    const status = msg.match(/\b(\d{3})\b/)?.[1] ?? null;
-    if (status === '429') return 'Too many requests. Try again in a moment';
-    if (status && status.startsWith('4')) return 'Request rejected by the server';
-    return 'Service temporarily unavailable. Try again later';
+    const text = msg
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!text) return 'Service temporarily unavailable. Try again later';
+    return text.length > 200 ? `${text.slice(0, 200)}…` : text;
   }
   if (/\bservice unavailable\b|\b50[234]\b|bad gateway|gateway timeout/i.test(msg)) {
     return 'Service temporarily unavailable. Try again later';
