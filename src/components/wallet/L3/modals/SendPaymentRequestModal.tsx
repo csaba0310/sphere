@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Loader2, User, CheckCircle, Hash, Receipt } from 'lucide-react';
 import { TokenRegistry, parseTokenAmount, safeParseTokenAmount } from '@unicitylabs/sphere-sdk';
@@ -17,22 +17,12 @@ interface CoinOption {
   iconUrl?: string;
 }
 
-export interface PaymentRequestPrefill {
-  to: string;
-  amount: string;
-  coinId: string;
-  message?: string;
-}
-
 interface SendPaymentRequestModalProps {
   isOpen: boolean;
   onClose: (result?: { success: boolean; requestId?: string }) => void;
-  prefill?: PaymentRequestPrefill;
-  /** Render as centered modal dialog instead of slide-in panel */
-  asModal?: boolean;
 }
 
-export function SendPaymentRequestModal({ isOpen, onClose, prefill, asModal }: SendPaymentRequestModalProps) {
+export function SendPaymentRequestModal({ isOpen, onClose }: SendPaymentRequestModalProps) {
   const { sphere } = useSphereContext();
 
   const [step, setStep] = useState<Step>('coin');
@@ -66,32 +56,6 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill, asModal }: S
     setAvailableCoins(coins);
   }, [isOpen]);
 
-  const prefillApplied = useRef(false);
-  useEffect(() => {
-    if (!prefill || !isOpen || prefillApplied.current) return;
-    if (availableCoins.length === 0) return;
-
-    const { to, amount, coinId, message } = prefill;
-
-    if (to.startsWith('DIRECT://')) {
-      setRecipientMode('direct');
-      setRecipient(to);
-    } else {
-      setRecipientMode('nametag');
-      setRecipient(to.replace(/^@/, ''));
-    }
-
-    setAmountInput(amount);
-    if (message) setMessageInput(message);
-
-    const coin = availableCoins.find(c => c.coinId === coinId);
-    if (coin) {
-      setSelectedCoin(coin);
-      setStep('confirm');
-      prefillApplied.current = true;
-    }
-  }, [prefill, isOpen, availableCoins]);
-
   const handleRecipientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (recipientMode === 'nametag') {
       const value = e.target.value.toLowerCase();
@@ -115,7 +79,6 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill, asModal }: S
     setRecipientError(null);
     setError(null);
     setRequestId(null);
-    prefillApplied.current = false;
   };
 
   const handleClose = () => {
@@ -215,7 +178,7 @@ export function SendPaymentRequestModal({ isOpen, onClose, prefill, asModal }: S
   };
 
   return (
-    <WalletScreen isOpen={isOpen} onClose={handleClose} asModal={asModal}>
+    <WalletScreen isOpen={isOpen} onClose={handleClose}>
       <ModalHeader variant="screen" title={getTitle()} onClose={getBackHandler()} />
 
       <div className="px-6 py-8 flex-1 overflow-y-auto">

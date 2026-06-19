@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Loader2, User, CheckCircle, Coins, Hash, Copy, Check } from 'lucide-react';
 import type { Asset } from '@unicitylabs/sphere-sdk';
@@ -11,22 +11,12 @@ import { ModalHeader, Button } from '../../ui';
 
 type Step = 'asset' | 'details' | 'confirm' | 'processing' | 'success';
 
-export interface SendPrefill {
-  to: string;
-  amount: string;
-  coinId: string;
-  memo?: string;
-}
-
 interface SendModalProps {
   isOpen: boolean;
   onClose: (result?: { success: boolean }) => void;
-  prefill?: SendPrefill;
-  /** Render as centered modal dialog instead of slide-in panel */
-  asModal?: boolean;
 }
 
-export function SendModal({ isOpen, onClose, prefill, asModal }: SendModalProps) {
+export function SendModal({ isOpen, onClose }: SendModalProps) {
   const { assets: sdkAssets } = useAssets();
   const { transfer, isLoading: isTransferring } = useTransfer();
   const { sphere } = useSphereContext();
@@ -54,33 +44,6 @@ export function SendModal({ isOpen, onClose, prefill, asModal }: SendModalProps)
   const [amountInput, setAmountInput] = useState('');
   const [memoInput, setMemoInput] = useState('');
 
-  // Pre-fill from connect intent (dApp request)
-  const prefillApplied = useRef(false);
-  useEffect(() => {
-    if (!prefill || !isOpen || prefillApplied.current) return;
-    if (assets.length === 0) return;
-
-    const { to, amount, coinId } = prefill;
-
-    if (to.startsWith('DIRECT://')) {
-      setRecipientMode('direct');
-      setRecipient(to);
-    } else {
-      setRecipientMode('nametag');
-      setRecipient(to.replace(/^@/, ''));
-    }
-
-    setAmountInput(amount);
-    if (prefill.memo) setMemoInput(prefill.memo);
-
-    const asset = assets.find(a => a.coinId === coinId);
-    if (asset) {
-      setSelectedAsset(asset);
-      setStep('confirm');
-      prefillApplied.current = true;
-    }
-  }, [prefill, isOpen, assets]);
-
   const handleRecipientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (recipientMode === 'nametag') {
       const value = e.target.value.toLowerCase();
@@ -103,7 +66,6 @@ export function SendModal({ isOpen, onClose, prefill, asModal }: SendModalProps)
     setAmountInput('');
     setMemoInput('');
     setRecipientError(null);
-    prefillApplied.current = false;
   };
 
   const handleClose = () => {
@@ -201,7 +163,7 @@ export function SendModal({ isOpen, onClose, prefill, asModal }: SendModalProps)
   };
 
   return (
-    <WalletScreen isOpen={isOpen} onClose={handleClose} asModal={asModal}>
+    <WalletScreen isOpen={isOpen} onClose={handleClose}>
       <ModalHeader variant="screen" title={getTitle()} onClose={getBackHandler()} />
 
       <div className="px-6 py-8 flex-1 overflow-y-auto">

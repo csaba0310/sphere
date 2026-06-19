@@ -15,6 +15,8 @@ interface SendIntentModalProps {
   memo?: string;
   /** Called after the transfer succeeds (resolves the intent). */
   onResolve: () => void;
+  /** Called when the transfer fails (rejects the intent with the message). */
+  onReject: (message: string) => void;
   /** Called when the user cancels (rejects the intent). */
   onCancel: () => void;
 }
@@ -24,13 +26,13 @@ interface SendIntentModalProps {
  * recipient, coin and amount (in base units); the user approves or rejects — the
  * amount is NOT editable here (a different amount = a different dApp request).
  * The base-unit amount is handed to the SDK verbatim; `formatAmount` is used only
- * to render a human-readable figure for review.
+ * to render a human-readable figure for review. A failed transfer rejects the
+ * intent (the dApp is told) rather than leaving it hanging.
  */
-export function SendIntentModal({ to, amount, coinId, memo, onResolve, onCancel }: SendIntentModalProps) {
+export function SendIntentModal({ to, amount, coinId, memo, onResolve, onReject, onCancel }: SendIntentModalProps) {
   const { assets } = useAssets();
   const { transfer } = useTransfer();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Prefer the held asset (gives balance); fall back to the registry for
   // metadata when the coin isn't held, so we can still display it sensibly.
@@ -49,16 +51,15 @@ export function SendIntentModal({ to, amount, coinId, memo, onResolve, onCancel 
   const displayAmount = formatAmount(amount, { decimals, symbol, maxFractionDigits: 8 });
 
   const handleSend = async () => {
-    setError(null);
     setBusy(true);
     try {
       const recipient = to.startsWith('DIRECT://') ? to : to.replace(/^@/, '');
       await transfer({ coinId, amount, recipient, ...(memo ? { memo } : {}) });
       onResolve();
     } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setBusy(false);
+      // Tell the dApp it failed instead of leaving the request hanging; the
+      // wallet's global query handler also surfaces a toast.
+      onReject(getErrorMessage(err));
     }
   };
 
@@ -70,7 +71,6 @@ export function SendIntentModal({ to, amount, coinId, memo, onResolve, onCancel 
       confirmLabel="Send"
       busyLabel="Sending…"
       confirmDisabled={insufficient}
-      error={error}
       onConfirm={handleSend}
       onCancel={onCancel}
     >
