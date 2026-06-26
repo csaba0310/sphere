@@ -179,6 +179,11 @@ export function useSphereEvents(): void {
 
     sphere.on('transfer:incoming', handleIncomingTransfer);
     sphere.on('transfer:confirmed', handleTransferConfirmed);
+    // sphere-sdk 0.10.6 (#621/#622): a send whose recipient delivery is deferred (full mailbox / 429,
+    // or a transient outage) resolves and emits transfer:delivery_pending INSTEAD of transfer:confirmed
+    // — the spend is final on-chain. Refresh on it too so balances/inventory/history don't go stale
+    // until the next sync.
+    sphere.on('transfer:delivery_pending', handleTransferConfirmed);
     sphere.on('history:updated', handleHistoryUpdated);
     sphere.on('nametag:registered', handleNametagChange);
     sphere.on('nametag:recovered', handleNametagChange);
@@ -198,6 +203,7 @@ export function useSphereEvents(): void {
       }
       sphere.off('transfer:incoming', handleIncomingTransfer);
       sphere.off('transfer:confirmed', handleTransferConfirmed);
+      sphere.off('transfer:delivery_pending', handleTransferConfirmed);
       sphere.off('history:updated', handleHistoryUpdated);
       sphere.off('nametag:registered', handleNametagChange);
       sphere.off('nametag:recovered', handleNametagChange);
