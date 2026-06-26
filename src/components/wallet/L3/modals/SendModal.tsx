@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Loader2, User, CheckCircle, Coins, Hash, Copy, Check } from 'lucide-react';
+import { ArrowRight, Loader2, User, CheckCircle, Coins, Hash, Copy, Check, Clock } from 'lucide-react';
 import type { Asset } from '@unicitylabs/sphere-sdk';
 import { parseTokenAmount, safeParseTokenAmount } from '@unicitylabs/sphere-sdk';
 import { useAssets, useTransfer, formatAmount } from '../../../../sdk';
@@ -43,6 +43,10 @@ export function SendModal({ isOpen, onClose }: SendModalProps) {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [amountInput, setAmountInput] = useState('');
   const [memoInput, setMemoInput] = useState('');
+  // sphere-sdk 0.10.6 (#621/#622): the send certified on-chain but the recipient's delivery is
+  // deferred (full inbox / 429, or a transient outage). The spend is FINAL — surface "delivery
+  // pending", never a failure.
+  const [deliveryPending, setDeliveryPending] = useState(false);
 
   const handleRecipientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (recipientMode === 'nametag') {
@@ -66,6 +70,7 @@ export function SendModal({ isOpen, onClose }: SendModalProps) {
     setAmountInput('');
     setMemoInput('');
     setRecipientError(null);
+    setDeliveryPending(false);
   };
 
   const handleClose = () => {
@@ -143,13 +148,14 @@ export function SendModal({ isOpen, onClose }: SendModalProps) {
 
     try {
       const amount = parseTokenAmount(amountInput, selectedAsset.decimals).toString();
-      await transfer({
+      const result = await transfer({
         coinId: selectedAsset.coinId,
         amount,
         recipient,
         ...(memoInput ? { memo: memoInput } : {}),
       });
 
+      setDeliveryPending(result.deliveryPending ?? false);
       setStep('success');
     } catch (e: unknown) {
       setRecipientError(getErrorMessage(e));
@@ -414,16 +420,30 @@ export function SendModal({ isOpen, onClose }: SendModalProps) {
             </motion.div>
           )}
 
-          {/* 5. SUCCESS */}
+          {/* 5. SUCCESS (delivered) or DELIVERY PENDING — both mean the spend is final on-chain. */}
           {step === 'success' && (
             <motion.div key="done" className="flex-1 flex flex-col items-center justify-center text-center py-10">
-              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/50">
-                <CheckCircle className="w-8 h-8 text-emerald-500" />
-              </div>
-              <h3 className="text-neutral-900 dark:text-white font-bold text-2xl mb-2">Success!</h3>
-              <p className="text-neutral-500 dark:text-white/45">
-                Successfully sent <b>{amountInput} {selectedAsset?.symbol}</b> to <b>{recipientMode === 'direct' ? recipient : `@${recipient}`}</b>
-              </p>
+              {deliveryPending ? (
+                <>
+                  <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/50">
+                    <Clock className="w-8 h-8 text-amber-500" />
+                  </div>
+                  <h3 className="text-neutral-900 dark:text-white font-bold text-2xl mb-2">Sent — delivery pending</h3>
+                  <p className="text-neutral-500 dark:text-white/45">
+                    Your <b>{amountInput} {selectedAsset?.symbol}</b> to <b>{recipientMode === 'direct' ? recipient : `@${recipient}`}</b> is finalized on-chain. They'll receive it once their inbox is reachable — nothing more to do.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/50">
+                    <CheckCircle className="w-8 h-8 text-emerald-500" />
+                  </div>
+                  <h3 className="text-neutral-900 dark:text-white font-bold text-2xl mb-2">Success!</h3>
+                  <p className="text-neutral-500 dark:text-white/45">
+                    Successfully sent <b>{amountInput} {selectedAsset?.symbol}</b> to <b>{recipientMode === 'direct' ? recipient : `@${recipient}`}</b>
+                  </p>
+                </>
+              )}
               <button onClick={handleSuccessClose} className="mt-8 px-8 py-2 bg-neutral-100 dark:bg-white/6 rounded-lg hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-900 dark:text-white transition-colors">
                 Close
               </button>
